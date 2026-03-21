@@ -18,11 +18,10 @@ export default function ProgramCard({ program }: ProgramCardProps) {
     <div
       className="program-card"
       style={{
-        background: '#fff',
-        border: '1px solid #d2d2d7',
+        background: '#f5f5f7',
+        border: '1px solid #e5e5ea',
         borderRadius: '12px',
         padding: '24px',
-        boxShadow: '0 1px 3px rgba(0, 0, 0, 0.06)',
       }}
     >
       <div className="program-card__badges">
