@@ -1,6 +1,12 @@
 import { Card, CardHeader, CardBody, CardFooter, Button } from '@arya/design-system'
-import StatusBadge from './StatusBadge'
 import type { Survey } from '@/types/survey'
+
+const STATUS_PILL_STYLES: Record<string, { bg: string; color: string }> = {
+  DRAFT: { bg: '#F2F2F7', color: '#8E8E93' },
+  ACTIVE: { bg: '#D1FAE5', color: '#065F46' },
+  CLOSED: { bg: '#FEE2E2', color: '#991B1B' },
+  ARCHIVED: { bg: '#E5E7EB', color: '#374151' },
+}
 
 interface SurveyCardProps {
   survey: Survey
@@ -13,10 +19,14 @@ export default function SurveyCard({ survey, onEdit, onDelete }: SurveyCardProps
     ? new Date(survey.updatedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
     : '\u2014'
 
+  const pill = STATUS_PILL_STYLES[survey.status] || STATUS_PILL_STYLES.DRAFT
+
   return (
     <Card variant="elevated" hoverable pressable padding="none" onClick={() => onEdit(survey.surveyId)}>
       <CardHeader style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px 20px 8px' }}>
-        <StatusBadge status={survey.status} />
+        <span style={{ display: 'inline-block', padding: '2px 10px', borderRadius: 12, fontSize: 12, fontWeight: 600, backgroundColor: pill.bg, color: pill.color }}>
+          {survey.status}
+        </span>
         <span style={{ fontSize: 12, color: '#8E8E93' }}>{formattedDate}</span>
       </CardHeader>
       <CardBody style={{ padding: '0 20px 8px' }}>

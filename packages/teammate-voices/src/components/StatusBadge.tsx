@@ -1,27 +1,18 @@
-import type { Survey } from '@/types/survey'
+import type { ActionStatus } from '@/types/dashboard'
 
-const STATUS_STYLES: Record<string, { bg: string; color: string }> = {
-  DRAFT: { bg: '#F2F2F7', color: '#8E8E93' },
-  ACTIVE: { bg: '#D1FAE5', color: '#065F46' },
-  CLOSED: { bg: '#FEE2E2', color: '#991B1B' },
-  ARCHIVED: { bg: '#E5E7EB', color: '#374151' },
+const DOT_COLORS: Record<string, string | undefined> = {
+  'In progress': '#007AFF',
+  'Not started': '#FF3B30',
 }
 
-export default function StatusBadge({ status }: { status: Survey['status'] }) {
-  const style = STATUS_STYLES[status] || STATUS_STYLES.DRAFT
+export default function StatusBadge({ status }: { status: ActionStatus }) {
+  const dotColor = DOT_COLORS[status]
+
   return (
-    <span
-      style={{
-        display: 'inline-block',
-        padding: '2px 10px',
-        borderRadius: 12,
-        fontSize: 12,
-        fontWeight: 600,
-        letterSpacing: '0.02em',
-        backgroundColor: style.bg,
-        color: style.color,
-      }}
-    >
+    <span className="status-badge">
+      {dotColor && (
+        <span className="status-badge__dot" style={{ backgroundColor: dotColor }} />
+      )}
       {status}
     </span>
   )

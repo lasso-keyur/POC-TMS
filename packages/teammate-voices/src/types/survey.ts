@@ -18,7 +18,7 @@ export interface Survey {
 }
 
 export interface SurveyQuestion {
-  questionId: number
+  questionId?: number
   questionText: string
   questionType: 'RATING_SCALE' | 'MULTIPLE_CHOICE' | 'TEXT' | 'MATRIX'
   sortOrder: number
@@ -27,7 +27,7 @@ export interface SurveyQuestion {
 }
 
 export interface SurveyOption {
-  optionId: number
+  optionId?: number
   optionText: string
   optionValue: number
   sortOrder: number
