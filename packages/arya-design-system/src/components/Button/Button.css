@@ -8,7 +8,7 @@
   gap: 8px;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   font-weight: 500;
-  border-radius: 12px;
+  border-radius: 6px;
   border: none;
   cursor: pointer;
   transition: all 250ms cubic-bezier(0.4, 0.0, 0.2, 1);
@@ -44,34 +44,35 @@
 
 /* Primary Variant */
 .arya-button--primary {
-  background: #007AFF;
+  background: #012169;
   color: #FFFFFF;
 }
 
 .arya-button--primary:hover:not(:disabled) {
-  background: #0062CC;
+  background: #001a4d;
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(0, 122, 255, 0.3);
+  box-shadow: 0 4px 12px rgba(1, 33, 105, 0.3);
 }
 
 .arya-button--primary:active:not(:disabled) {
-  background: #004999;
+  background: #001030;
   transform: translateY(0);
 }
 
 /* Secondary Variant */
 .arya-button--secondary {
-  background: rgba(120, 120, 128, 0.2);
-  color: #007AFF;
+  background: #FFFFFF;
+  color: #012169;
+  border: 1px solid #012169;
 }
 
 .arya-button--secondary:hover:not(:disabled) {
-  background: rgba(120, 120, 128, 0.28);
+  background: rgba(1, 33, 105, 0.06);
   transform: translateY(-1px);
 }
 
 .arya-button--secondary:active:not(:disabled) {
-  background: rgba(120, 120, 128, 0.35);
+  background: rgba(1, 33, 105, 0.12);
   transform: translateY(0);
 }
 
@@ -111,15 +112,15 @@
 /* Ghost Variant */
 .arya-button--ghost {
   background: transparent;
-  color: #007AFF;
+  color: #012169;
 }
 
 .arya-button--ghost:hover:not(:disabled) {
-  background: rgba(0, 122, 255, 0.1);
+  background: rgba(1, 33, 105, 0.08);
 }
 
 .arya-button--ghost:active:not(:disabled) {
-  background: rgba(0, 122, 255, 0.15);
+  background: rgba(1, 33, 105, 0.14);
 }
 
 /* States */
@@ -130,7 +131,7 @@
 }
 
 .arya-button:focus-visible {
-  outline: 2px solid #007AFF;
+  outline: 2px solid #012169;
   outline-offset: 2px;
 }
 
@@ -184,20 +185,21 @@
 /* Dark Mode */
 @media (prefers-color-scheme: dark) {
   .arya-button--primary {
-    background: #0A84FF;
+    background: #4A90D9;
   }
 
   .arya-button--primary:hover:not(:disabled) {
-    background: #0070E0;
+    background: #3A7BC8;
   }
 
   .arya-button--primary:active:not(:disabled) {
-    background: #005BBD;
+    background: #2E66B0;
   }
 
   .arya-button--secondary {
     background: rgba(120, 120, 128, 0.36);
-    color: #0A84FF;
+    color: #4A90D9;
+    border-color: #4A90D9;
   }
 
   .arya-button--secondary:hover:not(:disabled) {
@@ -222,14 +224,14 @@
   }
 
   .arya-button--ghost {
-    color: #0A84FF;
+    color: #4A90D9;
   }
 
   .arya-button--ghost:hover:not(:disabled) {
-    background: rgba(10, 132, 255, 0.1);
+    background: rgba(74, 144, 217, 0.1);
   }
 
   .arya-button--ghost:active:not(:disabled) {
-    background: rgba(10, 132, 255, 0.15);
+    background: rgba(74, 144, 217, 0.15);
   }
 }
