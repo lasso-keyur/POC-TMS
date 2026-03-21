@@ -15,7 +15,16 @@ export default function ProgramCard({ program }: ProgramCardProps) {
   const progressStyle = PROGRESS_STYLES[program.surveyProgress] || PROGRESS_STYLES['Not started']
 
   return (
-    <div className="program-card">
+    <div
+      className="program-card"
+      style={{
+        background: '#fff',
+        border: '1px solid #d2d2d7',
+        borderRadius: '12px',
+        padding: '24px',
+        boxShadow: '0 1px 3px rgba(0, 0, 0, 0.06)',
+      }}
+    >
       <div className="program-card__badges">
         <span className="program-card__badge program-card__badge--status">
           {program.status}
