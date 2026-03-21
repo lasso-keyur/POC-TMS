@@ -722,6 +722,14 @@ input, textarea, select {
 }
 
 /* ===== PROGRAM CARD ===== */
+.program-card {
+  background: #fff;
+  border: 1px solid #d2d2d7;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+}
+
 .program-card__badges {
   display: flex;
   gap: 6px;
