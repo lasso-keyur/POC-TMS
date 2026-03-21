@@ -4,6 +4,7 @@ import { Button, Input } from '@arya/design-system'
 import Breadcrumb from '@/components/Breadcrumb'
 import ToggleSwitch from '@/components/ToggleSwitch'
 import { PROGRAM_TEMPLATES } from '@/types/program'
+import { api } from '@/services/api'
 
 export default function ProgramCreate() {
   const navigate = useNavigate()
@@ -11,10 +12,24 @@ export default function ProgramCreate() {
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
   const [isActive, setIsActive] = useState(false)
+  const [loading, setLoading] = useState(false)
 
-  const handleSave = () => {
-    // TODO: API call to save program
-    navigate('/programs')
+  const handleSave = async () => {
+    if (!name.trim()) return
+    setLoading(true)
+    try {
+      await api.createProgram({
+        name: name.trim(),
+        description: description.trim(),
+        templateType: template || 'CUSTOM',
+        status: isActive ? 'ACTIVE' : 'INACTIVE',
+        surveyProgress: 'Not started',
+      })
+      navigate('/programs')
+    } catch (err) {
+      console.error('Failed to create program:', err)
+      setLoading(false)
+    }
   }
 
   const handleCancel = () => {
@@ -96,7 +111,7 @@ export default function ProgramCreate() {
           <Button variant="secondary" size="md" onClick={handleCancel}>
             Cancel
           </Button>
-          <Button variant="primary" size="md" onClick={handleSave}>
+          <Button variant="primary" size="md" onClick={handleSave} loading={loading} disabled={!name.trim()}>
             Save
           </Button>
         </div>

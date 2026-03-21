@@ -1,4 +1,5 @@
 import type { Survey } from '@/types/survey'
+import type { Program } from '@/types/program'
 import type { Participant, AssignmentRule, Dispatch } from '@/types/participant'
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8081/api'
@@ -59,6 +60,33 @@ class TeammateVoicesAPI {
 
   async publishSurvey(id: number): Promise<Survey> {
     return this.request<Survey>(`/surveys/${id}/publish`, { method: 'POST' })
+  }
+
+  // Programs
+  async getPrograms(): Promise<Program[]> {
+    return this.request<Program[]>('/programs')
+  }
+
+  async getProgram(id: number): Promise<Program> {
+    return this.request<Program>(`/programs/${id}`)
+  }
+
+  async createProgram(program: Partial<Program>): Promise<Program> {
+    return this.request<Program>('/programs', {
+      method: 'POST',
+      body: JSON.stringify(program),
+    })
+  }
+
+  async updateProgram(id: number, program: Partial<Program>): Promise<Program> {
+    return this.request<Program>(`/programs/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(program),
+    })
+  }
+
+  async deleteProgram(id: number): Promise<void> {
+    return this.request<void>(`/programs/${id}`, { method: 'DELETE' })
   }
 
   // Participants

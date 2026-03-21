@@ -5,10 +5,19 @@ interface ProgramCardProps {
   program: Program
 }
 
-const PROGRESS_STYLES: Record<string, { bg: string; color: string }> = {
-  'Not started': { bg: '#FEE2E2', color: '#991B1B' },
-  'In progress': { bg: '#DBEAFE', color: '#1E40AF' },
-  'Complete': { bg: '#D1FAE5', color: '#065F46' },
+const PROGRESS_STYLES: Record<string, { bg: string; color: string; label: string }> = {
+  'Not started': { bg: '#FEE2E2', color: '#991B1B', label: 'Not started' },
+  'NOT_STARTED': { bg: '#FEE2E2', color: '#991B1B', label: 'Not started' },
+  'In progress': { bg: '#DBEAFE', color: '#1E40AF', label: 'In progress' },
+  'IN_PROGRESS': { bg: '#DBEAFE', color: '#1E40AF', label: 'In progress' },
+  'Complete': { bg: '#D1FAE5', color: '#065F46', label: 'Complete' },
+  'COMPLETE': { bg: '#D1FAE5', color: '#065F46', label: 'Complete' },
+}
+
+function formatStatus(status: string): string {
+  if (status === 'ACTIVE') return 'Active'
+  if (status === 'INACTIVE') return 'Inactive'
+  return status
 }
 
 export default function ProgramCard({ program }: ProgramCardProps) {
@@ -26,13 +35,13 @@ export default function ProgramCard({ program }: ProgramCardProps) {
     >
       <div className="program-card__badges">
         <span className="program-card__badge program-card__badge--status">
-          {program.status}
+          {formatStatus(program.status)}
         </span>
         <span
           className="program-card__badge"
           style={{ backgroundColor: progressStyle.bg, color: progressStyle.color }}
         >
-          {program.surveyProgress}
+          {progressStyle.label}
         </span>
       </div>
 

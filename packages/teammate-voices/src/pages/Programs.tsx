@@ -1,17 +1,27 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { Button } from '@arya/design-system'
 import Breadcrumb from '@/components/Breadcrumb'
 import ToggleSwitch from '@/components/ToggleSwitch'
 import ProgramCard from '@/components/ProgramCard'
-import { MOCK_PROGRAMS } from '@/types/program'
+import { api } from '@/services/api'
+import type { Program } from '@/types/program'
 
 export default function Programs() {
   const [hideInactive, setHideInactive] = useState(false)
+  const [programs, setPrograms] = useState<Program[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    api.getPrograms()
+      .then(setPrograms)
+      .catch(err => console.error('Failed to load programs:', err))
+      .finally(() => setLoading(false))
+  }, [])
 
   const filteredPrograms = hideInactive
-    ? MOCK_PROGRAMS.filter(p => p.status === 'Active')
-    : MOCK_PROGRAMS
+    ? programs.filter(p => p.status === 'Active' || p.status === 'ACTIVE')
+    : programs
 
   return (
     <>
@@ -35,9 +45,15 @@ export default function Programs() {
       </div>
 
       <div className="programs-page__grid">
-        {filteredPrograms.map(program => (
-          <ProgramCard key={program.programId} program={program} />
-        ))}
+        {loading ? (
+          <p>Loading programs...</p>
+        ) : filteredPrograms.length === 0 ? (
+          <p>No programs found.</p>
+        ) : (
+          filteredPrograms.map(program => (
+            <ProgramCard key={program.programId} program={program} />
+          ))
+        )}
       </div>
       </div>
     </>
