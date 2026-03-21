@@ -54,6 +54,40 @@ services:
     networks:
       - arya-network
 
+  voices-web:
+    build:
+      context: .
+      dockerfile: packages/teammate-voices/Dockerfile
+    ports:
+      - "5175:5175"
+    environment:
+      CHOKIDAR_USEPOLLING: "true"
+      NODE_ENV: development
+      VITE_API_URL: http://voices-api:8081/api
+    volumes:
+      - .:/app
+      - /app/node_modules
+    networks:
+      - arya-network
+
+  voices-api:
+    build:
+      context: ./packages/teammate-voices-api
+      dockerfile: Dockerfile
+    ports:
+      - "8081:8081"
+    environment:
+      DB_HOST: oracle-db
+      DB_PORT: "1521"
+      DB_SERVICE: FREEPDB1
+      DB_USER: ARYA
+      DB_PASSWORD: arya123
+      SPRING_PROFILES_ACTIVE: docker
+    depends_on:
+      - oracle-db
+    networks:
+      - arya-network
+
   oracle-db:
     image: container-registry.oracle.com/database/free:latest
     ports:
