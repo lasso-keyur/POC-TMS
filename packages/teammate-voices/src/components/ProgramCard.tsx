@@ -19,7 +19,7 @@ export default function ProgramCard({ program }: ProgramCardProps) {
       className="program-card"
       style={{
         background: '#f5f5f7',
-        border: '1px solid #e5e5ea',
+        border: 'none',
         borderRadius: '12px',
         padding: '24px',
       }}

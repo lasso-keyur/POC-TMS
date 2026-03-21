@@ -14,12 +14,13 @@ export default function Programs() {
     : MOCK_PROGRAMS
 
   return (
-    <div className="programs-page">
+    <>
       <Breadcrumb items={[
         { label: 'Survey', path: '/' },
         { label: 'Programs' },
       ]} />
 
+      <div className="programs-page">
       <h1 className="programs-page__title">Programs</h1>
 
       <div className="programs-page__controls">
@@ -38,6 +39,7 @@ export default function Programs() {
           <ProgramCard key={program.programId} program={program} />
         ))}
       </div>
-    </div>
+      </div>
+    </>
   )
 }

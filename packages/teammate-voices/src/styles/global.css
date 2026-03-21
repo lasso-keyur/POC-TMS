@@ -730,7 +730,7 @@ input, textarea, select {
 /* ===== PROGRAM CARD ===== */
 .program-card {
   background: #f5f5f7;
-  border: 1px solid #e5e5ea;
+  border: none;
   border-radius: 12px;
   padding: 24px;
 }
