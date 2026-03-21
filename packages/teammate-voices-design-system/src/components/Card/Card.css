@@ -1,0 +1,118 @@
+/* Teammate Voices Card Component Styles */
+
+.tv-card {
+  position: relative;
+  border-radius: 18px;
+  transition: all 250ms cubic-bezier(0.4, 0.0, 0.2, 1);
+  overflow: hidden;
+}
+
+/* Variants */
+.tv-card--elevated {
+  background: #FFFFFF;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08), 0 1px 3px rgba(0, 0, 0, 0.06);
+  border: 1px solid rgba(0, 0, 0, 0.04);
+}
+
+.tv-card--filled {
+  background: #f5f5f7;
+  box-shadow: none;
+}
+
+.tv-card--outlined {
+  background: #FFFFFF;
+  border: 1px solid #d2d2d7;
+  box-shadow: none;
+}
+
+/* Padding */
+.tv-card--padding-none {
+  padding: 0;
+}
+
+.tv-card--padding-sm {
+  padding: 16px;
+}
+
+.tv-card--padding-md {
+  padding: 24px;
+}
+
+.tv-card--padding-lg {
+  padding: 32px;
+}
+
+/* Hoverable */
+.tv-card--hoverable {
+  cursor: pointer;
+}
+
+.tv-card--hoverable:hover {
+  transform: translateY(-4px);
+}
+
+.tv-card--elevated.tv-card--hoverable:hover {
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12), 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+
+/* Pressable */
+.tv-card--pressable {
+  cursor: pointer;
+}
+
+.tv-card--pressable:active {
+  transform: scale(0.98);
+}
+
+/* Glass Effect */
+.tv-card--glass {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+/* Card Sections */
+.tv-card__header {
+  margin-bottom: 12px;
+}
+
+.tv-card__body {
+  flex: 1;
+}
+
+.tv-card__footer {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(60, 60, 67, 0.29);
+}
+
+/* Dark Mode */
+@media (prefers-color-scheme: dark) {
+  .tv-card--elevated {
+    background: #1C1C1E;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  }
+
+  .tv-card--filled {
+    background: #2C2C2E;
+  }
+
+  .tv-card--outlined {
+    background: #1C1C1E;
+    border-color: rgba(84, 84, 88, 0.65);
+  }
+
+  .tv-card--elevated.tv-card--hoverable:hover {
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.5);
+  }
+
+  .tv-card--glass {
+    background: rgba(30, 30, 30, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  .tv-card__footer {
+    border-top-color: rgba(84, 84, 88, 0.65);
+  }
+}

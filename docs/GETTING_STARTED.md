@@ -1,13 +1,13 @@
-# ARYA Design System - Getting Started
+# Teammate Voices Design System - Getting Started
 
 ## Installation
 
 ```bash
-npm install @arya/design-system
+npm install @teammate-voices/design-system
 # or
-yarn add @arya/design-system
+yarn add @teammate-voices/design-system
 # or
-pnpm add @arya/design-system
+pnpm add @teammate-voices/design-system
 ```
 
 ## Quick Start
@@ -15,7 +15,7 @@ pnpm add @arya/design-system
 ### 1. Import Components
 
 ```tsx
-import { Button, Card, Input } from '@arya/design-system';
+import { Button, Card, Input } from '@teammate-voices/design-system';
 ```
 
 ### 2. Import Styles
@@ -23,7 +23,7 @@ import { Button, Card, Input } from '@arya/design-system';
 Import the CSS in your app entry point:
 
 ```tsx
-import '@arya/design-system/dist/styles.css';
+import '@teammate-voices/design-system/dist/styles.css';
 ```
 
 ### 3. Use Components
@@ -32,7 +32,7 @@ import '@arya/design-system/dist/styles.css';
 function App() {
   return (
     <Card>
-      <h2>Welcome to ARYA</h2>
+      <h2>Welcome to Teammate Voices</h2>
       <Input placeholder="Enter your name" />
       <Button variant="primary">Get Started</Button>
     </Card>
@@ -43,7 +43,7 @@ function App() {
 ## Project Structure
 
 ```
-arya-design-system/
+teammate-voices-design-system/
 ├── src/
 │   ├── components/        # React components
 │   │   ├── Button/
@@ -75,7 +75,7 @@ arya-design-system/
 1. Clone the repository:
 ```bash
 git clone <repository-url>
-cd arya-design-system
+cd teammate-voices-design-system
 ```
 
 2. Install dependencies:
@@ -180,7 +180,7 @@ We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) f
 
 ## License
 
-MIT © ARYA Design System
+MIT © Teammate Voices Design System
 
 ## Resources
 
@@ -191,7 +191,7 @@ MIT © ARYA Design System
 
 ## Support
 
-- 📧 Email: support@arya-design.com
+- 📧 Email: support@teammate-voices.com
 - 💬 Discord: [Join our community](#)
 - 🐛 Issues: [GitHub Issues](#)
 

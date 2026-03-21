@@ -18,7 +18,7 @@ The Spring Boot API is **not running**. You need to start it:
 
 ```bash
 # Terminal 1: Start the database
-cd /Users/keyur/AI\ Projects/ARYA\ Design\ System
+cd /Users/keyur/AI\ Projects/Teammate\ Voices
 docker compose -f docker-compose.db.yml up -d
 
 # Terminal 2: Start the API
@@ -114,7 +114,7 @@ from origin 'http://localhost:5176' has been blocked by CORS policy
 ### Solution
 The API CORS configuration needs to allow port 5176.
 
-Check file: `packages/empsurvey-api/src/main/java/com/arya/empsurvey/config/WebConfig.java`
+Check file: `packages/empsurvey-api/src/main/java/com/teammatevoices/empsurvey/config/WebConfig.java`
 
 Should look like:
 ```java
@@ -205,7 +205,7 @@ curl -X POST http://localhost:8080/api/surveys \
 ### If Starting from Fresh
 ```bash
 # 1. Go to project root
-cd /Users/keyur/AI\ Projects/ARYA\ Design\ System
+cd /Users/keyur/AI\ Projects/Teammate\ Voices
 
 # 2. Start database (Terminal 1)
 docker compose -f docker-compose.db.yml up -d
@@ -227,7 +227,7 @@ npm run dev
 
 ### If Using Docker Compose (Simpler)
 ```bash
-cd /Users/keyur/AI\ Projects/ARYA\ Design\ System
+cd /Users/keyur/AI\ Projects/Teammate\ Voices
 
 # One command to start everything:
 docker compose up --build

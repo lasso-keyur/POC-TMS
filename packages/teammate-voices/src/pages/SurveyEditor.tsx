@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { Card, CardHeader, CardBody, Button, Input } from '@arya/design-system'
+import { Card, CardHeader, CardBody, Button, Input } from '@teammate-voices/design-system'
 import { api } from '@/services/api'
 import type { Survey, SurveyQuestion } from '@/types/survey'
 

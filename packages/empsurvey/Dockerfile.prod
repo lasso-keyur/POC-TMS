@@ -3,7 +3,7 @@ FROM node:20-alpine AS build-survey
 WORKDIR /app
 
 COPY package*.json ./
-COPY packages/arya-design-system/package.json packages/arya-design-system/
+COPY packages/teammate-voices-design-system/package.json packages/teammate-voices-design-system/
 COPY packages/empsurvey packages/empsurvey/
 
 RUN npm install

@@ -7,7 +7,7 @@ A versatile button component with multiple variants and states.
 ### Import
 
 ```tsx
-import { Button } from '@arya/design-system';
+import { Button } from '@teammate-voices/design-system';
 ```
 
 ### Basic Usage
@@ -57,7 +57,7 @@ A flexible container component for grouping content.
 ### Import
 
 ```tsx
-import { Card, CardHeader, CardBody, CardFooter } from '@arya/design-system';
+import { Card, CardHeader, CardBody, CardFooter } from '@teammate-voices/design-system';
 ```
 
 ### Basic Usage
@@ -110,7 +110,7 @@ A text input component with label, helper text, and error states.
 ### Import
 
 ```tsx
-import { Input } from '@arya/design-system';
+import { Input } from '@teammate-voices/design-system';
 ```
 
 ### Basic Usage
@@ -184,7 +184,7 @@ import { Input } from '@arya/design-system';
 ### Colors
 
 ```tsx
-import { colors } from '@arya/design-system';
+import { colors } from '@teammate-voices/design-system';
 
 // System colors
 colors.system.blue // #007AFF
@@ -203,7 +203,7 @@ colors.dark.text.primary // #FFFFFF
 ### Typography
 
 ```tsx
-import { typography } from '@arya/design-system';
+import { typography } from '@teammate-voices/design-system';
 
 // Font sizes
 typography.fontSize.largeTitle // 34px
@@ -217,7 +217,7 @@ typography.textStyle.headline
 ### Spacing
 
 ```tsx
-import { spacing } from '@arya/design-system';
+import { spacing } from '@teammate-voices/design-system';
 
 spacing[2] // 16px (2 × 8px)
 spacing.md // 16px
@@ -227,7 +227,7 @@ spacing.inset.lg // 20px
 ### Shadows
 
 ```tsx
-import { shadows } from '@arya/design-system';
+import { shadows } from '@teammate-voices/design-system';
 
 shadows.card.light // '0 2px 8px rgba(0, 0, 0, 0.08)'
 shadows.depth[3] // '0 4px 8px rgba(0, 0, 0, 0.1)'
@@ -236,7 +236,7 @@ shadows.depth[3] // '0 4px 8px rgba(0, 0, 0, 0.1)'
 ### Border Radius
 
 ```tsx
-import { radius } from '@arya/design-system';
+import { radius } from '@teammate-voices/design-system';
 
 radius.ios.medium // 10px
 radius.base // 8px
@@ -245,7 +245,7 @@ radius.base // 8px
 ### Transitions
 
 ```tsx
-import { transitions } from '@arya/design-system';
+import { transitions } from '@teammate-voices/design-system';
 
 transitions.duration.fast // 150ms
 transitions.easing.standard // cubic-bezier(0.4, 0.0, 0.2, 1)
@@ -256,7 +256,7 @@ transitions.all.base // 'all 250ms cubic-bezier(0.4, 0.0, 0.2, 1)'
 
 ## Theming
 
-ARYA automatically adapts to system preferences for light and dark mode using CSS media queries.
+Teammate Voices automatically adapts to system preferences for light and dark mode using CSS media queries.
 
 ### Custom Theme
 
@@ -264,16 +264,16 @@ Create a CSS file with custom properties:
 
 ```css
 :root {
-  --arya-primary-color: #007AFF;
-  --arya-background: #FFFFFF;
-  --arya-text: #000000;
+  --tv-primary-color: #007AFF;
+  --tv-background: #FFFFFF;
+  --tv-text: #000000;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --arya-primary-color: #0A84FF;
-    --arya-background: #000000;
-    --arya-text: #FFFFFF;
+    --tv-primary-color: #0A84FF;
+    --tv-background: #000000;
+    --tv-text: #FFFFFF;
   }
 }
 ```
@@ -281,7 +281,7 @@ Create a CSS file with custom properties:
 ### Accessing Tokens in JavaScript
 
 ```tsx
-import { colors, typography, spacing } from '@arya/design-system';
+import { colors, typography, spacing } from '@teammate-voices/design-system';
 
 const MyComponent = () => {
   return (
@@ -336,7 +336,7 @@ Build complex UIs by composing simple components:
 Use CSS media queries or the breakpoints tokens:
 
 ```tsx
-import { breakpoints } from '@arya/design-system';
+import { breakpoints } from '@teammate-voices/design-system';
 
 const styles = {
   container: {

@@ -1,7 +1,7 @@
 -- Phase 1: Lifecycle survey model (Admin-authored, automated milestones)
 
 ALTER SESSION SET CONTAINER = FREEPDB1;
-ALTER SESSION SET CURRENT_SCHEMA = ARYA;
+ALTER SESSION SET CURRENT_SCHEMA = TEAMMATE_VOICES;
 
 -- 1) Extend SURVEYS with lifecycle targeting
 ALTER TABLE SURVEYS ADD (

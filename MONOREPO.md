@@ -1,13 +1,13 @@
 # Monorepo Structure
 
-This is a monorepo containing multiple applications and the shared ARYA Design System.
+This is a monorepo containing multiple applications and the shared Teammate Voices Design System.
 
 ## Packages
 
-### @arya/design-system
+### @teammate-voices/design-system
 Centralized design system with reusable React components, styling, and design tokens.
 
-**Location:** `packages/arya-design-system/`
+**Location:** `packages/teammate-voices-design-system/`
 
 **Runs on:** 
 - Dev: http://localhost:5173 (Vite dev server)
@@ -15,12 +15,12 @@ Centralized design system with reusable React components, styling, and design to
 
 **Scripts:**
 ```bash
-npm run dev:arya      # Start dev server
-npm run build:arya    # Build for production
+npm run dev:ds      # Start dev server
+npm run build:ds    # Build for production
 ```
 
 ### empsurvey
-Employee engagement and feedback survey application using ARYA components.
+Employee engagement and feedback survey application using Teammate Voices components.
 
 **Location:** `packages/empsurvey/`
 
@@ -40,7 +40,7 @@ Shared Oracle Database (FREEPDB1) running in Docker.
 - Host: `localhost`
 - Port: `1521`
 - Service: `FREEPDB1`
-- User: `arya`
+- User: `teammate_voices`
 - Tables: 
   - `APPLE_ACCOUNT_USERS` (User registration data)
   - `SURVEYS` (Survey definitions)
@@ -59,8 +59,8 @@ npm run db:down      # Stop database container
 # Terminal 1: Start Database
 npm run db:up
 
-# Terminal 2: Start ARYA Design System
-npm run dev:arya
+# Terminal 2: Start Teammate Voices Design System
+npm run dev:ds
 
 # Terminal 3: Start EMPSurvey
 npm run dev:survey
@@ -91,9 +91,9 @@ npm run docker:prod:down # Stop production containers
 ## File Structure
 
 ```
-ARYA-Monorepo/
+Teammate-Voices-Monorepo/
 ├── packages/
-│   ├── arya-design-system/
+│   ├── teammate-voices-design-system/
 │   │   ├── src/
 │   │   │   ├── components/      # Reusable UI components
 │   │   │   ├── pages/           # Full-page components
@@ -128,14 +128,14 @@ ARYA-Monorepo/
 
 ## Contributing
 
-- Follow ARYA Design System pattern for styling
-- Use shared components from @arya/design-system in empsurvey
+- Follow Teammate Voices Design System pattern for styling
+- Use shared components from @teammate-voices/design-system in empsurvey
 - Keep database schema normalized and well-documented
 - Test locally before pushing changes
 
 ## Shared Components Available
 
-Import from `@arya/design-system`:
+Import from `@teammate-voices/design-system`:
 - `Input` - Text input with floating labels
 - `Button` - Primary and secondary buttons
 - `Select` - Dropdown select
@@ -143,7 +143,7 @@ Import from `@arya/design-system`:
 
 Example:
 ```tsx
-import { Input, Button } from '@arya/design-system'
+import { Input, Button } from '@teammate-voices/design-system'
 
 export function MyComponent() {
   return (

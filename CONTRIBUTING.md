@@ -1,6 +1,6 @@
-# Contributing to ARYA Design System
+# Contributing to Teammate Voices Design System
 
-Thank you for your interest in contributing to ARYA! We welcome contributions from the community.
+Thank you for your interest in contributing to Teammate Voices! We welcome contributions from the community.
 
 ## Code of Conduct
 
@@ -39,7 +39,7 @@ Please be respectful and considerate of others. We aim to maintain a welcoming a
 
 ```bash
 # Clone your fork
-git clone https://github.com/your-username/arya-design-system.git
+git clone https://github.com/your-username/teammate-voices-design-system.git
 
 # Install dependencies
 npm install

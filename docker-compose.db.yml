@@ -8,7 +8,7 @@ services:
       - "5500:5500"
     environment:
       ORACLE_PASSWORD: "ChangeMe123"
-      APP_USER: "arya"
+      APP_USER: "teammate_voices"
       APP_USER_PASSWORD: "ChangeMe123"
     volumes:
       - oracle-data:/opt/oracle/oradata

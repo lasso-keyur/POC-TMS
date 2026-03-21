@@ -1,6 +1,6 @@
 # Design Principles
 
-ARYA Design System follows Apple's core design principles to create beautiful, intuitive, and accessible user interfaces.
+Teammate Voices Design System follows Apple's core design principles to create beautiful, intuitive, and accessible user interfaces.
 
 ## Core Principles
 

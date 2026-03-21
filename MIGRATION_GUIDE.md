@@ -1,32 +1,32 @@
 # MIGRATION GUIDE: Moving to Monorepo Structure
 
-This guide explains how to move your existing ARYA Design System files into the monorepo structure.
+This guide explains how to move your existing Teammate Voices Design System files into the monorepo structure.
 
 ## Step 1: Understanding the Current Layout
 
-Your current structure has all files in the root directory. We need to move them into `packages/arya-design-system/`.
+Your current structure has all files in the root directory. We need to move them into `packages/teammate-voices-design-system/`.
 
 ## Step 2: What to Move
 
 ### Source Files
 ```
-FROM: /src/*                    → TO: /packages/arya-design-system/src/*
-FROM: /public/*                 → TO: /packages/arya-design-system/public/*
-FROM: /index.html               → TO: /packages/arya-design-system/index.html
-FROM: /.eslintrc.cjs            → TO: /packages/arya-design-system/.eslintrc.cjs
+FROM: /src/*                    → TO: /packages/teammate-voices-design-system/src/*
+FROM: /public/*                 → TO: /packages/teammate-voices-design-system/public/*
+FROM: /index.html               → TO: /packages/teammate-voices-design-system/index.html
+FROM: /.eslintrc.cjs            → TO: /packages/teammate-voices-design-system/.eslintrc.cjs
 ```
 
 ### Configuration Files
 ```
-FROM: /vite.config.ts                   → TO: /packages/arya-design-system/vite.config.ts
-FROM: /tsconfig.json                    → TO: /packages/arya-design-system/tsconfig.json
-FROM: /tsconfig.node.json               → TO: /packages/arya-design-system/tsconfig.node.json
+FROM: /vite.config.ts                   → TO: /packages/teammate-voices-design-system/vite.config.ts
+FROM: /tsconfig.json                    → TO: /packages/teammate-voices-design-system/tsconfig.json
+FROM: /tsconfig.node.json               → TO: /packages/teammate-voices-design-system/tsconfig.node.json
 ```
 
-### Docker Files (Keep in Root, but symlink for arya)
+### Docker Files (Keep in Root, but symlink for teammate-voices)
 ```
-/Dockerfile                     (Update to use packages/arya-design-system context)
-/Dockerfile.prod                (Update to use packages/arya-design-system context)
+/Dockerfile                     (Update to use packages/teammate-voices-design-system context)
+/Dockerfile.prod                (Update to use packages/teammate-voices-design-system context)
 /nginx.conf                     (Stays in root)
 /docker-compose.yml             (Update for both services)
 /docker-compose.prod.yml        (Update for both services)
@@ -39,22 +39,22 @@ Since moving files via command-line tools is complex, you have these options:
 ### Option A: Using VS Code (Recommended)
 1. Create the directory structure in VS Code
 2. Select files/folders in the root (src/, public/, etc.)
-3. Drag and drop to `packages/arya-design-system/`
+3. Drag and drop to `packages/teammate-voices-design-system/`
 4. Update imports in moved files
 
 ### Option B: Using Terminal
 ```bash
 # Navigate to workspace root
-cd /Users/keyur/AI\ Projects/ARYA\ Design\ System
+cd /Users/keyur/AI\ Projects/Teammate\ Voices
 
 # Copy source files
-cp -r src packages/arya-design-system/
-cp -r public packages/arya-design-system/
-cp index.html packages/arya-design-system/
-cp vite.config.ts packages/arya-design-system/
-cp tsconfig.json packages/arya-design-system/
-cp tsconfig.node.json packages/arya-design-system/
-cp .eslintrc.cjs packages/arya-design-system/
+cp -r src packages/teammate-voices-design-system/
+cp -r public packages/teammate-voices-design-system/
+cp index.html packages/teammate-voices-design-system/
+cp vite.config.ts packages/teammate-voices-design-system/
+cp tsconfig.json packages/teammate-voices-design-system/
+cp tsconfig.node.json packages/teammate-voices-design-system/
+cp .eslintrc.cjs packages/teammate-voices-design-system/
 
 # Optionally remove from root (keep backup first!)
 # rm -rf src public index.html vite.config.ts tsconfig.json tsconfig.node.json
@@ -63,7 +63,7 @@ cp .eslintrc.cjs packages/arya-design-system/
 ### Option C: Keep Files in Root with Symlinks
 If you prefer not to move files:
 ```bash
-cd packages/arya-design-system
+cd packages/teammate-voices-design-system
 ln -s ../../src src
 ln -s ../../public public
 ln -s ../../index.html index.html
@@ -74,7 +74,7 @@ ln -s ../../index.html index.html
 
 ```bash
 cp .eslintrc.cjs packages/empsurvey/
-cp .gitignore packages/arya-design-system/
+cp .gitignore packages/teammate-voices-design-system/
 cp .gitignore packages/empsurvey/
 ```
 
@@ -95,7 +95,7 @@ After migrating:
 
 1. **Check structure:**
    ```bash
-   ls -la packages/arya-design-system/src
+   ls -la packages/teammate-voices-design-system/src
    ls -la packages/empsurvey/src
    ```
 
@@ -106,13 +106,13 @@ After migrating:
 
 3. **Test dev servers:**
    ```bash
-   npm run dev:arya   # Should start on :5173
+   npm run dev:teammate-voices   # Should start on :5173
    npm run dev:survey # Should start on :5174
    ```
 
 4. **Test Docker build:**
    ```bash
-   docker build -f Dockerfile -t arya-design-system:latest ./packages/arya-design-system
+   docker build -f Dockerfile -t teammate-voices-design-system:latest ./packages/teammate-voices-design-system
    ```
 
 ## Troubleshooting
@@ -122,22 +122,22 @@ After migrating:
 - Update path aliases in each package's tsconfig.json
 
 ### Docker build fails
-- Update COPY command in Dockerfile to reference `packages/arya-design-system/`
+- Update COPY command in Dockerfile to reference `packages/teammate-voices-design-system/`
 - Verify nginx.conf path references are correct
 
 ### Dev server won't start
 - Ensure vite.config.ts is in the correct package directory
 - Check that index.html points to correct main.tsx location
-- Verify port assignments (5173 for arya, 5174 for survey)
+- Verify port assignments (5173 for teammate-voices, 5174 for survey)
 
 ## Final Check
 
 Your repository should look like this after migration:
 
 ```
-ARYA-Monorepo/
+Teammate Voices-Monorepo/
 ├── packages/
-│   ├── arya-design-system/
+│   ├── teammate-voices-design-system/
 │   │   ├── src/               ← MOVED FILES
 │   │   ├── public/            ← MOVED FILES
 │   │   ├── index.html         ← MOVED FILE

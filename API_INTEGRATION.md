@@ -5,7 +5,7 @@
 ### ✅ Backend (Spring Boot API)
 ```
 packages/empsurvey-api/
-├── src/main/java/com/arya/empsurvey/
+├── src/main/java/com/teammatevoices/empsurvey/
 │   ├── EmpSurveyApplication.java
 │   ├── controller/
 │   │   └── SurveyController.java          ← REST API endpoints
@@ -232,7 +232,7 @@ CREATE TABLE SURVEY_OPTIONS (
 
 **Terminal 1 - Database:**
 ```bash
-cd /Users/keyur/AI\ Projects/ARYA\ Design\ System
+cd /Users/keyur/AI\ Projects/Teammate\ Voices
 docker compose -f docker-compose.db.yml up -d
 ```
 
@@ -336,7 +336,7 @@ curl http://localhost:8080/api/surveys | jq
 ### View Database Tables
 ```bash
 # Use Oracle SQL Developer or:
-sqlplus ARYA/arya123@localhost:1521/FREEPDB1
+sqlplus TEAMMATE_VOICES/teammate123@localhost:1521/FREEPDB1
 
 SQL> SELECT * FROM SURVEYS;
 SQL> SELECT * FROM SURVEY_QUESTIONS;
@@ -364,7 +364,7 @@ VITE_API_URL=http://localhost:8080/api
 VITE_DB_HOST=localhost
 VITE_DB_PORT=1521
 VITE_DB_SERVICE=FREEPDB1
-VITE_DB_USER=ARYA
+VITE_DB_USER=TEAMMATE_VOICES
 ```
 
 ### Backend (application.yml)
@@ -372,8 +372,8 @@ VITE_DB_USER=ARYA
 spring:
   datasource:
     url: jdbc:oracle:thin:@${DB_HOST:localhost}:${DB_PORT:1521}/${DB_SERVICE:FREEPDB1}
-    username: ${DB_USER:ARYA}
-    password: ${DB_PASSWORD:arya123}
+    username: ${DB_USER:TEAMMATE_VOICES}
+    password: ${DB_PASSWORD:teammate123}
 ```
 
 ---

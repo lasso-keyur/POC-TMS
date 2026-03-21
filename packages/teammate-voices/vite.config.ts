@@ -3,7 +3,7 @@ import react from '@vitejs/plugin-react'
 import path from 'path'
 
 const appSrc = path.resolve(__dirname, './src')
-const designSystemSrc = path.resolve(__dirname, '../arya-design-system/src')
+const designSystemSrc = path.resolve(__dirname, '../teammate-voices-design-system/src')
 
 export default defineConfig({
   plugins: [
@@ -14,7 +14,7 @@ export default defineConfig({
       resolveId(source, importer) {
         if (!source.startsWith('@/') || !importer) return null
         // If the importer is inside the design system, resolve @/ to design system src
-        if (importer.includes('arya-design-system')) {
+        if (importer.includes('teammate-voices-design-system')) {
           const resolved = source.replace('@/', designSystemSrc + '/')
           return this.resolve(resolved, importer, { skipSelf: true })
         }
@@ -35,7 +35,7 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      '@arya/design-system': path.resolve(designSystemSrc, 'index.ts'),
+      '@teammate-voices/design-system': path.resolve(designSystemSrc, 'index.ts'),
     },
   },
 })

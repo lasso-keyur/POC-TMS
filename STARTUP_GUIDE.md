@@ -10,7 +10,7 @@
 
 ### Step 1: Start Oracle Database
 ```bash
-cd /Users/keyur/AI\ Projects/ARYA\ Design\ System
+cd /Users/keyur/AI\ Projects/Teammate\ Voices
 docker compose -f docker-compose.db.yml up -d
 ```
 
@@ -50,7 +50,7 @@ The app will start on **http://localhost:5176**
 Run everything together:
 
 ```bash
-cd /Users/keyur/AI\ Projects/ARYA\ Design\ System
+cd /Users/keyur/AI\ Projects/Teammate\ Voices
 docker compose up --build
 ```
 
@@ -127,7 +127,7 @@ packages/
 │
 └── empsurvey-api/          # Spring Boot Backend
     ├── pom.xml
-    ├── src/main/java/com/arya/empsurvey/
+    ├── src/main/java/com/teammatevoices/empsurvey/
     │   ├── controller/SurveyController.java
     │   ├── service/SurveyService.java
     │   ├── repository/SurveyRepository.java

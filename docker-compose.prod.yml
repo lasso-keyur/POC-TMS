@@ -1,10 +1,10 @@
 version: "3.9"
 
 services:
-  arya-web:
+  tv-web:
     build:
       context: .
-      dockerfile: packages/arya-design-system/Dockerfile.prod
+      dockerfile: packages/teammate-voices-design-system/Dockerfile.prod
     ports:
       - "8082:80"
     environment:
@@ -12,7 +12,7 @@ services:
     depends_on:
       - oracle-db
     networks:
-      - arya-network
+      - tv-network
 
   survey-web:
     build:
@@ -25,11 +25,11 @@ services:
       VITE_DB_HOST: oracle-db
       VITE_DB_PORT: "1521"
       VITE_DB_SERVICE: FREEPDB1
-      VITE_DB_USER: arya
+      VITE_DB_USER: teammate_voices
     depends_on:
       - oracle-db
     networks:
-      - arya-network
+      - tv-network
 
   oracle-db:
     image: container-registry.oracle.com/database/free:latest
@@ -42,11 +42,11 @@ services:
       - oracle-data:/opt/oracle/oradata
       - ./db/init:/docker-entrypoint-initdb.d
     networks:
-      - arya-network
+      - tv-network
 
 volumes:
   oracle-data:
 
 networks:
-  arya-network:
+  tv-network:
     driver: bridge

@@ -12,7 +12,7 @@
         <relativePath/>
     </parent>
 
-    <groupId>com.arya</groupId>
+    <groupId>com.teammatevoices</groupId>
     <artifactId>empsurvey-api</artifactId>
     <version>1.0.0</version>
     <name>EMPSurvey API</name>

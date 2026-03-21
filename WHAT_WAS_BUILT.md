@@ -24,7 +24,7 @@ Complete Spring Boot REST API + React Frontend integration with:
   ├── README.md (API documentation)
   ├── src/main/resources/
   │   └── application.yml (Database & server config)
-  └── src/main/java/com/arya/empsurvey/
+  └── src/main/java/com/teammatevoices/empsurvey/
       ├── EmpSurveyApplication.java (Main)
       ├── controller/
       │   └── SurveyController.java (REST endpoints)
@@ -76,7 +76,7 @@ Complete Spring Boot REST API + React Frontend integration with:
 🔄 docker-compose.yml
   - Added empsurvey-api service (Spring Boot)
   - Added oracle-db service with volume
-  - Added arya-network for service communication
+  - Added tv-network for service communication
   - Updated VITE_API_URL for survey-web service
   - Added networks configuration
 ```
@@ -115,7 +115,7 @@ setSurveyId(savedSurvey.surveyId!)
 Before:
 ```yaml
 services:
-  arya-web: ...  # Design system
+  tv-web: ...  # Design system
   survey-web: ... # Frontend only
   # No API or database services
 ```
@@ -123,7 +123,7 @@ services:
 After:
 ```yaml
 services:
-  arya-web: ...
+  tv-web: ...
   survey-web: ...
   empsurvey-api: ... # ← NEW
   oracle-db: ... # ← NEW
@@ -291,15 +291,15 @@ VITE_API_URL=http://localhost:8080/api
 DB_HOST=localhost
 DB_PORT=1521
 DB_SERVICE=FREEPDB1
-DB_USER=ARYA
-DB_PASSWORD=arya123
+DB_USER=TEAMMATE_VOICES
+DB_PASSWORD=teammate123
 ```
 
 ### Database Connection
 ```
 Oracle URL: jdbc:oracle:thin:@localhost:1521/FREEPDB1
-User: ARYA
-Password: arya123
+User: TEAMMATE_VOICES
+Password: teammate123
 ```
 
 ---
@@ -337,7 +337,7 @@ curl http://localhost:8080/api/surveys
 
 ### Check Database
 ```bash
-docker exec -it <oracle-container> sqlplus ARYA/arya123
+docker exec -it <oracle-container> sqlplus TEAMMATE_VOICES/teammate123
 SQL> SELECT * FROM SURVEYS;
 ```
 

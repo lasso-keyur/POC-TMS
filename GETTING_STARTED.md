@@ -75,7 +75,7 @@ Frontend updates state with survey ID
 ### **I just want to test it NOW:**
 ```bash
 # Terminal 1
-cd /Users/keyur/AI\ Projects/ARYA\ Design\ System
+cd /Users/keyur/AI\ Projects/Teammate\ Voices
 docker compose -f docker-compose.db.yml up -d
 
 # Terminal 2
@@ -209,8 +209,8 @@ VITE_API_URL=http://localhost:8080/api
 spring:
   datasource:
     url: jdbc:oracle:thin:@localhost:1521/FREEPDB1
-    username: ARYA
-    password: arya123
+    username: TEAMMATE_VOICES
+    password: teammate123
 ```
 
 ### Docker Compose

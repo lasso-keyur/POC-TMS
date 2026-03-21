@@ -38,7 +38,7 @@ docker compose -f docker-compose.db.yml up -d
 
 ### Step 3: Start the API
 ```bash
-cd /Users/keyur/AI\ Projects/ARYA\ Design\ System/packages/empsurvey-api
+cd /Users/keyur/AI\ Projects/Teammate\ Voices/packages/empsurvey-api
 ```
 
 **First time only:**

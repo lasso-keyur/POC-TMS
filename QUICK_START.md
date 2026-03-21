@@ -15,14 +15,14 @@ If any are missing, install them first.
 
 ### Terminal 1: Start Database
 ```bash
-cd /Users/keyur/AI\ Projects/ARYA\ Design\ System
+cd /Users/keyur/AI\ Projects/Teammate\ Voices
 docker compose -f docker-compose.db.yml up -d
 ```
 Wait for message: `[+] Running` and `oracle` container is up
 
 ### Terminal 2: Start API Server
 ```bash
-cd /Users/keyur/AI\ Projects/ARYA\ Design\ System/packages/empsurvey-api
+cd /Users/keyur/AI\ Projects/Teammate\ Voices/packages/empsurvey-api
 mvn clean package
 mvn spring-boot:run
 ```
@@ -30,7 +30,7 @@ Wait for message: ✅ `Started EmpSurveyApplication`
 
 ### Terminal 3: Start React Frontend
 ```bash
-cd /Users/keyur/AI\ Projects/ARYA\ Design\ System/packages/empsurvey
+cd /Users/keyur/AI\ Projects/Teammate\ Voices/packages/empsurvey
 npm run dev
 ```
 Wait for message: ✅ `Local: http://localhost:5176`
@@ -45,7 +45,7 @@ http://localhost:5176
 ## 🐳 Option B: Run with Docker Compose (One Command)
 
 ```bash
-cd /Users/keyur/AI\ Projects/ARYA\ Design\ System
+cd /Users/keyur/AI\ Projects/Teammate\ Voices
 docker compose up --build
 ```
 

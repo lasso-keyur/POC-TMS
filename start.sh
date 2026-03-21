@@ -2,10 +2,10 @@
 
 set -e
 
-echo "🚀 Starting ARYA Survey System..."
+echo "🚀 Starting Teammate Voices Survey System..."
 echo ""
 
-PROJECT_ROOT="/Users/keyur/AI Projects/ARYA Design System"
+PROJECT_ROOT="/Users/keyur/AI Projects/Teammate Voices"
 cd "$PROJECT_ROOT"
 
 # Colors for output

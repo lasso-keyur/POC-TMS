@@ -1,4 +1,4 @@
-import { Card, CardBody } from '@arya/design-system'
+import { Card, CardBody } from '@teammate-voices/design-system'
 import BarChart from '@/components/BarChart'
 import DonutChart from '@/components/DonutChart'
 import {

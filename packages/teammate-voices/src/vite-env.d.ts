@@ -1,6 +1,6 @@
 /// <reference types="vite/client" />
 
-declare module '@arya/design-system' {
+declare module '@teammate-voices/design-system' {
   import type { FC, ForwardRefExoticComponent, RefAttributes, ButtonHTMLAttributes, HTMLAttributes, InputHTMLAttributes } from 'react'
 
   export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {

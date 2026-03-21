@@ -42,16 +42,16 @@ The application connects to Oracle Database with the following defaults:
 
 ```yaml
 URL: jdbc:oracle:thin:@localhost:1521/FREEPDB1
-Username: ARYA
-Password: arya123
+Username: TEAMMATE_VOICES
+Password: teammate123
 ```
 
 Override these using environment variables:
 - `DB_HOST` (default: localhost)
 - `DB_PORT` (default: 1521)
 - `DB_SERVICE` (default: FREEPDB1)
-- `DB_USER` (default: ARYA)
-- `DB_PASSWORD` (default: arya123)
+- `DB_USER` (default: TEAMMATE_VOICES)
+- `DB_PASSWORD` (default: teammate123)
 
 ## Running Locally
 
@@ -90,7 +90,7 @@ This will:
 ### Project Structure
 
 ```
-src/main/java/com/arya/empsurvey/
+src/main/java/com/teammatevoices/empsurvey/
 ├── EmpSurveyApplication.java       # Main application class
 ├── config/
 │   └── WebConfig.java              # CORS and web configuration
@@ -124,14 +124,14 @@ Schema files are located in `../../db/init/`
 ## CORS Configuration
 
 The API allows requests from:
-- `http://localhost:5173` (arya-web)
+- `http://localhost:5173` (tv-web)
 - `http://localhost:5174` (survey-web)
 - `http://localhost:5176` (empsurvey)
 
 ## Logging
 
 Debug logging is enabled for:
-- Application code: `com.arya.empsurvey`
+- Application code: `com.teammatevoices.empsurvey`
 - Hibernate SQL: Shows all SQL queries
 - SQL Parameters: Shows bound parameters in queries
 
@@ -168,4 +168,4 @@ mvn clean package -DskipTests
 
 ## License
 
-Proprietary - ARYA Design System Project
+Proprietary - Teammate Voices Design System Project

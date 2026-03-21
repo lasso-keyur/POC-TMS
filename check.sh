@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo "🔍 ARYA Survey System - Diagnostic Check"
+echo "🔍 Teammate Voices Survey System - Diagnostic Check"
 echo "========================================"
 echo ""
 
