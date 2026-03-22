@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Button } from '@teammate-voices/design-system'
+import { Button } from '../design-system'
 import SurveyPageEditor from '@/components/SurveyPageEditor'
 import type { SurveyPage } from '@/types/survey'
 
@@ -9,6 +9,8 @@ interface FormBuilderPanelProps {
   onSave: () => void
   onCancel: () => void
   saving?: boolean
+  saveMessage?: string
+  detailsComplete?: boolean
 }
 
 function generatePageId(pages: SurveyPage[]): string {
@@ -28,7 +30,7 @@ function createEmptyPage(pages: SurveyPage[]): SurveyPage {
   }
 }
 
-export default function FormBuilderPanel({ pages, onPagesChange, onSave, onCancel, saving }: FormBuilderPanelProps) {
+export default function FormBuilderPanel({ pages, onPagesChange, onSave, onCancel, saving, saveMessage, detailsComplete = true }: FormBuilderPanelProps) {
   const [activePageIdx, setActivePageIdx] = useState(0)
   const [sidebarOpen, setSidebarOpen] = useState(true)
 
@@ -84,12 +86,23 @@ export default function FormBuilderPanel({ pages, onPagesChange, onSave, onCance
             ) : (
               <ul className="form-builder__page-list">
                 {pages.map((page, idx) => (
-                  <li
-                    key={page.pageId}
-                    className={`form-builder__page-item${idx === activePageIdx ? ' form-builder__page-item--active' : ''}`}
-                    onClick={() => setActivePageIdx(idx)}
-                  >
-                    {page.label || page.pageId}
+                  <li key={page.pageId}>
+                    <div
+                      className={`form-builder__page-item${idx === activePageIdx ? ' form-builder__page-item--active' : ''}`}
+                      onClick={() => setActivePageIdx(idx)}
+                    >
+                      {page.title || page.label || page.pageId}
+                    </div>
+                    {idx === activePageIdx && page.questions.length > 0 && (
+                      <ul className="form-builder__question-tree">
+                        <li className="form-builder__tree-label">Questions</li>
+                        {page.questions.map((q, qIdx) => (
+                          <li key={q.questionId ?? qIdx} className="form-builder__tree-question">
+                            {q.questionLabel || q.questionText || `Question ${qIdx + 1}`}
+                          </li>
+                        ))}
+                      </ul>
+                    )}
                   </li>
                 ))}
               </ul>
@@ -112,9 +125,11 @@ export default function FormBuilderPanel({ pages, onPagesChange, onSave, onCance
             <div className="form-builder__empty-state">
               <h3 className="form-builder__empty-title">Your form is empty</h3>
               <p className="form-builder__empty-message">
-                Use the &apos;Add page&apos; button to start building your survey.
+                {detailsComplete
+                  ? "Use the 'Add page' button to start building your survey."
+                  : 'Please complete the Details tab (survey name) before adding pages.'}
               </p>
-              <Button variant="secondary" onClick={handleAddPage}>
+              <Button variant="secondary" onClick={handleAddPage} disabled={!detailsComplete}>
                 Add Page
               </Button>
             </div>
@@ -130,9 +145,10 @@ export default function FormBuilderPanel({ pages, onPagesChange, onSave, onCance
       </div>
 
       <div className="form-builder__bottom-actions">
-        <Button variant="secondary" onClick={onCancel}>Cancel</Button>
-        <Button variant="secondary" onClick={handleAddPage}>Add Page</Button>
-        <Button variant="primary" onClick={onSave} loading={saving}>Save</Button>
+        {saveMessage && <span className="survey-editor__save-message">{saveMessage}</span>}
+        <Button variant="secondary" size="sm" onClick={onCancel}>Cancel</Button>
+        <Button variant="secondary" size="sm" onClick={handleAddPage} disabled={!detailsComplete}>Add Page</Button>
+        <Button variant="primary" size="sm" onClick={onSave} loading={saving} disabled={!detailsComplete}>Save</Button>
       </div>
     </div>
   )
