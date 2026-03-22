@@ -82,7 +82,8 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
             `tv-input-container--${size}`,
             error && 'tv-input-container--error',
             disabled && 'tv-input-container--disabled',
-            (isFocused || hasValue) && 'tv-input-container--active'
+            (isFocused || hasValue) && 'tv-input-container--active',
+            label && 'tv-input-container--has-label'
           )}
         >
           {iconBefore && <span className="tv-input__icon-before">{iconBefore}</span>}

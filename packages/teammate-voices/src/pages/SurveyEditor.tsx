@@ -1,124 +1,240 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { Card, CardHeader, CardBody, Button, Input } from '@teammate-voices/design-system'
+import { Button, Input } from '@teammate-voices/design-system'
+import Breadcrumb from '@/components/Breadcrumb'
+import TabBar from '@/components/TabBar'
+import StatusPill from '@/components/StatusPill'
+import FormField from '@/components/FormField'
+import FormBuilderPanel from '@/components/FormBuilderPanel'
+import ToggleSwitch from '@/components/ToggleSwitch'
 import { api } from '@/services/api'
-import type { Survey, SurveyQuestion } from '@/types/survey'
+import type { Survey, SurveyPage, SurveyTab } from '@/types/survey'
+import { SURVEY_TABS } from '@/types/survey'
+import type { Program } from '@/types/program'
+
+const EMPTY_SURVEY: Partial<Survey> = {
+  title: '',
+  description: '',
+  templateType: 'CUSTOM',
+  status: 'DRAFT',
+  buildStatus: 'DRAFT',
+  participantType: 'ALL',
+  surveyStage: 'ONBOARDING',
+  audienceSource: 'CSV_UPLOAD',
+  autoSend: false,
+  isAnonymous: true,
+  questions: [],
+  pages: [],
+}
 
 export default function SurveyEditor() {
   const { surveyId } = useParams<{ surveyId: string }>()
   const navigate = useNavigate()
-  const [survey, setSurvey] = useState<Survey | null>(null)
-  const [loading, setLoading] = useState(true)
+  const isEditMode = !!surveyId
+
+  const [survey, setSurvey] = useState<Partial<Survey>>(EMPTY_SURVEY)
+  const [programs, setPrograms] = useState<Program[]>([])
+  const [activeTab, setActiveTab] = useState<SurveyTab>('details')
+  const [loading, setLoading] = useState(isEditMode)
   const [saving, setSaving] = useState(false)
+
+  useEffect(() => {
+    api.getPrograms()
+      .then(setPrograms)
+      .catch(() => setPrograms([]))
+  }, [])
 
   useEffect(() => {
     if (!surveyId) return
     api.getSurvey(Number(surveyId))
-      .then(setSurvey)
+      .then((s) => setSurvey({ ...s, pages: s.pages || [] }))
       .catch(() => navigate('/surveys'))
       .finally(() => setLoading(false))
   }, [surveyId, navigate])
 
+  const isActive = survey.status === 'ACTIVE'
+
   const handleSave = async () => {
-    if (!survey) return
+    if (!survey.title?.trim()) return
     setSaving(true)
     try {
-      await api.updateSurvey(survey.surveyId, survey)
+      if (isEditMode && survey.surveyId) {
+        await api.updateSurvey(survey.surveyId, survey)
+      } else {
+        const created = await api.createSurvey(survey)
+        navigate(`/surveys/${created.surveyId}/edit`, { replace: true })
+      }
     } catch {
-      alert('Failed to save')
+      alert('Failed to save survey')
     } finally {
       setSaving(false)
     }
   }
 
+  const handleDelete = async () => {
+    if (!survey.surveyId || !confirm('Delete this survey?')) return
+    try {
+      await api.deleteSurvey(survey.surveyId)
+      navigate('/surveys')
+    } catch {
+      alert('Failed to delete survey')
+    }
+  }
+
   const handlePublish = async () => {
-    if (!survey) return
+    if (!survey.surveyId) {
+      await handleSave()
+      return
+    }
     try {
       const updated = await api.publishSurvey(survey.surveyId)
       setSurvey(updated)
     } catch {
-      alert('Failed to publish')
+      alert('Failed to publish survey')
     }
   }
 
-  const updateQuestion = (index: number, field: keyof SurveyQuestion, value: string | boolean) => {
-    if (!survey?.questions) return
-    const updated = [...survey.questions]
-    updated[index] = { ...updated[index], [field]: value }
-    setSurvey({ ...survey, questions: updated })
+  const handleNext = () => {
+    const currentIdx = SURVEY_TABS.findIndex(t => t.key === activeTab)
+    if (currentIdx < SURVEY_TABS.length - 1) {
+      setActiveTab(SURVEY_TABS[currentIdx + 1].key)
+    }
+  }
+
+  const handlePagesChange = (pages: SurveyPage[]) => {
+    setSurvey({ ...survey, pages })
   }
 
   if (loading) {
-    return <p style={{ textAlign: 'center', padding: 60, color: '#86868B' }}>Loading survey...</p>
+    return <p style={{ textAlign: 'center', padding: 60, color: '#86868b' }}>Loading survey...</p>
   }
 
-  if (!survey) return null
+  const pageTitle = isEditMode ? (survey.title || 'Edit survey') : 'Create survey'
+  const breadcrumbLabel = isEditMode ? (survey.title || 'Edit survey') : 'Create survey'
 
   return (
-    <div style={{ maxWidth: 800, margin: '0 auto' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 24 }}>
-        <div>
-          <h1 style={{ fontSize: 28, fontWeight: 700, color: '#1D1D1F', margin: '0 0 4px', letterSpacing: '-0.02em' }}>
-            {survey.title}
-          </h1>
-          <p style={{ fontSize: 14, color: '#86868B', margin: 0 }}>
-            {survey.templateType.replace(/_/g, ' ')} &middot; {survey.status}
-          </p>
+    <div className="survey-editor">
+      <Breadcrumb items={[
+        { label: 'Survey', path: '/surveys' },
+        { label: breadcrumbLabel },
+      ]} />
+
+      <div className="survey-editor__header">
+        <div className="survey-editor__header-left">
+          <h1 className="survey-editor__title">{pageTitle}</h1>
+          <div className="survey-editor__status-row">
+            <span className="survey-editor__status-label">Build status:</span>
+            <StatusPill
+              label={survey.buildStatus === 'PUBLISHED' ? 'Published' : 'Draft'}
+              variant={survey.buildStatus === 'PUBLISHED' ? 'active' : 'draft'}
+            />
+          </div>
         </div>
-        <div style={{ display: 'flex', gap: 8 }}>
-          <Button variant="secondary" onClick={() => navigate('/surveys')}>Back</Button>
-          <Button variant="secondary" onClick={handleSave} loading={saving}>Save</Button>
-          {survey.status === 'DRAFT' && (
-            <Button variant="primary" onClick={handlePublish}>Publish</Button>
+        <div className="survey-editor__header-actions">
+          {isEditMode && (
+            <Button variant="destructive" onClick={handleDelete}>Delete</Button>
           )}
+          <Button variant="secondary" onClick={() => navigate('/surveys')}>Cancel</Button>
+          <Button variant="secondary" onClick={handlePublish}>Publish</Button>
         </div>
       </div>
 
-      <div style={{ marginBottom: 24 }}>
-        <Input
-          label="Title"
-          id="editor-title"
-          value={survey.title}
-          onChange={(e) => setSurvey({ ...survey, title: e.target.value })}
-          fullWidth
-        />
-      </div>
+      <TabBar
+        tabs={SURVEY_TABS}
+        activeTab={activeTab}
+        onChange={(key) => setActiveTab(key as SurveyTab)}
+      />
 
-      <h2 style={{ fontSize: 20, fontWeight: 600, color: '#1D1D1F', margin: '0 0 16px' }}>
-        Questions ({survey.questions?.length || 0})
-      </h2>
+      <div className="survey-editor__content">
+        {activeTab === 'details' && (
+          <>
+            <h2 className="survey-editor__section-title">Survey information</h2>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-        {survey.questions?.map((q, i) => (
-          <Card key={q.questionId} variant="elevated" padding="none">
-            <CardHeader style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 20px' }}>
-              <span style={{ fontSize: 13, fontWeight: 600, color: '#86868B' }}>Q{i + 1} &middot; {q.questionType.replace(/_/g, ' ')}</span>
-              <span style={{ fontSize: 12, color: q.isRequired ? '#FF3B30' : '#86868B' }}>
-                {q.isRequired ? 'Required' : 'Optional'}
-              </span>
-            </CardHeader>
-            <CardBody style={{ padding: '0 20px 16px' }}>
-              <Input
-                id={`q-${q.questionId}`}
-                value={q.questionText}
-                onChange={(e) => updateQuestion(i, 'questionText', e.target.value)}
-                fullWidth
-                size="sm"
-              />
-              {q.options && q.options.length > 0 && (
-                <div style={{ marginTop: 12, display: 'flex', flexDirection: 'column', gap: 4 }}>
-                  {q.options.map(opt => (
-                    <div key={opt.optionId} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '4px 0' }}>
-                      <span style={{ width: 20, height: 20, borderRadius: '50%', border: '2px solid #D2D2D7', flexShrink: 0 }} />
-                      <span style={{ fontSize: 14, color: '#1D1D1F' }}>{opt.optionText}</span>
-                      <span style={{ fontSize: 12, color: '#86868B', marginLeft: 'auto' }}>({opt.optionValue})</span>
-                    </div>
+            <div className="survey-editor__form-row">
+              <FormField label="Survey Name" required helper="Create a name for the survey." htmlFor="survey-name">
+                <Input
+                  id="survey-name"
+                  placeholder="Add name"
+                  value={survey.title || ''}
+                  onChange={(e) => setSurvey({ ...survey, title: e.target.value })}
+                  fullWidth
+                />
+              </FormField>
+
+              <FormField label="Summary" helper="Add a short description of the survey." htmlFor="survey-summary">
+                <Input
+                  id="survey-summary"
+                  placeholder="Add description"
+                  value={survey.description || ''}
+                  onChange={(e) => setSurvey({ ...survey, description: e.target.value })}
+                  fullWidth
+                />
+              </FormField>
+
+              <FormField label="Survey status">
+                <ToggleSwitch
+                  label={isActive ? 'Active' : 'Inactive'}
+                  checked={isActive}
+                  onChange={(checked) => setSurvey({ ...survey, status: checked ? 'ACTIVE' : 'DRAFT' })}
+                />
+              </FormField>
+            </div>
+
+            <div className="survey-editor__form-row survey-editor__form-row--program">
+              <FormField label="Program" required helper="Map the survey to a program." htmlFor="survey-program">
+                <select
+                  id="survey-program"
+                  className="program-create__select"
+                  value={survey.programId ? String(survey.programId) : ''}
+                  onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setSurvey({ ...survey, programId: Number(e.target.value) || undefined })}
+                >
+                  <option value="">Select</option>
+                  {programs.map(p => (
+                    <option key={p.programId} value={String(p.programId)}>{p.name}</option>
                   ))}
-                </div>
-              )}
-            </CardBody>
-          </Card>
-        ))}
+                </select>
+              </FormField>
+            </div>
+
+            <hr className="survey-editor__divider" />
+
+            <div className="survey-editor__bottom-actions">
+              <Button variant="secondary" onClick={handleSave} loading={saving}>Save</Button>
+              <Button variant="primary" onClick={handleNext}>Next</Button>
+            </div>
+          </>
+        )}
+
+        {activeTab === 'formBuilder' && (
+          <FormBuilderPanel
+            pages={survey.pages || []}
+            onPagesChange={handlePagesChange}
+            onSave={handleSave}
+            onCancel={() => navigate('/surveys')}
+            saving={saving}
+          />
+        )}
+
+        {activeTab === 'formViewer' && (
+          <div style={{ padding: '60px 0', textAlign: 'center', color: '#86868b' }}>
+            <p style={{ fontSize: 17 }}>Form Viewer</p>
+            <p style={{ fontSize: 14 }}>Preview your survey form here.</p>
+          </div>
+        )}
+
+        {activeTab === 'configuration' && (
+          <div style={{ padding: '60px 0', textAlign: 'center', color: '#86868b' }}>
+            <p style={{ fontSize: 17 }}>Configuration</p>
+            <p style={{ fontSize: 14 }}>Survey configuration options coming soon.</p>
+          </div>
+        )}
+
+        {activeTab === 'settings' && (
+          <div style={{ padding: '60px 0', textAlign: 'center', color: '#86868b' }}>
+            <p style={{ fontSize: 17 }}>Settings</p>
+            <p style={{ fontSize: 14 }}>Survey settings coming soon.</p>
+          </div>
+        )}
       </div>
     </div>
   )

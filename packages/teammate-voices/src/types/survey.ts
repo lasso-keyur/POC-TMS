@@ -4,6 +4,9 @@ export interface Survey {
   description: string
   templateType: 'CUSTOM' | 'TEAM_MATE_VOICES' | 'ENGAGEMENT' | 'NPS'
   status: 'DRAFT' | 'ACTIVE' | 'CLOSED' | 'ARCHIVED'
+  buildStatus?: 'DRAFT' | 'PUBLISHED'
+  programId?: number
+  cycle?: string
   participantType: 'NEW_HIRE' | 'EXISTING_RESOURCE' | 'ALL'
   surveyStage: 'ONBOARDING' | 'MID_TRAINING' | 'END_TRAINING'
   audienceSource: 'AUTO_API' | 'CSV_UPLOAD' | 'GOOGLE_SHEET'
@@ -15,7 +18,28 @@ export interface Survey {
   createdAt: string
   updatedAt: string
   questions?: SurveyQuestion[]
+  pages?: SurveyPage[]
 }
+
+export interface SurveyPage {
+  pageId: string
+  title: string
+  label: string
+  description: string
+  showDescription: boolean
+  sortOrder: number
+  questions: SurveyQuestion[]
+}
+
+export type SurveyTab = 'details' | 'formBuilder' | 'formViewer' | 'configuration' | 'settings'
+
+export const SURVEY_TABS: Array<{ key: SurveyTab; label: string }> = [
+  { key: 'details', label: 'Details' },
+  { key: 'formBuilder', label: 'Form Builder' },
+  { key: 'formViewer', label: 'Form Viewer' },
+  { key: 'configuration', label: 'Configuration' },
+  { key: 'settings', label: 'Settings' },
+]
 
 export interface SurveyQuestion {
   questionId?: number

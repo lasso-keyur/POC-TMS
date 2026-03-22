@@ -1,122 +1,119 @@
 import { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { Button, Input } from '@teammate-voices/design-system'
-import SurveyCard from '@/components/SurveyCard'
+import { useNavigate, Link } from 'react-router-dom'
+import { Button } from '@teammate-voices/design-system'
+import Breadcrumb from '@/components/Breadcrumb'
+import DataTable from '@/components/DataTable'
+import StatusPill from '@/components/StatusPill'
+import type { Column } from '@/components/DataTable'
 import { api } from '@/services/api'
 import type { Survey } from '@/types/survey'
+import type { Program } from '@/types/program'
 
-type TabKey = 'all' | 'DRAFT' | 'ACTIVE' | 'CLOSED'
-
-const TABS: Array<{ key: TabKey; label: string }> = [
-  { key: 'all', label: 'All' },
-  { key: 'DRAFT', label: 'Drafts' },
-  { key: 'ACTIVE', label: 'Active' },
-  { key: 'CLOSED', label: 'Closed' },
-]
+function formatDate(dateStr: string | null): string {
+  if (!dateStr) return ''
+  return dateStr.substring(0, 10)
+}
 
 export default function SurveyList() {
   const [surveys, setSurveys] = useState<Survey[]>([])
+  const [programs, setPrograms] = useState<Program[]>([])
   const [loading, setLoading] = useState(true)
-  const [activeTab, setActiveTab] = useState<TabKey>('all')
-  const [search, setSearch] = useState('')
   const navigate = useNavigate()
 
   useEffect(() => {
-    api.getSurveys()
-      .then(setSurveys)
-      .catch(() => setSurveys([]))
+    Promise.all([api.getSurveys(), api.getPrograms()])
+      .then(([s, p]) => { setSurveys(s); setPrograms(p) })
+      .catch(() => { setSurveys([]); setPrograms([]) })
       .finally(() => setLoading(false))
   }, [])
 
-  const filtered = surveys.filter(s => {
-    const matchesTab = activeTab === 'all' || s.status === activeTab
-    const matchesSearch = s.title.toLowerCase().includes(search.toLowerCase())
-    return matchesTab && matchesSearch
-  })
-
-  const getCount = (tab: TabKey) =>
-    tab === 'all' ? surveys.length : surveys.filter(s => s.status === tab).length
-
-  const handleDelete = async (id: number) => {
-    if (!confirm('Delete this survey?')) return
-    try {
-      await api.deleteSurvey(id)
-      setSurveys(prev => prev.filter(s => s.surveyId !== id))
-    } catch {
-      alert('Failed to delete survey')
-    }
+  const getProgramName = (survey: Survey): string => {
+    if (!survey.programId) return ''
+    const program = programs.find(p => p.programId === survey.programId)
+    return program?.name ?? ''
   }
 
+  const columns: Column<Survey>[] = [
+    {
+      key: 'program',
+      label: 'Program',
+      render: (row) => getProgramName(row),
+    },
+    {
+      key: 'title',
+      label: 'Survey name',
+      render: (row) => (
+        <Link to={`/surveys/${row.surveyId}/edit`} className="dt__link">
+          {row.title}
+        </Link>
+      ),
+    },
+    {
+      key: 'description',
+      label: 'Summary',
+      render: (row) => row.description || '',
+    },
+    {
+      key: 'cycle',
+      label: 'Cycle',
+      render: (row) => row.cycle || '',
+    },
+    {
+      key: 'status',
+      label: 'Active',
+      render: (row) => (row.status === 'ACTIVE' ? 'Active' : 'Inactive'),
+    },
+    {
+      key: 'buildStatus',
+      label: 'Build status',
+      render: (row) => (
+        <StatusPill
+          label={row.buildStatus === 'PUBLISHED' ? 'Published' : 'Draft'}
+          variant={row.buildStatus === 'PUBLISHED' ? 'active' : 'draft'}
+        />
+      ),
+    },
+    {
+      key: 'updatedAt',
+      label: 'Last updated',
+      render: (row) => formatDate(row.updatedAt),
+    },
+    {
+      key: 'createdAt',
+      label: 'Date created',
+      render: (row) => formatDate(row.createdAt),
+    },
+  ]
+
   return (
-    <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
-        <h1 style={{ fontSize: 34, fontWeight: 700, color: '#1D1D1F', margin: 0, letterSpacing: '-0.02em' }}>
-          Surveys
-        </h1>
-        <Button variant="primary" onClick={() => navigate('/surveys/new')}>
-          Create Survey
-        </Button>
-      </div>
+    <div className="survey-library">
+      <Breadcrumb items={[
+        { label: 'Surveys', path: '/surveys' },
+        { label: 'Survey Library' },
+      ]} />
 
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20, gap: 16, flexWrap: 'wrap' }}>
-        <div style={{ display: 'flex', gap: 4 }}>
-          {TABS.map(tab => (
-            <button
-              key={tab.key}
-              onClick={() => setActiveTab(tab.key)}
-              style={{
-                padding: '6px 16px',
-                borderRadius: 20,
-                border: 'none',
-                cursor: 'pointer',
-                fontSize: 14,
-                fontWeight: 500,
-                backgroundColor: activeTab === tab.key ? '#007AFF' : '#F2F2F7',
-                color: activeTab === tab.key ? '#fff' : '#636366',
-                transition: 'all 0.2s ease',
-              }}
-            >
-              {tab.label} <span style={{ opacity: 0.7 }}>({getCount(tab.key)})</span>
-            </button>
-          ))}
+      <h1 className="survey-library__title">Survey library</h1>
+
+      <div className="survey-library__table-card">
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px 16px 8px' }}>
+          <h2 className="survey-library__section-title">Surveys</h2>
+          <Button variant="secondary" size="sm" onClick={() => navigate('/surveys/new')}>
+            Create survey
+          </Button>
         </div>
 
-        <div style={{ width: 280 }}>
-          <Input
-            placeholder="Search surveys..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            size="sm"
-            fullWidth
+        {loading ? (
+          <p style={{ textAlign: 'center', padding: 60, color: '#86868b' }}>Loading surveys...</p>
+        ) : (
+          <DataTable
+            columns={columns}
+            data={surveys}
+            emptyMessage="No surveys available"
+            rowKey={(row) => row.surveyId}
+            onRowAction={(row) => navigate(`/surveys/${row.surveyId}/edit`)}
           />
-        </div>
+        )}
       </div>
-
-      {loading ? (
-        <p style={{ textAlign: 'center', padding: 60, color: '#86868B', fontSize: 17 }}>Loading surveys...</p>
-      ) : filtered.length === 0 ? (
-        <div style={{ textAlign: 'center', padding: 60 }}>
-          <p style={{ fontSize: 17, color: '#86868B', marginBottom: 16 }}>
-            {search ? 'No surveys match your search' : 'No surveys yet'}
-          </p>
-          {!search && (
-            <Button variant="primary" onClick={() => navigate('/surveys/new')}>
-              Create Your First Survey
-            </Button>
-          )}
-        </div>
-      ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: 16 }}>
-          {filtered.map(survey => (
-            <SurveyCard
-              key={survey.surveyId}
-              survey={survey}
-              onEdit={(id) => navigate(`/surveys/${id}/edit`)}
-              onDelete={handleDelete}
-            />
-          ))}
-        </div>
-      )}
     </div>
   )
 }

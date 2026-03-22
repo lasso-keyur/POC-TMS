@@ -76,12 +76,17 @@
   border: none;
   outline: none;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-  font-size: 17px;
+  font-size: 14px;
   line-height: 1.47;
   letter-spacing: -0.32px;
   color: #1d1d1f;
-  padding-top: 16px;
+  padding-top: 0;
   padding-bottom: 0;
+}
+
+/* When floating label is present, offset input text down */
+.tv-input-container--has-label .tv-input {
+  padding-top: 16px;
 }
 
 .tv-input::placeholder {

@@ -46,7 +46,6 @@ export default function SummaryOfActions() {
       <DataTable
         columns={TABLE_COLUMNS}
         data={MOCK_ACTIONS}
-        totalRows={30}
       />
     </div>
   )
