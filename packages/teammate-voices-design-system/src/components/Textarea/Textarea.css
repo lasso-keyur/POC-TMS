@@ -1,0 +1,125 @@
+/* Teammate Voices Textarea Component Styles */
+
+.tv-textarea-wrapper {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.tv-textarea-wrapper--full-width {
+  width: 100%;
+}
+
+.tv-textarea__label {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 20px;
+  color: #1d1d1f;
+  margin-bottom: 4px;
+}
+
+.tv-textarea {
+  width: 100%;
+  min-height: 100px;
+  padding: 12px 16px;
+  background: #FFFFFF;
+  border: 1px solid #d2d2d7;
+  border-radius: 12px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  font-size: 16px;
+  line-height: 24px;
+  color: #1d1d1f;
+  resize: vertical;
+  outline: none;
+  transition: all 150ms cubic-bezier(0.4, 0.0, 0.2, 1);
+}
+
+.tv-textarea::placeholder {
+  color: #86868b;
+}
+
+/* States */
+.tv-textarea:hover:not(:disabled) {
+  border-color: #aeaeb2;
+}
+
+.tv-textarea:focus:not(:disabled) {
+  border-color: #007AFF;
+  box-shadow: 0 0 0 4px rgba(0, 122, 255, 0.12);
+}
+
+.tv-textarea--error {
+  border-color: #FF3B30;
+}
+
+.tv-textarea--error:focus {
+  box-shadow: 0 0 0 4px rgba(255, 59, 48, 0.12);
+}
+
+.tv-textarea--disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* Helper Text */
+.tv-textarea__helper-text {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  font-size: 12px;
+  line-height: 16px;
+  color: #86868b;
+  margin: 0;
+  display: inline-flex;
+  align-items: center;
+}
+
+.tv-textarea__helper-text--error {
+  color: #FF3B30;
+}
+
+.tv-textarea__error-inline {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 15px;
+  height: 15px;
+  margin-right: 6px;
+  border-radius: 50%;
+  background: #FFFFFF;
+  color: #1d1d1f;
+  border: 1px solid #1d1d1f;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+/* Dark Mode */
+@media (prefers-color-scheme: dark) {
+  .tv-textarea__label {
+    color: #FFFFFF;
+  }
+
+  .tv-textarea {
+    background: #1C1C1E;
+    border-color: rgba(84, 84, 88, 0.65);
+    color: #FFFFFF;
+  }
+
+  .tv-textarea::placeholder {
+    color: rgba(235, 235, 245, 0.3);
+  }
+
+  .tv-textarea:hover:not(:disabled) {
+    border-color: rgba(84, 84, 88, 0.8);
+  }
+
+  .tv-textarea:focus:not(:disabled) {
+    border-color: #0A84FF;
+    box-shadow: 0 0 0 3px rgba(10, 132, 255, 0.1);
+  }
+
+  .tv-textarea__helper-text {
+    color: rgba(235, 235, 245, 0.6);
+  }
+}

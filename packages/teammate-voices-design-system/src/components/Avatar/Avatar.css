@@ -1,0 +1,60 @@
+/* Teammate Voices Avatar Component Styles */
+
+.tv-avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: #012169;
+  color: #FFFFFF;
+  overflow: hidden;
+  flex-shrink: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  font-weight: 600;
+  user-select: none;
+}
+
+/* Sizes */
+.tv-avatar--sm {
+  width: 32px;
+  height: 32px;
+  font-size: 13px;
+  line-height: 32px;
+}
+
+.tv-avatar--md {
+  width: 40px;
+  height: 40px;
+  font-size: 16px;
+  line-height: 40px;
+}
+
+.tv-avatar--lg {
+  width: 56px;
+  height: 56px;
+  font-size: 22px;
+  line-height: 56px;
+}
+
+/* Image */
+.tv-avatar__image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Initials */
+.tv-avatar__initials {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+
+/* Dark Mode */
+@media (prefers-color-scheme: dark) {
+  .tv-avatar {
+    background: #4A90D9;
+  }
+}

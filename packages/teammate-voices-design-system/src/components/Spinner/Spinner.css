@@ -1,0 +1,63 @@
+/* Teammate Voices Spinner Component Styles */
+
+.tv-spinner {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #012169;
+}
+
+/* Sizes */
+.tv-spinner--sm .tv-spinner__svg {
+  width: 16px;
+  height: 16px;
+}
+
+.tv-spinner--md .tv-spinner__svg {
+  width: 24px;
+  height: 24px;
+}
+
+.tv-spinner--lg .tv-spinner__svg {
+  width: 32px;
+  height: 32px;
+}
+
+/* SVG */
+.tv-spinner__svg {
+  animation: tv-spinner-rotate 1s linear infinite;
+}
+
+.tv-spinner__circle {
+  stroke-dasharray: 60;
+  stroke-dashoffset: 45;
+}
+
+@keyframes tv-spinner-rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Screen Reader Only */
+.tv-spinner__sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Dark Mode */
+@media (prefers-color-scheme: dark) {
+  .tv-spinner {
+    color: #4A90D9;
+  }
+}

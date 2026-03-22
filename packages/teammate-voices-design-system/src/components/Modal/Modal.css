@@ -1,0 +1,108 @@
+/* Teammate Voices Modal Component Styles */
+
+.tv-modal {
+  border: none;
+  border-radius: 16px;
+  padding: 0;
+  background: #FFFFFF;
+  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.16), 0 8px 16px rgba(0, 0, 0, 0.08);
+  max-height: 85vh;
+  animation: tv-modal-enter 200ms cubic-bezier(0.4, 0.0, 0.2, 1);
+}
+
+.tv-modal::backdrop {
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+@keyframes tv-modal-enter {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Sizes */
+.tv-modal--sm {
+  width: min(520px, 90vw);
+}
+
+.tv-modal--md {
+  width: min(640px, 90vw);
+}
+
+.tv-modal--lg {
+  width: min(800px, 90vw);
+}
+
+/* Content */
+.tv-modal__content {
+  display: flex;
+  flex-direction: column;
+  max-height: 85vh;
+}
+
+/* Header */
+.tv-modal__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px;
+  border-bottom: 1px solid #e5e5ea;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 24px;
+  color: #1d1d1f;
+}
+
+/* Body */
+.tv-modal__body {
+  flex: 1;
+  padding: 24px;
+  overflow-y: auto;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  font-size: 16px;
+  line-height: 24px;
+  color: #1d1d1f;
+}
+
+/* Footer */
+.tv-modal__footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 16px 24px;
+  border-top: 1px solid #e5e5ea;
+}
+
+/* Dark Mode */
+@media (prefers-color-scheme: dark) {
+  .tv-modal {
+    background: #1C1C1E;
+    box-shadow: 0 24px 48px rgba(0, 0, 0, 0.4), 0 8px 16px rgba(0, 0, 0, 0.24);
+  }
+
+  .tv-modal::backdrop {
+    background: rgba(0, 0, 0, 0.6);
+  }
+
+  .tv-modal__header {
+    border-bottom-color: rgba(84, 84, 88, 0.65);
+    color: #FFFFFF;
+  }
+
+  .tv-modal__body {
+    color: #FFFFFF;
+  }
+
+  .tv-modal__footer {
+    border-top-color: rgba(84, 84, 88, 0.65);
+  }
+}
