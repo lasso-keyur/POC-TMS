@@ -27,7 +27,7 @@ export default function ProgramCreate() {
         description: description.trim(),
         templateType: template || 'CUSTOM',
         status: isActive ? 'ACTIVE' : 'INACTIVE',
-        surveyProgress: 'Not started',
+        surveyProgress: 'NOT_STARTED',
       })
       setSuccessMessage('Program saved successfully!')
       setLoading(false)
