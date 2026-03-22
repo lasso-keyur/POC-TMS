@@ -12,7 +12,6 @@ services:
       APP_USER_PASSWORD: "ChangeMe123"
     volumes:
       - oracle-data:/opt/oracle/oradata
-      - ./db/init:/container-entrypoint-initdb.d
 
 volumes:
   oracle-data:
