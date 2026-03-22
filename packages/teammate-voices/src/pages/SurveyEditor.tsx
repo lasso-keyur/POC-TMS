@@ -135,7 +135,7 @@ export default function SurveyEditor() {
             <Button variant="destructive" onClick={handleDelete}>Delete</Button>
           )}
           <Button variant="secondary" onClick={() => navigate('/surveys')}>Cancel</Button>
-          <Button variant="secondary" onClick={handlePublish}>Publish</Button>
+          <Button variant="ghost" onClick={handlePublish}>Publish</Button>
         </div>
       </div>
 

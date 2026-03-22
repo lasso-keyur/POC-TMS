@@ -1,4 +1,4 @@
-import { Input } from '@teammate-voices/design-system'
+import { Input, Button } from '@teammate-voices/design-system'
 import FormField from '@/components/FormField'
 import ToggleSwitch from '@/components/ToggleSwitch'
 import type { SurveyPage } from '@/types/survey'
@@ -91,6 +91,10 @@ export default function SurveyPageEditor({ page, onUpdate, onDuplicate, onDelete
             </div>
           ))
         )}
+
+        <div style={{ marginTop: 24 }}>
+          <Button variant="secondary" size="sm">Add Question</Button>
+        </div>
       </div>
     </div>
   )
