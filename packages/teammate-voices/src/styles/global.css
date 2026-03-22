@@ -173,6 +173,56 @@ input, textarea, select {
 
 .nav-bar__chevron {
   margin-left: 2px;
+  transition: transform 0.15s ease;
+}
+
+.nav-bar__chevron--open {
+  transform: rotate(180deg);
+}
+
+.nav-bar__dropdown-wrapper {
+  position: relative;
+  display: inline-flex;
+}
+
+.nav-bar__dropdown-trigger {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.nav-bar__dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  min-width: 180px;
+  background: #fff;
+  border: 1px solid #d2d2d7;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  z-index: 100;
+  padding: 4px 0;
+  margin-top: 4px;
+}
+
+.nav-bar__dropdown-item {
+  display: block;
+  width: 100%;
+  padding: 8px 16px;
+  font-size: 14px;
+  color: #1d1d1f;
+  text-align: left;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background-color 0.1s ease;
+}
+
+.nav-bar__dropdown-item:hover {
+  background-color: #f2f2f7;
+  color: #007aff;
 }
 
 /* ===== SITE FOOTER ===== */
