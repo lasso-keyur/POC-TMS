@@ -14,4 +14,3 @@ CREATE TABLE USERS (
 );
 
 CREATE INDEX idx_users_role ON USERS(role);
-CREATE INDEX idx_users_email ON USERS(email);
