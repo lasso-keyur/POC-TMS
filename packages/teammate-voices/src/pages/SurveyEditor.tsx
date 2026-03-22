@@ -12,6 +12,13 @@ import type { Survey, SurveyPage, SurveyTab } from '@/types/survey'
 import { SURVEY_TABS } from '@/types/survey'
 import type { Program } from '@/types/program'
 
+const FALLBACK_PROGRAMS: Program[] = [
+  { programId: 1, name: 'Teammate Voices', description: 'Employee engagement', templateType: 'Teammate Voices', status: 'ACTIVE', surveyProgress: 'NOT_STARTED', createdAt: '', updatedAt: '' },
+  { programId: 2, name: 'ESAT', description: 'Employee satisfaction', templateType: 'Engagement Survey', status: 'ACTIVE', surveyProgress: 'NOT_STARTED', createdAt: '', updatedAt: '' },
+  { programId: 3, name: 'Intern Program', description: 'Intern feedback', templateType: 'Intern Program', status: 'ACTIVE', surveyProgress: 'NOT_STARTED', createdAt: '', updatedAt: '' },
+  { programId: 4, name: 'NPS Survey', description: 'Net promoter score', templateType: 'NPS Survey', status: 'ACTIVE', surveyProgress: 'NOT_STARTED', createdAt: '', updatedAt: '' },
+]
+
 const EMPTY_SURVEY: Partial<Survey> = {
   title: '',
   description: '',
@@ -40,8 +47,8 @@ export default function SurveyEditor() {
 
   useEffect(() => {
     api.getPrograms()
-      .then(setPrograms)
-      .catch(() => setPrograms([]))
+      .then((p) => setPrograms(p.length > 0 ? p : FALLBACK_PROGRAMS))
+      .catch(() => setPrograms(FALLBACK_PROGRAMS))
   }, [])
 
   useEffect(() => {
