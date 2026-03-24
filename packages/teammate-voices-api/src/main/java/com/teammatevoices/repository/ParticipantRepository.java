@@ -12,4 +12,5 @@ public interface ParticipantRepository extends JpaRepository<Participant, String
     Optional<Participant> findByEmail(String email);
     List<Participant> findByParticipantType(String participantType);
     List<Participant> findByIsActive(Boolean isActive);
+    List<Participant> findByProgramId(Long programId);
 }

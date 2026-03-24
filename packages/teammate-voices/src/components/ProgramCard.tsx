@@ -1,8 +1,12 @@
+import { useState, useEffect, useRef } from 'react'
+import { createPortal } from 'react-dom'
 import { Link } from 'react-router-dom'
 import type { Program } from '@/types/program'
 
 interface ProgramCardProps {
   program: Program
+  onEdit?: (programId: number) => void
+  onDelete?: (programId: number) => void
 }
 
 const PROGRESS_STYLES: Record<string, { bg: string; color: string; label: string }> = {
@@ -20,8 +24,34 @@ function formatStatus(status: string): string {
   return status
 }
 
-export default function ProgramCard({ program }: ProgramCardProps) {
+export default function ProgramCard({ program, onEdit, onDelete }: ProgramCardProps) {
+  const [menuOpen, setMenuOpen] = useState(false)
+  const [menuPos, setMenuPos] = useState({ top: 0, left: 0 })
+  const triggerRef = useRef<HTMLButtonElement>(null)
+  const menuRef = useRef<HTMLDivElement>(null)
   const progressStyle = PROGRESS_STYLES[program.surveyProgress] || PROGRESS_STYLES['Not started']
+
+  useEffect(() => {
+    if (!menuOpen) return
+    const handler = (e: MouseEvent) => {
+      if (
+        menuRef.current && !menuRef.current.contains(e.target as Node) &&
+        triggerRef.current && !triggerRef.current.contains(e.target as Node)
+      ) {
+        setMenuOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [menuOpen])
+
+  const handleToggleMenu = () => {
+    if (!menuOpen && triggerRef.current) {
+      const rect = triggerRef.current.getBoundingClientRect()
+      setMenuPos({ top: rect.bottom + 4, left: rect.right - 140 })
+    }
+    setMenuOpen(prev => !prev)
+  }
 
   return (
     <div
@@ -31,8 +61,47 @@ export default function ProgramCard({ program }: ProgramCardProps) {
         border: 'none',
         borderRadius: '12px',
         padding: '24px',
+        position: 'relative',
       }}
     >
+      {/* Actions menu trigger */}
+      <button
+        ref={triggerRef}
+        className="program-card__menu-trigger"
+        onClick={handleToggleMenu}
+        title="Actions"
+      >
+        ⋮
+      </button>
+
+      {menuOpen && createPortal(
+        <div
+          ref={menuRef}
+          className="program-card__menu-dropdown"
+          style={{ top: menuPos.top, left: menuPos.left }}
+        >
+          <button
+            className="program-card__menu-item"
+            onClick={() => {
+              setMenuOpen(false)
+              onEdit?.(program.programId)
+            }}
+          >
+            Edit
+          </button>
+          <button
+            className="program-card__menu-item program-card__menu-item--danger"
+            onClick={() => {
+              setMenuOpen(false)
+              onDelete?.(program.programId)
+            }}
+          >
+            Delete
+          </button>
+        </div>,
+        document.body,
+      )}
+
       <div className="program-card__badges">
         <span className="program-card__badge program-card__badge--status">
           {formatStatus(program.status)}

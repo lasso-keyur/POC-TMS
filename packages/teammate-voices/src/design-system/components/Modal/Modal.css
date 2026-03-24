@@ -4,6 +4,7 @@
   border: none;
   border-radius: 16px;
   padding: 0;
+  margin: auto;
   background: #FFFFFF;
   box-shadow: 0 24px 48px rgba(0, 0, 0, 0.16), 0 8px 16px rgba(0, 0, 0, 0.08);
   max-height: 85vh;

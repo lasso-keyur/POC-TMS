@@ -23,6 +23,7 @@ public class SurveyDTO {
     private Long programId;
     private String cycle;
     private String pages;
+    private String logicJson;
     private String participantType;
     private String surveyStage;
     private String audienceSource;
@@ -105,6 +106,14 @@ public class SurveyDTO {
 
     public void setPages(String pages) {
         this.pages = pages;
+    }
+
+    public String getLogicJson() {
+        return logicJson;
+    }
+
+    public void setLogicJson(String logicJson) {
+        this.logicJson = logicJson;
     }
 
     public String getParticipantType() {

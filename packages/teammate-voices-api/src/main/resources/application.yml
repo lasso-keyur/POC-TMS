@@ -28,6 +28,21 @@ spring:
     locations: classpath:db/migration
     baseline-on-migrate: true
     baseline-version: 0
+    validate-on-migrate: false
+
+  mail:
+    host: ${MAIL_HOST:smtp.mail.me.com}
+    port: ${MAIL_PORT:587}
+    username: ${MAIL_USERNAME:keyur@me.com}
+    password: ${MAIL_PASSWORD:xhgl-bmsq-uwlb-ninl}
+    properties:
+      mail.smtp.auth: true
+      mail.smtp.starttls.enable: true
+      mail.smtp.starttls.required: true
+
+app:
+  notification-email: ${NOTIFICATION_EMAIL:keyur@me.com}
+  base-url: ${APP_BASE_URL:http://localhost:5200}
 
 server:
   port: 8081

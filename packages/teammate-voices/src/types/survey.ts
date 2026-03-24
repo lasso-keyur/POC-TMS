@@ -19,6 +19,7 @@ export interface Survey {
   updatedAt: string
   questions?: SurveyQuestion[]
   pages?: SurveyPage[]
+  logicJson?: string
 }
 
 export interface SurveyPage {
@@ -31,13 +32,13 @@ export interface SurveyPage {
   questions: SurveyQuestion[]
 }
 
-export type SurveyTab = 'details' | 'formBuilder' | 'formViewer' | 'configuration' | 'settings'
+export type SurveyTab = 'details' | 'formBuilder' | 'formViewer' | 'logic' | 'settings'
 
 export const SURVEY_TABS: Array<{ key: SurveyTab; label: string }> = [
   { key: 'details', label: 'Details' },
   { key: 'formBuilder', label: 'Form Builder' },
   { key: 'formViewer', label: 'Form Viewer' },
-  { key: 'configuration', label: 'Configuration' },
+  { key: 'logic', label: 'Configuration' },
   { key: 'settings', label: 'Settings' },
 ]
 

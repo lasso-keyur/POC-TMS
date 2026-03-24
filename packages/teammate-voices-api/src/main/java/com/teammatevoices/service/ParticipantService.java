@@ -61,6 +61,7 @@ public class ParticipantService {
         dto.setStandardId(p.getStandardId());
         dto.setManagerName(p.getManagerName());
         dto.setHierarchyCode(p.getHierarchyCode());
+        dto.setProgramId(p.getProgramId());
         dto.setTrainingProgram(p.getTrainingProgram());
         dto.setCohort(p.getCohort());
         dto.setStartDate(p.getStartDate());
@@ -81,6 +82,7 @@ public class ParticipantService {
         p.setStandardId(dto.getStandardId());
         p.setManagerName(dto.getManagerName());
         p.setHierarchyCode(dto.getHierarchyCode());
+        p.setProgramId(dto.getProgramId());
         p.setTrainingProgram(dto.getTrainingProgram());
         p.setCohort(dto.getCohort());
         p.setStartDate(dto.getStartDate());

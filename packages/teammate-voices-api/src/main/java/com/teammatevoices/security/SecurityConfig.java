@@ -41,7 +41,8 @@ public class SecurityConfig {
                         .requestMatchers("/health").permitAll()
                         // Permit all API endpoints until login flow is implemented
                         .requestMatchers("/programs/**", "/surveys/**", "/participants/**",
-                                "/dispatches/**", "/assignment-rules/**").permitAll()
+                                "/dispatches/**", "/assignment-rules/**",
+                                "/email-templates/**", "/respond/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);

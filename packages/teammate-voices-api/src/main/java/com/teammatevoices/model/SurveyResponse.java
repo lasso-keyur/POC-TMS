@@ -23,6 +23,15 @@ public class SurveyResponse {
     @Column(name = "RESPONDENT_USER_ID")
     private Long respondentUserId;
 
+    @Column(name = "DISPATCH_ID")
+    private Long dispatchId;
+
+    @Column(name = "IS_COMPLETE")
+    private Boolean isComplete = false;
+
+    @Column(name = "PARTICIPANT_ID", length = 100)
+    private String participantId;
+
     @Column(name = "SUBMITTED_AT")
     private LocalDateTime submittedAt;
 
@@ -104,4 +113,13 @@ public class SurveyResponse {
     public void setAnswers(List<SurveyAnswer> answers) {
         this.answers = answers;
     }
+
+    public Long getDispatchId() { return dispatchId; }
+    public void setDispatchId(Long dispatchId) { this.dispatchId = dispatchId; }
+
+    public Boolean getIsComplete() { return isComplete; }
+    public void setIsComplete(Boolean isComplete) { this.isComplete = isComplete; }
+
+    public String getParticipantId() { return participantId; }
+    public void setParticipantId(String participantId) { this.participantId = participantId; }
 }

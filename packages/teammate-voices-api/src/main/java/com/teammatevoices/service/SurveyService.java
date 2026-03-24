@@ -1,5 +1,6 @@
 package com.teammatevoices.service;
 
+import com.teammatevoices.dto.LogicRuleDTO;
 import com.teammatevoices.dto.OptionDTO;
 import com.teammatevoices.dto.QuestionDTO;
 import com.teammatevoices.dto.SurveyDTO;
@@ -8,6 +9,8 @@ import com.teammatevoices.model.Survey;
 import com.teammatevoices.model.SurveyOption;
 import com.teammatevoices.model.SurveyQuestion;
 import com.teammatevoices.repository.SurveyRepository;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -22,9 +25,15 @@ public class SurveyService {
     private static final Logger log = LoggerFactory.getLogger(SurveyService.class);
 
     private final SurveyRepository surveyRepository;
+    private final LogicRuleValidator logicRuleValidator;
+    private final ObjectMapper objectMapper;
 
-    public SurveyService(SurveyRepository surveyRepository) {
+    public SurveyService(SurveyRepository surveyRepository,
+                         LogicRuleValidator logicRuleValidator,
+                         ObjectMapper objectMapper) {
         this.surveyRepository = surveyRepository;
+        this.logicRuleValidator = logicRuleValidator;
+        this.objectMapper = objectMapper;
     }
 
     @Transactional(readOnly = true)
@@ -69,6 +78,7 @@ public class SurveyService {
         survey.setBuildStatus(dto.getBuildStatus());
         survey.setCycle(dto.getCycle());
         survey.setPages(dto.getPages());
+        survey.setLogicJson(dto.getLogicJson());
 
         survey.getQuestions().clear();
         if (dto.getQuestions() != null) {
@@ -88,6 +98,48 @@ public class SurveyService {
             throw new ResourceNotFoundException("Survey", id);
         }
         surveyRepository.deleteById(id);
+    }
+
+    /**
+     * Validates and persists logic rules for a survey.
+     *
+     * The middleware acts as the "brain" here: it validates structural integrity,
+     * referential integrity (question IDs exist), and business rules (no circular
+     * skips, no hiding required questions) before persisting to the database.
+     *
+     * @param id    the survey ID
+     * @param rules the logic rules to validate and save
+     * @throws BusinessRuleException if validation fails
+     * @throws ResourceNotFoundException if survey does not exist
+     */
+    @Transactional
+    public void updateLogicRules(Long id, List<LogicRuleDTO> rules) {
+        log.info("Validating and updating logic rules for survey: {}", id);
+
+        // Middleware brain: validate before persisting
+        logicRuleValidator.validate(id, rules);
+
+        // Serialize validated rules to JSON for storage
+        try {
+            String logicJson = objectMapper.writeValueAsString(rules);
+            Survey survey = surveyRepository.findById(id)
+                    .orElseThrow(() -> new ResourceNotFoundException("Survey", id));
+            survey.setLogicJson(logicJson);
+            surveyRepository.save(survey);
+        } catch (JsonProcessingException e) {
+            log.error("Failed to serialize logic rules for survey {}", id, e);
+            throw new RuntimeException("Failed to serialize logic rules", e);
+        }
+    }
+
+    /** @deprecated Use updateLogicRules(Long, List<LogicRuleDTO>) for validated saves */
+    @Transactional
+    public void updateLogicJson(Long id, String logicJson) {
+        log.info("Updating logic rules (raw) for survey: {}", id);
+        Survey survey = surveyRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Survey", id));
+        survey.setLogicJson(logicJson);
+        surveyRepository.save(survey);
     }
 
     @Transactional
@@ -114,6 +166,7 @@ public class SurveyService {
         clone.setProgramId(source.getProgramId());
         clone.setCycle(source.getCycle());
         clone.setPages(source.getPages());
+        clone.setLogicJson(source.getLogicJson());
         clone.setParticipantType(source.getParticipantType());
         clone.setSurveyStage(source.getSurveyStage());
         clone.setAudienceSource(source.getAudienceSource());
@@ -158,6 +211,7 @@ public class SurveyService {
         dto.setBuildStatus(survey.getBuildStatus());
         dto.setCycle(survey.getCycle());
         dto.setPages(survey.getPages());
+        dto.setLogicJson(survey.getLogicJson());
         dto.setCreatedBy(survey.getCreatedBy());
         dto.setStartDate(survey.getStartDate());
         dto.setEndDate(survey.getEndDate());
@@ -207,6 +261,7 @@ public class SurveyService {
         survey.setProgramId(dto.getProgramId());
         survey.setCycle(dto.getCycle());
         survey.setPages(dto.getPages());
+        survey.setLogicJson(dto.getLogicJson());
         survey.setParticipantType(dto.getParticipantType());
         survey.setSurveyStage(dto.getSurveyStage());
         survey.setAudienceSource(dto.getAudienceSource());

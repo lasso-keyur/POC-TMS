@@ -72,6 +72,32 @@ function ActionsCellRenderer({ data, onEdit, onClone }: { data: Survey; onEdit: 
   )
 }
 
+const STATUS_STYLES: Record<string, { bg: string; color: string; label: string }> = {
+  ACTIVE: { bg: '#dcfce7', color: '#166534', label: 'Active' },
+  DRAFT: { bg: '#fef9c3', color: '#854d0e', label: 'Draft' },
+  CLOSED: { bg: '#f3f4f6', color: '#6b7280', label: 'Closed' },
+}
+
+function StatusCellRenderer({ value }: { value: string }) {
+  const style = STATUS_STYLES[value] || STATUS_STYLES.DRAFT
+  return (
+    <span
+      style={{
+        display: 'inline-block',
+        padding: '3px 10px',
+        borderRadius: 999,
+        fontSize: 12,
+        fontWeight: 600,
+        backgroundColor: style.bg,
+        color: style.color,
+        lineHeight: '18px',
+      }}
+    >
+      {style.label}
+    </span>
+  )
+}
+
 export default function SurveyList() {
   const [surveys, setSurveys] = useState<Survey[]>([])
   const [programs, setPrograms] = useState<Program[]>([])
@@ -136,22 +162,8 @@ export default function SurveyList() {
     {
       field: 'status',
       headerName: 'Status',
-      width: 110,
-      cellRenderer: (params: { value: string }) => {
-        if (!params.value) return ''
-        const isActive = params.value === 'ACTIVE'
-        return `<span class="ag-status-pill ag-status-pill--${isActive ? 'active' : 'draft'}">${isActive ? 'Active' : 'Draft'}</span>`
-      },
-    },
-    {
-      field: 'buildStatus',
-      headerName: 'Build Status',
-      width: 130,
-      cellRenderer: (params: { value: string }) => {
-        if (!params.value) return ''
-        const isPublished = params.value === 'PUBLISHED'
-        return `<span class="ag-status-pill ag-status-pill--${isPublished ? 'published' : 'draft'}">${isPublished ? 'Published' : 'Draft'}</span>`
-      },
+      width: 120,
+      cellRenderer: StatusCellRenderer,
     },
     {
       field: 'updatedAt',
@@ -265,7 +277,7 @@ export default function SurveyList() {
               paginationPageSizeSelector={paginationPageSizeSelector}
               quickFilterText={quickFilterText}
               domLayout="autoHeight"
-              rowHeight={52}
+              rowHeight={40}
               getRowId={(params) => String(params.data.surveyId)}
               overlayNoRowsTemplate="<span style='padding:40px;color:#86868b;font-size:14px'>No surveys found</span>"
             />

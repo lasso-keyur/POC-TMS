@@ -52,9 +52,9 @@ public class ProgramService {
 
         program.setName(dto.getName());
         program.setDescription(dto.getDescription());
-        program.setTemplateType(dto.getTemplateType());
-        program.setStatus(dto.getStatus());
-        program.setSurveyProgress(dto.getSurveyProgress());
+        if (dto.getTemplateType() != null) program.setTemplateType(dto.getTemplateType());
+        if (dto.getStatus() != null) program.setStatus(dto.getStatus());
+        if (dto.getSurveyProgress() != null) program.setSurveyProgress(dto.getSurveyProgress());
 
         return toDTO(programRepository.save(program));
     }

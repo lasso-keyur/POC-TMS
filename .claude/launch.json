@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "teammate-voices",
+      "runtimeExecutable": "bash",
+      "runtimeArgs": ["-c", "cd packages/teammate-voices && npx vite --port ${PORT}"],
+      "port": 5200
+    }
+  ]
+}

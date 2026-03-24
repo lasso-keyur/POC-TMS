@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useState, useEffect } from 'react'
+import { useNavigate, useParams } from 'react-router-dom'
 import { Button } from '../design-system'
 import Breadcrumb from '@/components/Breadcrumb'
 import ToggleSwitch from '@/components/ToggleSwitch'
@@ -7,14 +7,35 @@ import { PROGRAM_TEMPLATES } from '@/types/program'
 import { api } from '@/services/api'
 
 export default function ProgramCreate() {
+  const { programId } = useParams<{ programId: string }>()
   const navigate = useNavigate()
+  const isEditMode = !!programId
+
   const [template, setTemplate] = useState('')
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
   const [isActive, setIsActive] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [pageLoading, setPageLoading] = useState(isEditMode)
   const [successMessage, setSuccessMessage] = useState('')
   const [errorMessage, setErrorMessage] = useState('')
+
+  // Load existing program data in edit mode
+  useEffect(() => {
+    if (!programId) return
+    api.getProgram(Number(programId))
+      .then(program => {
+        setName(program.name || '')
+        setDescription(program.description || '')
+        setTemplate(program.templateType || '')
+        setIsActive(program.status === 'ACTIVE' || program.status === 'Active')
+      })
+      .catch(() => {
+        setErrorMessage('Failed to load program.')
+        navigate('/programs')
+      })
+      .finally(() => setPageLoading(false))
+  }, [programId, navigate])
 
   const handleSave = async () => {
     if (!name.trim()) return
@@ -22,18 +43,28 @@ export default function ProgramCreate() {
     setErrorMessage('')
     setSuccessMessage('')
     try {
-      await api.createProgram({
-        name: name.trim(),
-        description: description.trim(),
-        templateType: template || 'CUSTOM',
-        status: isActive ? 'ACTIVE' : 'INACTIVE',
-        surveyProgress: 'NOT_STARTED',
-      })
-      setSuccessMessage('Program saved successfully!')
+      if (isEditMode) {
+        await api.updateProgram(Number(programId), {
+          name: name.trim(),
+          description: description.trim(),
+          templateType: template || 'CUSTOM',
+          status: isActive ? 'ACTIVE' : 'INACTIVE',
+        })
+        setSuccessMessage('Program updated successfully!')
+      } else {
+        await api.createProgram({
+          name: name.trim(),
+          description: description.trim(),
+          templateType: template || 'CUSTOM',
+          status: isActive ? 'ACTIVE' : 'INACTIVE',
+          surveyProgress: 'NOT_STARTED',
+        })
+        setSuccessMessage('Program saved successfully!')
+      }
       setLoading(false)
       setTimeout(() => navigate('/programs'), 1500)
     } catch (err) {
-      console.error('Failed to create program:', err)
+      console.error('Failed to save program:', err)
       setErrorMessage('Failed to save program. Please try again.')
       setLoading(false)
     }
@@ -43,14 +74,18 @@ export default function ProgramCreate() {
     navigate('/programs')
   }
 
+  if (pageLoading) {
+    return <p style={{ textAlign: 'center', padding: 60, color: '#86868b' }}>Loading program...</p>
+  }
+
   return (
     <div className="program-create">
       <Breadcrumb items={[
         { label: 'Programs', path: '/programs' },
-        { label: 'Add program' },
+        { label: isEditMode ? name || 'Edit program' : 'Add program' },
       ]} />
 
-      <h1 className="program-create__title">Add program</h1>
+      <h1 className="program-create__title">{isEditMode ? 'Edit program' : 'Add program'}</h1>
 
       <div className="program-create__form">
         <h2 className="program-create__section-title">Program information</h2>
@@ -107,7 +142,7 @@ export default function ProgramCreate() {
           <div className="program-create__field program-create__field--status">
             <span className="program-create__label">Program status</span>
             <ToggleSwitch
-              label="Inactive"
+              label={isActive ? 'Active' : 'Inactive'}
               checked={isActive}
               onChange={setIsActive}
             />
@@ -130,7 +165,7 @@ export default function ProgramCreate() {
             Cancel
           </Button>
           <Button variant="primary" size="md" onClick={handleSave} loading={loading} disabled={!name.trim()}>
-            Save
+            {isEditMode ? 'Update' : 'Save'}
           </Button>
         </div>
       </div>

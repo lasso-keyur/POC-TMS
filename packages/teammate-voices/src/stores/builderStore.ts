@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import type { LogicRule } from '@/types/logic'
 
 export interface QuestionOption {
   id: string
@@ -20,6 +21,8 @@ interface BuilderState {
   questions: Question[]
   selectedQuestionId: string | null
   isDirty: boolean
+  logicRules: LogicRule[]
+  selectedRuleId: string | null
 
   setQuestions: (questions: Question[]) => void
   selectQuestion: (id: string | null) => void
@@ -29,12 +32,20 @@ interface BuilderState {
   reorderQuestions: (fromIndex: number, toIndex: number) => void
   markClean: () => void
   reset: () => void
+
+  setLogicRules: (rules: LogicRule[]) => void
+  addLogicRule: (rule: LogicRule) => void
+  updateLogicRule: (ruleId: string, rule: LogicRule) => void
+  removeLogicRule: (ruleId: string) => void
+  selectRule: (ruleId: string | null) => void
 }
 
 export const useBuilderStore = create<BuilderState>((set) => ({
   questions: [],
   selectedQuestionId: null,
   isDirty: false,
+  logicRules: [],
+  selectedRuleId: null,
 
   setQuestions: (questions) => set({ questions, isDirty: false }),
 
@@ -82,5 +93,29 @@ export const useBuilderStore = create<BuilderState>((set) => ({
   markClean: () => set({ isDirty: false }),
 
   reset: () =>
-    set({ questions: [], selectedQuestionId: null, isDirty: false }),
+    set({ questions: [], selectedQuestionId: null, isDirty: false, logicRules: [], selectedRuleId: null }),
+
+  setLogicRules: (logicRules) => set({ logicRules }),
+
+  addLogicRule: (rule) =>
+    set((state) => ({
+      logicRules: [...state.logicRules, rule],
+      selectedRuleId: rule.id,
+      isDirty: true,
+    })),
+
+  updateLogicRule: (ruleId, rule) =>
+    set((state) => ({
+      logicRules: state.logicRules.map((r) => (r.id === ruleId ? rule : r)),
+      isDirty: true,
+    })),
+
+  removeLogicRule: (ruleId) =>
+    set((state) => ({
+      logicRules: state.logicRules.filter((r) => r.id !== ruleId),
+      selectedRuleId: state.selectedRuleId === ruleId ? null : state.selectedRuleId,
+      isDirty: true,
+    })),
+
+  selectRule: (ruleId) => set({ selectedRuleId: ruleId }),
 }))

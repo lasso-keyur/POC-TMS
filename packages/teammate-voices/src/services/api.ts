@@ -1,6 +1,8 @@
 import type { Survey } from '@/types/survey'
 import type { Program } from '@/types/program'
 import type { Participant, AssignmentRule, Dispatch } from '@/types/participant'
+import type { LogicRule, LogicEvaluationResult } from '@/types/logic'
+import type { EmailTemplate, EmailTemplateAssignment } from '@/types/emailTemplate'
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8081/api'
 
@@ -129,6 +131,96 @@ class TeammateVoicesAPI {
   // Dispatches
   async getDispatches(): Promise<Dispatch[]> {
     return this.request<Dispatch[]>('/dispatches')
+  }
+
+  // Logic Rules
+  async getLogicRules(surveyId: number): Promise<LogicRule[]> {
+    return this.request<LogicRule[]>(`/surveys/${surveyId}/logic`)
+  }
+
+  async saveLogicRules(surveyId: number, rules: LogicRule[]): Promise<LogicRule[]> {
+    return this.request<LogicRule[]>(`/surveys/${surveyId}/logic`, {
+      method: 'PUT',
+      body: JSON.stringify({ rules }),
+    })
+  }
+
+  async evaluateLogic(surveyId: number, answers: Record<string, unknown>): Promise<LogicEvaluationResult> {
+    return this.request<LogicEvaluationResult>(`/surveys/${surveyId}/evaluate`, {
+      method: 'POST',
+      body: JSON.stringify({ answers }),
+    })
+  }
+
+  // Email Templates
+  async getEmailTemplates(category?: string): Promise<EmailTemplate[]> {
+    const query = category ? `?category=${category}` : ''
+    return this.request<EmailTemplate[]>(`/email-templates${query}`)
+  }
+
+  async getEmailTemplate(id: number): Promise<EmailTemplate> {
+    return this.request<EmailTemplate>(`/email-templates/${id}`)
+  }
+
+  async createEmailTemplate(template: Partial<EmailTemplate>): Promise<EmailTemplate> {
+    return this.request<EmailTemplate>('/email-templates', {
+      method: 'POST',
+      body: JSON.stringify(template),
+    })
+  }
+
+  async updateEmailTemplate(id: number, template: Partial<EmailTemplate>): Promise<EmailTemplate> {
+    return this.request<EmailTemplate>(`/email-templates/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(template),
+    })
+  }
+
+  async deleteEmailTemplate(id: number): Promise<void> {
+    return this.request<void>(`/email-templates/${id}`, { method: 'DELETE' })
+  }
+
+  async duplicateEmailTemplate(id: number): Promise<EmailTemplate> {
+    return this.request<EmailTemplate>(`/email-templates/${id}/duplicate`, { method: 'POST' })
+  }
+
+  async getMergeFields(): Promise<Record<string, Array<{ field: string; label: string }>>> {
+    return this.request(`/email-templates/merge-fields`)
+  }
+
+  // Email Template Assignments
+  async getTemplateAssignments(templateId: number): Promise<EmailTemplateAssignment[]> {
+    return this.request<EmailTemplateAssignment[]>(`/email-templates/${templateId}/assignments`)
+  }
+
+  async saveTemplateAssignment(templateId: number, assignment: Partial<EmailTemplateAssignment>): Promise<EmailTemplateAssignment> {
+    return this.request<EmailTemplateAssignment>(`/email-templates/${templateId}/assignments`, {
+      method: 'POST',
+      body: JSON.stringify(assignment),
+    })
+  }
+
+  async deleteTemplateAssignment(assignmentId: number): Promise<void> {
+    return this.request<void>(`/email-templates/assignments/${assignmentId}`, { method: 'DELETE' })
+  }
+
+  async getAssignmentsBySurvey(surveyId: number): Promise<EmailTemplateAssignment[]> {
+    return this.request<EmailTemplateAssignment[]>(`/email-templates/by-survey/${surveyId}`)
+  }
+
+  async sendTestEmail(templateId: number, email?: string): Promise<{ sent: boolean; to: string; message: string }> {
+    return this.request(`/email-templates/${templateId}/send-test`, {
+      method: 'POST',
+      body: JSON.stringify(email ? { email } : {}),
+    })
+  }
+
+  async getNotificationConfig(): Promise<{ notificationEmail: string }> {
+    return this.request(`/email-templates/config/notification`)
+  }
+
+  async validateDispatch(surveyId: number): Promise<{ passed: boolean; checks: Array<{ key: string; label: string; passed: boolean; detail: string }> }> {
+    return this.request(`/email-templates/validate-dispatch/${surveyId}`)
   }
 
   // pages is stored as a JSON string in the backend but as SurveyPage[] on the frontend

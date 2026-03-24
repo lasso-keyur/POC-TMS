@@ -44,6 +44,10 @@ public class Survey {
     @Column(name = "PAGES")
     private String pages;
 
+    @Lob
+    @Column(name = "LOGIC_JSON")
+    private String logicJson;
+
     @Column(name = "PARTICIPANT_TYPE", length = 30)
     private String participantType = "ALL";
 
@@ -261,6 +265,14 @@ public class Survey {
 
     public void setPages(String pages) {
         this.pages = pages;
+    }
+
+    public String getLogicJson() {
+        return logicJson;
+    }
+
+    public void setLogicJson(String logicJson) {
+        this.logicJson = logicJson;
     }
 
     public List<SurveyQuestion> getQuestions() {

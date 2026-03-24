@@ -24,6 +24,7 @@ public class ParticipantDTO {
     private String standardId;
     private String managerName;
     private String hierarchyCode;
+    private Long programId;
     private String trainingProgram;
     private String cohort;
     private LocalDate startDate;
@@ -87,6 +88,14 @@ public class ParticipantDTO {
 
     public void setHierarchyCode(String hierarchyCode) {
         this.hierarchyCode = hierarchyCode;
+    }
+
+    public Long getProgramId() {
+        return programId;
+    }
+
+    public void setProgramId(Long programId) {
+        this.programId = programId;
     }
 
     public String getTrainingProgram() {

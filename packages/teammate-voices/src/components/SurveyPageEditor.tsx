@@ -1,7 +1,9 @@
 import { useState } from 'react'
-import { Input, Button } from '../design-system'
+import { Input, Modal, ModalHeader, ModalBody, ModalFooter, Button } from '../design-system'
 import FormField from '@/components/FormField'
 import ToggleSwitch from '@/components/ToggleSwitch'
+import QuestionOptionsEditor from '@/components/QuestionOptionsEditor'
+import QuestionConfigPanel from '@/components/QuestionConfigPanel'
 import type { SurveyPage, SurveyQuestion } from '@/types/survey'
 import { QUESTION_TYPES } from '@/types/survey'
 
@@ -19,8 +21,7 @@ function generateQuestionId(questions: SurveyQuestion[]): string {
 }
 
 export default function SurveyPageEditor({ page, onUpdate, onDuplicate, onDelete, onConfigure }: SurveyPageEditorProps) {
-  const [newQuestionType, setNewQuestionType] = useState('')
-  const [newSecondaryType, setNewSecondaryType] = useState('')
+  const [configuringIdx, setConfiguringIdx] = useState<number | null>(null)
 
   const updateField = <K extends keyof SurveyPage>(field: K, value: SurveyPage[K]) => {
     onUpdate({ ...page, [field]: value })
@@ -31,10 +32,10 @@ export default function SurveyPageEditor({ page, onUpdate, onDuplicate, onDelete
     onUpdate({ ...page, questions })
   }
 
-  const handleAddFirstQuestion = () => {
+  const addQuestion = (type: string) => {
     const newQ: SurveyQuestion = {
       questionText: '',
-      questionType: 'TEXT',
+      questionType: type,
       questionLabel: '',
       questionDescription: '',
       showDescription: false,
@@ -43,24 +44,6 @@ export default function SurveyPageEditor({ page, onUpdate, onDuplicate, onDelete
       options: [],
     }
     onUpdate({ ...page, questions: [...page.questions, newQ] })
-  }
-
-  const handleAddQuestion = () => {
-    if (!newQuestionType) return
-    const newQ: SurveyQuestion = {
-      questionText: '',
-      questionType: newQuestionType,
-      questionLabel: '',
-      questionDescription: '',
-      showDescription: false,
-      secondaryType: newSecondaryType || undefined,
-      sortOrder: page.questions.length + 1,
-      isRequired: false,
-      options: [],
-    }
-    onUpdate({ ...page, questions: [...page.questions, newQ] })
-    setNewQuestionType('')
-    setNewSecondaryType('')
   }
 
   const toggleRequired = (idx: number) => {
@@ -147,19 +130,11 @@ export default function SurveyPageEditor({ page, onUpdate, onDuplicate, onDelete
       </div>
 
       {page.questions.length === 0 ? (
-        <>
-          <div className="page-editor__questions-card">
-            <p className="page-editor__questions-empty">
-              The page is empty. Add a question type using the button below.
-            </p>
-          </div>
-
-          <div className="question-editor__add-section">
-            <Button variant="secondary" size="sm" onClick={handleAddFirstQuestion}>
-              Add Question
-            </Button>
-          </div>
-        </>
+        <div className="page-editor__questions-card">
+          <p className="page-editor__questions-empty">
+            Add a question from the question types dropdown below.
+          </p>
+        </div>
       ) : (
         <>
           {page.questions.map((q, idx) => {
@@ -176,7 +151,7 @@ export default function SurveyPageEditor({ page, onUpdate, onDuplicate, onDelete
                       >
                         ✱ Required
                       </button>
-                      <button className="question-editor__action-btn" onClick={() => {}}>
+                      <button className={`question-editor__action-btn${configuringIdx === idx ? ' question-editor__action-btn--configuring' : ''}`} onClick={() => setConfiguringIdx(configuringIdx === idx ? null : idx)}>
                         <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M6.5 2.5L9.5 2.5M6.5 8L9.5 8M6.5 13.5L9.5 13.5M3 5L13 5M3 10.5L13 10.5" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"/></svg>
                         Configure
                       </button>
@@ -229,51 +204,71 @@ export default function SurveyPageEditor({ page, onUpdate, onDuplicate, onDelete
                       />
                     </FormField>
                   </div>
-                </div>
 
-                <div className="question-editor__add-inline">
-                  <p className="page-editor__questions-empty">
-                    Add a question from the question types dropdown below.
-                  </p>
-                </div>
+                  {/* type-specific option editor */}
+                  <QuestionOptionsEditor
+                    question={q}
+                    onChange={(updated) => updateQuestion(idx, updated)}
+                  />
 
-                <div className="question-editor__type-section">
-                  <div className="question-editor__type-row">
+                  <div className="question-editor__type-section">
                     <FormField label="Question type">
                       <select
-                        className="question-editor__select"
-                        value={newQuestionType}
-                        onChange={(e) => setNewQuestionType(e.target.value)}
+                        className="add-question-bar__select"
+                        value={q.questionType}
+                        onChange={(e) => updateQuestion(idx, { ...q, questionType: e.target.value, options: [] })}
                       >
-                        <option value="">Select Question type</option>
-                        {QUESTION_TYPES.map(t => (
+                        <option value="" disabled>Select Question type</option>
+                        {QUESTION_TYPES.map((t) => (
                           <option key={t} value={t}>{t}</option>
                         ))}
                       </select>
                     </FormField>
-
-                    <FormField label="Secondary type" required>
-                      <select
-                        className="question-editor__select"
-                        value={newSecondaryType}
-                        onChange={(e) => setNewSecondaryType(e.target.value)}
-                      >
-                        <option value="">Secondary type</option>
-                      </select>
-                    </FormField>
                   </div>
+
                 </div>
               </div>
             )
           })}
 
-          <div className="question-editor__add-section">
-            <Button variant="secondary" size="sm" onClick={handleAddQuestion} disabled={!newQuestionType}>
-              Add Question
-            </Button>
-          </div>
+          {/* Configuration Modal */}
+          {configuringIdx !== null && configuringIdx < page.questions.length && (
+            <Modal open={true} onClose={() => setConfiguringIdx(null)} size="lg">
+              <ModalHeader>
+                <div className="question-config__modal-title">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="12" cy="12" r="3" />
+                    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
+                  </svg>
+                  Configure: Q{configuringIdx + 1} — {page.questions[configuringIdx].questionText || 'Untitled'}
+                </div>
+              </ModalHeader>
+              <ModalBody>
+                <QuestionConfigPanel
+                  question={page.questions[configuringIdx]}
+                  questionIdx={configuringIdx}
+                  allQuestions={page.questions}
+                  onChange={(updated) => updateQuestion(configuringIdx, updated)}
+                  onClose={() => setConfiguringIdx(null)}
+                />
+              </ModalBody>
+              <ModalFooter>
+                <Button variant="primary" size="sm" onClick={() => setConfiguringIdx(null)}>Done</Button>
+              </ModalFooter>
+            </Modal>
+          )}
         </>
       )}
+
+      {/* Add Question button — outside cards */}
+      <button
+        type="button"
+        className="add-question-bar__btn"
+        onClick={() => addQuestion('Checkboxes')}
+      >
+        Add Question
+      </button>
     </div>
   )
 }
+

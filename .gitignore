@@ -37,3 +37,9 @@ yarn-error.log*
 
 # Vercel
 .vercel
+target/
+
+# Java build artifacts
+target/
+*.class
+*.jar

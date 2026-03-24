@@ -9,4 +9,5 @@ export const ROUTES = {
   SURVEY_ANALYTICS: (id: number | string) => `/surveys/${id}/analytics`,
   PARTICIPANTS: '/participants',
   ASSIGNMENT_RULES: '/assignment-rules',
+  REPORTS: '/reports',
 } as const

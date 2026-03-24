@@ -24,6 +24,9 @@ public class Participant {
     @Column(name = "PARTICIPANT_TYPE", nullable = false, length = 30)
     private String participantType;
 
+    @Column(name = "PROGRAM_ID")
+    private Long programId;
+
     @Column(name = "TRAINING_PROGRAM", length = 255)
     private String trainingProgram;
 
@@ -194,5 +197,13 @@ public class Participant {
 
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    public Long getProgramId() {
+        return programId;
+    }
+
+    public void setProgramId(Long programId) {
+        this.programId = programId;
     }
 }

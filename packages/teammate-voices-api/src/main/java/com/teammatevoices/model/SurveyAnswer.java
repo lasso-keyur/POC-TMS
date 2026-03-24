@@ -28,6 +28,13 @@ public class SurveyAnswer {
     @Column(name = "ANSWER_VALUE")
     private Integer answerValue;
 
+    @Column(name = "PAGE_ID", length = 100)
+    private String pageId;
+
+    @Column(name = "ANSWER_JSON")
+    @Lob
+    private String answerJson;
+
     @CreationTimestamp
     @Column(name = "CREATED_AT", updatable = false)
     private LocalDateTime createdAt;
@@ -91,4 +98,10 @@ public class SurveyAnswer {
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
     }
+
+    public String getPageId() { return pageId; }
+    public void setPageId(String pageId) { this.pageId = pageId; }
+
+    public String getAnswerJson() { return answerJson; }
+    public void setAnswerJson(String answerJson) { this.answerJson = answerJson; }
 }
