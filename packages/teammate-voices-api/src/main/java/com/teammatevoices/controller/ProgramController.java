@@ -1,6 +1,7 @@
 package com.teammatevoices.controller;
 
 import com.teammatevoices.dto.ProgramDTO;
+import com.teammatevoices.dto.ProgramDetailDTO;
 import com.teammatevoices.service.ProgramService;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
@@ -33,6 +34,13 @@ public class ProgramController {
     public ResponseEntity<ProgramDTO> getProgramById(@PathVariable Long id) {
         log.info("GET /programs/{}", id);
         return ResponseEntity.ok(programService.getProgramById(id));
+    }
+
+    /** Program detail page: program info + participants with dispatch statuses */
+    @GetMapping("/{id}/detail")
+    public ResponseEntity<ProgramDetailDTO> getProgramDetail(@PathVariable Long id) {
+        log.info("GET /programs/{}/detail", id);
+        return ResponseEntity.ok(programService.getProgramDetail(id));
     }
 
     @PostMapping

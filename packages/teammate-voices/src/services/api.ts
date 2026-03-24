@@ -1,5 +1,5 @@
 import type { Survey } from '@/types/survey'
-import type { Program } from '@/types/program'
+import type { Program, ProgramDetail } from '@/types/program'
 import type { Participant, AssignmentRule, Dispatch } from '@/types/participant'
 import type { LogicRule, LogicEvaluationResult } from '@/types/logic'
 import type { EmailTemplate, EmailTemplateAssignment } from '@/types/emailTemplate'
@@ -80,6 +80,10 @@ class TeammateVoicesAPI {
 
   async getProgram(id: number): Promise<Program> {
     return this.request<Program>(`/programs/${id}`)
+  }
+
+  async getProgramDetail(id: number): Promise<ProgramDetail> {
+    return this.request<ProgramDetail>(`/programs/${id}/detail`)
   }
 
   async createProgram(program: Partial<Program>): Promise<Program> {

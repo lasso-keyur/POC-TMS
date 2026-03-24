@@ -3,6 +3,7 @@ import Layout from '@/components/Layout'
 import Dashboard from '@/pages/Dashboard'
 import Programs from '@/pages/Programs'
 import ProgramCreate from '@/pages/ProgramCreate'
+import ProgramDetail from '@/pages/ProgramDetail'
 import SurveyList from '@/pages/SurveyList'
 import SurveyEditor from '@/pages/SurveyEditor'
 import SurveyResponder from '@/pages/SurveyResponder'
@@ -28,6 +29,7 @@ export default function App() {
               <Route path="/" element={<Dashboard />} />
               <Route path="/programs" element={<Programs />} />
               <Route path="/programs/new" element={<ProgramCreate />} />
+              <Route path="/programs/:programId" element={<ProgramDetail />} />
               <Route path="/programs/:programId/edit" element={<ProgramCreate />} />
               <Route path="/surveys" element={<SurveyList />} />
               <Route path="/surveys/new" element={<SurveyEditor />} />

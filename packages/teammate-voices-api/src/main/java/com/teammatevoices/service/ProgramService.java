@@ -1,14 +1,21 @@
 package com.teammatevoices.service;
 
 import com.teammatevoices.dto.ProgramDTO;
+import com.teammatevoices.dto.ProgramDetailDTO;
+import com.teammatevoices.dto.ProgramDetailDTO.ParticipantStatusRow;
 import com.teammatevoices.exception.ResourceNotFoundException;
+import com.teammatevoices.model.Dispatch;
+import com.teammatevoices.model.Participant;
 import com.teammatevoices.model.Program;
+import com.teammatevoices.repository.DispatchRepository;
+import com.teammatevoices.repository.ParticipantRepository;
 import com.teammatevoices.repository.ProgramRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -18,9 +25,15 @@ public class ProgramService {
     private static final Logger log = LoggerFactory.getLogger(ProgramService.class);
 
     private final ProgramRepository programRepository;
+    private final ParticipantRepository participantRepository;
+    private final DispatchRepository dispatchRepository;
 
-    public ProgramService(ProgramRepository programRepository) {
+    public ProgramService(ProgramRepository programRepository,
+                          ParticipantRepository participantRepository,
+                          DispatchRepository dispatchRepository) {
         this.programRepository = programRepository;
+        this.participantRepository = participantRepository;
+        this.dispatchRepository = dispatchRepository;
     }
 
     @Transactional(readOnly = true)
@@ -66,6 +79,68 @@ public class ProgramService {
             throw new ResourceNotFoundException("Program", id);
         }
         programRepository.deleteById(id);
+    }
+
+    /**
+     * Returns program info + all participants with their latest dispatch status.
+     * Used by the Program Detail page.
+     */
+    @Transactional(readOnly = true)
+    public ProgramDetailDTO getProgramDetail(Long id) {
+        log.info("Getting program detail for: {}", id);
+        Program program = programRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Program", id));
+
+        List<Participant> participants = participantRepository.findByProgramId(id);
+
+        int completedCount = 0;
+        int sentCount = 0;
+        int pendingCount = 0;
+
+        List<ParticipantStatusRow> rows = new java.util.ArrayList<>();
+        for (Participant p : participants) {
+            ParticipantStatusRow row = new ParticipantStatusRow();
+            row.setParticipantId(p.getParticipantId());
+            row.setFullName(p.getFullName());
+            row.setEmail(p.getEmail());
+            row.setCohort(p.getCohort());
+            row.setParticipantType(p.getParticipantType());
+            row.setActive(Boolean.TRUE.equals(p.getIsActive()));
+
+            // Get latest dispatch for this participant
+            List<Dispatch> dispatches = dispatchRepository.findByParticipantId(p.getParticipantId());
+            if (!dispatches.isEmpty()) {
+                Dispatch latest = dispatches.stream()
+                        .max(Comparator.comparing(Dispatch::getCreatedAt))
+                        .orElse(dispatches.get(0));
+                row.setDispatchStatus(latest.getDispatchStatus());
+                row.setSurveyStage(latest.getSurveyStage());
+                row.setSentAt(latest.getSentAt());
+                row.setSubmittedAt(latest.getSubmittedAt());
+                row.setReminderCount(latest.getReminderCount() != null ? latest.getReminderCount() : 0);
+
+                // Count statuses
+                if ("SUBMITTED".equals(latest.getDispatchStatus())) completedCount++;
+                else if ("SENT".equals(latest.getDispatchStatus()) || "OPENED".equals(latest.getDispatchStatus())) sentCount++;
+                else pendingCount++;
+            } else {
+                row.setDispatchStatus(null);
+                row.setReminderCount(0);
+                pendingCount++;
+            }
+
+            rows.add(row);
+        }
+
+        ProgramDetailDTO detail = new ProgramDetailDTO();
+        detail.setProgram(toDTO(program));
+        detail.setParticipants(rows);
+        detail.setTotalParticipants(participants.size());
+        detail.setCompletedCount(completedCount);
+        detail.setSentCount(sentCount);
+        detail.setPendingCount(pendingCount);
+
+        return detail;
     }
 
     private ProgramDTO toDTO(Program program) {
