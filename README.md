@@ -1,4 +1,4 @@
-# 🏗️ Teammate Voices Design System - Complete Project
+# 🏗️POC TMS Complete Project
 
 A modern, accessible design system with integrated Survey Management System.
 
@@ -16,12 +16,11 @@ A modern, accessible design system with integrated Survey Management System.
 
 ---
 
-## 🎨 About Teammate Voices Design System
+## 🎨 About POC TMS
 
 A modern, accessible design system inspired by Apple's design language. Built with React, TypeScript, and thoughtful attention to detail.
 
 ### Features
-- 🎨 **Apple-inspired Design Tokens**
 - 🧩 **Comprehensive Components**
 - ♿ **Accessibility First** - WCAG 2.1 AA compliant
 - 🎭 **Dark Mode** support
