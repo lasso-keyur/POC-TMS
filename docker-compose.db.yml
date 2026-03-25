@@ -7,12 +7,18 @@ services:
       - "1521:1521"
       - "5500:5500"
     environment:
-      ORACLE_PASSWORD: "ChangeMe123"
-      APP_USER: "arya"
-      APP_USER_PASSWORD: "ChangeMe123"
+      ORACLE_PASSWORD: "arya123"
+      APP_USER: "ARYA"
+      APP_USER_PASSWORD: "arya123"
     volumes:
       - oracle-data:/opt/oracle/oradata
       - ./db/init:/container-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "healthcheck.sh"]
+      interval: 30s
+      timeout: 10s
+      retries: 10
+      start_period: 60s
 
 volumes:
   oracle-data:

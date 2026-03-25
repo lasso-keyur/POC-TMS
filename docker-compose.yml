@@ -45,25 +45,33 @@ services:
     environment:
       DB_HOST: oracle-db
       DB_PORT: "1521"
-      DB_SERVICE: FREE
+      DB_SERVICE: FREEPDB1
       DB_USER: ARYA
       DB_PASSWORD: arya123
       SPRING_PROFILES_ACTIVE: docker
     depends_on:
-      - oracle-db
+      oracle-db:
+        condition: service_healthy
     networks:
       - arya-network
 
   oracle-db:
-    image: container-registry.oracle.com/database/free:latest
+    image: gvenzl/oracle-free:23-slim
     ports:
       - "1521:1521"
     environment:
-      ORACLE_PWD: oracle_password
-      ORACLE_CHARACTERSET: AL32UTF8
+      ORACLE_PASSWORD: arya123
+      APP_USER: ARYA
+      APP_USER_PASSWORD: arya123
     volumes:
       - oracle-data:/opt/oracle/oradata
-      - ./db/init:/docker-entrypoint-initdb.d
+      - ./db/init:/container-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "healthcheck.sh"]
+      interval: 30s
+      timeout: 10s
+      retries: 10
+      start_period: 60s
     networks:
       - arya-network
 

@@ -1,6 +1,5 @@
 -- Survey Management Tables for EMPSurvey
 
-ALTER SESSION SET CONTAINER = FREEPDB1;
 ALTER SESSION SET CURRENT_SCHEMA = ARYA;
 
 -- Surveys Table
