@@ -41,16 +41,21 @@ This report surveys the current state of the industry, evaluating NLP models (VA
 ### Market Size & Growth
 | Metric | Value |
 |--------|-------|
-| Global sentiment analysis market (2024) | ~$4.1 billion |
-| Projected market size (2027) | ~$6.3 billion |
-| CAGR | ~15–18% |
-| Employee experience analytics segment growth | ~22% CAGR |
+| Sentiment analytics systems (2025) | $4.27 billion |
+| Sentiment analytics systems (2026 projected) | $5.61 billion |
+| Sentiment analytics CAGR | 31.4% |
+| Employee feedback software (2025) | $1.10 billion |
+| Employee feedback software (2026 projected) | $1.28 billion (to $3.15B by 2034) |
+| Employee experience management (2025) | $6.7 billion |
+| Employee experience management (2035 projected) | $12.9 billion |
+| Disengaged employees cost globally (Gallup) | $8.8 trillion/year |
+| Continuous listening programs lower turnover by | 24% (Gallup, 2025) |
 
 ### Key Industry Trends
 
-1. **AI-Native Survey Platforms** — Platforms like Qualtrics XM, Culture Amp, and Medallia now embed real-time sentiment analysis directly into survey workflows, offering instant theme detection and sentiment scoring as responses arrive.
+1. **AI-Native Survey Platforms** — Platforms like Qualtrics XM, Culture Amp, and Medallia now embed real-time sentiment analysis directly into survey workflows, offering instant theme detection and sentiment scoring as responses arrive. Software holds ~63% share of the employee experience management market (2025).
 
-2. **Shift from Annual to Continuous Listening** — Organizations are moving from annual engagement surveys to continuous pulse surveys, requiring real-time or near-real-time sentiment processing capabilities.
+2. **Shift from Annual to Continuous Listening** — Organizations are moving from annual engagement surveys to continuous pulse surveys, requiring real-time or near-real-time sentiment processing capabilities. Organizations with continuous listening see 24% lower turnover (Gallup, 2025).
 
 3. **Multi-Dimensional Sentiment** — Beyond positive/negative/neutral, modern tools detect specific emotions (frustration, enthusiasm, anxiety), intensity levels, and topic-specific sentiment (e.g., positive about team culture but negative about compensation).
 
@@ -59,6 +64,13 @@ This report surveys the current state of the industry, evaluating NLP models (VA
 5. **Multilingual Sentiment Analysis** — With global workforces, platforms now support 50+ languages for sentiment detection, often using multilingual transformer models (mBERT, XLM-RoBERTa).
 
 6. **Privacy-First Analysis** — Growing emphasis on anonymized, aggregated sentiment insights to maintain employee trust, especially in regulated industries (healthcare, finance).
+
+7. **Executive AI Urgency** — Executive urgency to incorporate AI tools has increased 7x in the past six months (Slack Workforce Index), while 93% of workers still do not consider AI outputs completely trustworthy for work-related tasks.
+
+### Employee Sentiment Macro Trends (2020–2026)
+- Between August 2020 and April 2024, overall US employee sentiment fell ~5.6% across all industries
+- Sentiment stabilized mid-2024 and improved throughout 2025 — the first improvement in nearly three years
+- Early 2026: Gallup data shows a renewed decline in worker sentiment as hiring slowed to its slowest pace in years
 
 ---
 
@@ -140,14 +152,16 @@ This report surveys the current state of the industry, evaluating NLP models (VA
 
 | Platform | Sentiment Capabilities | Integration Model | Pricing Tier |
 |----------|----------------------|-------------------|-------------|
-| **Qualtrics XM** | Real-time text analytics, topic detection, sentiment scoring, 23+ languages | Embedded in survey platform | Enterprise |
-| **Culture Amp** | AI-driven comment analysis, theme extraction, sentiment trends, manager-level insights | Native to platform | Enterprise |
-| **Medallia** | Experience analytics, real-time text mining, predictive sentiment | API + Embedded | Enterprise |
+| **Qualtrics XM** | Real-time text analytics (Text iQ), sentence-level scoring (-5 to +5), 15+ languages, 50K+ employees | Embedded in survey platform | Enterprise ($30K–$250K+/yr) |
+| **Culture Amp** | AI-driven comment analysis, theme extraction, sentiment trends, attrition risk prediction | Native to platform | Enterprise |
+| **Medallia** | Athena AI engine, real-time text mining, acquired MonkeyLearn (2022) for no-code ML | API + Embedded | Enterprise |
 | **Peakon (Workday)** | Continuous listening, NLP-driven insights, engagement prediction | Native to Workday | Enterprise |
-| **Glint (LinkedIn/Microsoft)** | AI-powered comment analysis, driver identification, pulse analytics | Native to Viva | Enterprise |
-| **MonkeyLearn** | Custom sentiment classifiers, no-code model training, API access | API-first | Mid-market |
-| **Lattice** | Engagement surveys with AI-powered open-ended analysis | Native | Mid-market |
+| **Viva Glint (Microsoft)** | Copilot-powered comment analysis, natural language exploration, integrates with Viva Insights (327% ROI reported) | Native to Microsoft 365 | Enterprise |
+| **MonkeyLearn (Medallia)** | Drag-and-drop custom sentiment classifiers, no-code model building | API-first | Mid-market ($299–$499/mo) |
+| **Lattice** | Pulse surveys and engagement measurement with sentiment tracking | Native | Mid-market |
 | **SurveyMonkey (Momentive)** | Built-in sentiment analysis for open-ended questions | Embedded | SMB–Enterprise |
+| **Happily.ai** | Daily conversational pulse checks replacing static annual surveys | Native | Mid-market |
+| **Polly (Slack)** | "Hot Topics" AI feature groups open-ended feedback by sentiment (2026) | Slack integration | SMB–Mid-market |
 
 ### API-Based Services
 
@@ -202,21 +216,23 @@ This report surveys the current state of the industry, evaluating NLP models (VA
 ### How Leading Companies Handle Employee Sentiment
 
 **Microsoft (Viva Glint)**
-- Uses continuous listening with pulse surveys
-- NLP models analyze open-ended comments in real-time
-- Provides manager-level dashboards with sentiment trends
-- Leverages Azure AI for multilingual support
+- Uses continuous listening with pulse surveys, deeply integrated with Microsoft 365
+- **Copilot in Viva Glint** uses generative AI to summarize all comments, filter by sentiment, and generate prescriptive recommendations
+- Combines survey sentiment with **Viva Insights** workplace analytics (meeting patterns, collaboration data, work habits)
+- Privacy safeguards: configurable thresholds (5+ respondents for quantitative, 10+ for comments)
+- Reports potential 327% total ROI with payback in under six months
 
 **Google**
-- Annual "Googlegeist" survey with sophisticated NLP analysis
-- Custom models for topic extraction and sentiment
-- Focus on psychological safety metrics
-- Real-time pulse surveys supplement annual data
+- Annual **Googlegeist** survey with 88%+ response rate despite 30-minute completion time
+- People Analytics team analyzes aggregate trends by gender, ethnicity, job level
+- **Project Oxygen** found that managers greatly influence retention, leading to targeted manager programs
+- Covers inclusion, manager effectiveness, fairness of promotion/compensation, and company values
+- Notable finding (2022): Only 46% found total compensation competitive (down 12 pts YoY), while mission satisfaction scored 90%
 
-**Salesforce**
-- Uses AI (Einstein Analytics) for survey sentiment
-- Predictive models for employee attrition risk based on sentiment trends
-- Integrates survey data with CRM and HR systems
+**Salesforce / Slack**
+- Rebuilt **Slackbot** as a personal AI agent that analyzes feedback from pilot channels — grouping responses by sentiment, identifying themes, and suggesting priorities with inline citations
+- Internal adoption: 25,000 weekly active users among 80,000 employees (80% retention, 96% satisfaction — highest of any Slack AI feature)
+- Slack positioning as "agentic operating system" with partners including OpenAI, Anthropic, Google
 
 **IBM**
 - Watson-powered sentiment analysis on employee feedback
@@ -402,13 +418,35 @@ GET    /api/answers/{id}/sentiment         -- Get sentiment for individual answe
 
 ## 11. References
 
-1. PMC (2025). "Sentiment Analysis in Healthcare: A Comparison of VADER, BERT, and Flair NLP Models on Patient Reviews" — https://pmc.ncbi.nlm.nih.gov/articles/PMC12382424/
+### Academic & Research Papers
+1. PMC (2025). "Sentiment Analysis in Healthcare: A Comparison of VADER, BERT, and Flair NLP Models" — https://pmc.ncbi.nlm.nih.gov/articles/PMC12382424/
 2. Frontiers in Political Science (2025). "Sentiment Analysis of UN Speeches: VADER vs BERT" — https://www.frontiersin.org/journals/political-science/articles/10.3389/fpos.2025.1546822/full
-3. NHSJS (2025). "A Case Study of Sentiment Analysis on Survey Data Using LLMs vs Dedicated Neural Networks" — https://nhsjs.com/2025/a-case-study-of-sentiment-analysis-on-survey-data-using-llms-versus-dedicated-neural-networks/
+3. NHSJS (2025). "Sentiment Analysis on Survey Data: LLMs vs Dedicated Neural Networks" — https://nhsjs.com/2025/a-case-study-of-sentiment-analysis-on-survey-data-using-llms-versus-dedicated-neural-networks/
 4. Nature Scientific Reports (2025). "Multi-task Opinion Enhanced Hybrid BERT Model for Mental Health Analysis" — https://www.nature.com/articles/s41598-025-86124-6
 5. Frontiers in Big Data (2025). "Analyzing Student Mental Health with RoBERTa-Large" — https://www.frontiersin.org/journals/big-data/articles/10.3389/fdata.2025.1615788/full
 6. ArXiv (2025). "Visualizing Public Opinion: Real-Time Sentiment Dashboard Using VADER and DistilBERT" — https://arxiv.org/html/2504.15448v2
 7. PMC (2025). "From Words to Action: Automatic Sentiment Analysis of Patient Experience Comments" — https://pmc.ncbi.nlm.nih.gov/articles/PMC12548608/
+8. ArXiv (2025). "Bridging Emotions and Architecture: Sentiment Analysis in Distributed Systems" — https://arxiv.org/html/2503.18260
+
+### Market Research & Industry Reports
+9. GII Research (2026). "Sentiment Analytics Systems Global Market Report" — https://www.giiresearch.com/report/tbrc1983101-sentiment-analytics-systems-global-market-report.html
+10. IntelMarketResearch (2026). "Employee Feedback Software Market Outlook 2026–2034" — https://www.intelmarketresearch.com/employee-feedback-software-market-35646
+11. GM Insights (2025). "Employee Experience Management Market Size" — https://www.gminsights.com/industry-analysis/employee-experience-management-market
+12. Aon (2025). "Employee Sentiment Study" — https://www.aon.com/en/insights/reports/employee-sentiment-study
+13. Gallup (2025). Workplace engagement and sentiment data
+14. Revelio Labs (2025). "After a Three-Year Slide, Employee Sentiment Has Turned a Corner" — https://www.reveliolabs.com/news/social/after-a-three-year-slide-employee-sentiment-has-finally-turned-a-corner/
+
+### Enterprise & Platform Sources
+15. Microsoft Viva Glint — https://www.microsoft.com/en-us/microsoft-viva/glint
+16. Microsoft Copilot in Viva Glint — https://techcommunity.microsoft.com/blog/viva_glint_blog/microsoft-copilot-in-viva-glint-bringing-ai-to-comment-analysis---updated-march-/4003914
+17. Google Googlegeist Survey — https://fortune.com/2022/03/15/google-googlegeist-survey-employees-unhappy-with-pay/
+18. Salesforce Slackbot AI Agent — https://salesforcedevops.net/index.php/2026/01/13/slackbot-gets-a-glow-up/
+19. Slack Workforce Index — https://slack.com/blog/news/the-workforce-index-june-2024
+
+### Best Practices & Guides
+20. HP (2025). "Expert Tips for Employee Sentiment and Survey Analysis" — https://workforceexperience.hp.com/learning/employee-experience/employee-sentiment/
+21. AllHRSoftware (2025). "AI-Powered Sentiment Analysis for Employee Surveys: 5-Step Guide" — https://allhrsoftware.com/blog/ai-powered-sentiment-analysis-for-employee-surveys-5-step-guide/
+22. AIMultiple (2026). "Top 7 Sentiment Analysis Challenges" — https://research.aimultiple.com/sentiment-analysis-challenges/
 
 ---
 
