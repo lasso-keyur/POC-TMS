@@ -110,6 +110,17 @@ export default function RuleEditorForm({
             </button>
           )}
         </div>
+
+        {/* Column header row — makes each dropdown's purpose clear */}
+        {rule.conditions.items.length > 0 && (
+          <div className="cfg-condition-col-headers">
+            <span className="cfg-condition-col-headers__col cfg-condition-col-headers__col--source">Source</span>
+            <span className="cfg-condition-col-headers__col cfg-condition-col-headers__col--field">Question / Attribute</span>
+            <span className="cfg-condition-col-headers__col cfg-condition-col-headers__col--op">Operator</span>
+            <span className="cfg-condition-col-headers__col cfg-condition-col-headers__col--val">Value</span>
+          </div>
+        )}
+
         <div className="cfg-rule-editor__conditions">
           {rule.conditions.items.map((cond, idx) => (
             <ConditionRow

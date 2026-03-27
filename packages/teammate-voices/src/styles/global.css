@@ -4341,6 +4341,37 @@ input, textarea, select {
 }
 
 /* --- Condition Row --- */
+/* Column headers above condition rows */
+.cfg-condition-col-headers {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 4px;
+  padding-right: 34px; /* align with fields, leaving room for remove button */
+}
+
+.cfg-condition-col-headers__col {
+  flex: 1;
+  min-width: 0;
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #86868b;
+}
+
+.cfg-condition-col-headers__col--field {
+  flex: 2;
+}
+
+.cfg-condition-col-headers__col--op {
+  flex: 1;
+}
+
+.cfg-condition-col-headers__col--val {
+  flex: 1.5;
+}
+
 .cfg-condition-row {
   margin-bottom: 8px;
 }

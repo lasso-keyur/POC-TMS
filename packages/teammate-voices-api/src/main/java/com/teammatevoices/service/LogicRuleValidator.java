@@ -392,16 +392,25 @@ public class LogicRuleValidator {
 
         Set<String> seenCondKeys = new HashSet<>();
         for (LogicCondition cond : rule.getConditions().getItems()) {
-            // Build a key: for participant conditions use "participant:field", for question use "question:id"
+            // Key includes operator so that Q1 > 3 AND Q1 < 7 (range) is NOT flagged as duplicate.
+            // Only flag when the exact same source + field + operator combination repeats —
+            // that is always an authoring mistake since the value would just overwrite.
+            String operator = cond.getOperator() != null ? cond.getOperator() : "";
             String condKey = "participant".equals(cond.getConditionType())
-                    ? ("participant:" + (cond.getParticipantField() != null ? cond.getParticipantField() : ""))
-                    : ("question:" + (cond.getQuestionId() != null ? cond.getQuestionId() : ""));
-            if (!condKey.endsWith(":") && !seenCondKeys.add(condKey)) {
+                    ? ("participant:" + (cond.getParticipantField() != null ? cond.getParticipantField() : "") + ":" + operator)
+                    : ("question:" + (cond.getQuestionId() != null ? cond.getQuestionId() : "") + ":" + operator);
+
+            // Skip incomplete conditions (empty field or question) — structural validation covers those
+            boolean isIncomplete = "participant".equals(cond.getConditionType())
+                    ? (cond.getParticipantField() == null || cond.getParticipantField().isBlank())
+                    : (cond.getQuestionId() == null || cond.getQuestionId().isBlank());
+
+            if (!isIncomplete && !seenCondKeys.add(condKey)) {
                 String label = "participant".equals(cond.getConditionType())
-                        ? "participant field '" + cond.getParticipantField() + "'"
-                        : "question '" + cond.getQuestionId() + "'";
+                        ? "participant field '" + cond.getParticipantField() + "' with operator '" + operator + "'"
+                        : "question '" + cond.getQuestionId() + "' with operator '" + operator + "'";
                 errors.add(prefix + ": duplicate condition on " + label
-                        + ". Use a single condition with 'any_of' or 'between' instead.");
+                        + ". Combine into a single condition using 'any_of' or adjust the operator.");
             }
         }
     }
