@@ -48,7 +48,7 @@ export default function DistributeTab({ surveyId, surveyTitle, isActive }: Distr
   const [loadingHistory, setLoadingHistory] = useState(true)
 
   // ----- Copy link -----
-  const surveyLink = `${window.location.origin}/respond/${surveyId}`
+  const surveyLink = `${window.location.origin}/survey/${surveyId}/respond`
   const [copied, setCopied] = useState(false)
 
   // Load participants and dispatch history on mount
