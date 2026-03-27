@@ -6114,3 +6114,223 @@ input, textarea, select {
   color: #86868b;
   margin: 0;
 }
+
+/* ═══════════════════════════════════════════════════
+   PARTICIPANTS TAB (Survey Editor)
+   ═══════════════════════════════════════════════════ */
+
+.ptab {
+  padding: 24px 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.ptab__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.ptab__title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1d1d1f;
+  margin: 0 0 4px;
+}
+
+.ptab__subtitle {
+  font-size: 13px;
+  color: #86868b;
+  margin: 0;
+  line-height: 1.5;
+  max-width: 560px;
+}
+
+.ptab__actions {
+  flex-shrink: 0;
+}
+
+/* Banners */
+.ptab__banner {
+  padding: 14px 18px;
+  border-radius: 10px;
+  font-size: 13px;
+  line-height: 1.5;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.ptab__banner--success { background: #f0fdf4; border: 1px solid #86efac; }
+.ptab__banner--warn    { background: #fffbeb; border: 1px solid #fcd34d; }
+.ptab__banner--error   { background: #fef2f2; border: 1px solid #fecaca; flex-direction: row; justify-content: space-between; align-items: center; }
+
+.ptab__banner-title {
+  font-weight: 600;
+  font-size: 14px;
+  color: #1d1d1f;
+}
+
+.ptab__banner-stats {
+  display: flex;
+  gap: 20px;
+}
+
+.ptab__banner-stat { font-size: 13px; font-weight: 500; }
+.ptab__banner-stat--created { color: #065f46; }
+.ptab__banner-stat--updated { color: #1d4ed8; }
+.ptab__banner-stat--skipped { color: #92400e; }
+
+.ptab__banner-errors {
+  margin: 4px 0 0;
+  padding-left: 18px;
+  font-size: 12px;
+  color: #92400e;
+}
+
+.ptab__banner-dismiss {
+  background: none;
+  border: none;
+  font-size: 12px;
+  color: #86868b;
+  cursor: pointer;
+  padding: 0;
+  align-self: flex-start;
+}
+
+.ptab__banner-close {
+  background: none;
+  border: none;
+  font-size: 15px;
+  color: #991b1b;
+  cursor: pointer;
+  padding: 0 4px;
+  flex-shrink: 0;
+}
+
+/* Excel hint bar */
+.ptab__hint {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 10px 14px;
+  background: #f9f9fb;
+  border: 1px solid #e5e5ea;
+  border-radius: 8px;
+  font-size: 12px;
+  color: #48484a;
+  line-height: 1.5;
+}
+
+.ptab__hint-icon {
+  font-size: 14px;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+/* Toolbar */
+.ptab__toolbar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.ptab__count {
+  font-size: 12px;
+  color: #86868b;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* Empty states */
+.ptab__empty {
+  text-align: center;
+  padding: 40px 0;
+  color: #86868b;
+  font-size: 14px;
+  margin: 0;
+}
+
+.ptab__empty-card {
+  border: 1px solid #e5e5ea;
+  border-radius: 12px;
+  padding: 40px 24px;
+  text-align: center;
+  background: #fafafa;
+}
+
+.ptab__empty-title {
+  font-size: 15px;
+  color: #48484a;
+  margin: 0 0 8px;
+  font-weight: 500;
+}
+
+.ptab__empty-sub {
+  font-size: 13px;
+  color: #86868b;
+  margin: 0;
+}
+
+/* Table */
+.ptab__table-wrap {
+  border: 1px solid #e5e5ea;
+  border-radius: 12px;
+  overflow: hidden;
+  overflow-x: auto;
+}
+
+.ptab__table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.ptab__table thead tr {
+  background: #f9f9fb;
+  border-bottom: 1px solid #e5e5ea;
+}
+
+.ptab__table th {
+  padding: 10px 14px;
+  text-align: left;
+  font-size: 11px;
+  font-weight: 600;
+  color: #86868b;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+.ptab__table td {
+  padding: 11px 14px;
+  border-bottom: 1px solid #f2f2f7;
+  vertical-align: middle;
+}
+
+.ptab__table tr:last-child td { border-bottom: none; }
+.ptab__table tr:hover td { background: #f9f9fb; }
+
+.ptab__cell--name {
+  font-weight: 500;
+  color: #1d1d1f;
+}
+
+.ptab__cell--muted {
+  color: #636366;
+}
+
+/* Pills */
+.ptab__pill {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.ptab__pill--type     { background: #eff6ff; color: #1d4ed8; }
+.ptab__pill--active   { background: #d1fae5; color: #065f46; }
+.ptab__pill--inactive { background: #fee2e2; color: #991b1b; }

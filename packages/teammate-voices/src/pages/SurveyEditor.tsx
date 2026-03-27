@@ -10,6 +10,7 @@ import FormViewer from '@/components/FormViewer'
 import ToggleSwitch from '@/components/ToggleSwitch'
 import { LogicTab } from '@/components/logic'
 import DistributeTab from '@/components/DistributeTab'
+import ParticipantsTab from '@/components/ParticipantsTab'
 import { api } from '@/services/api'
 import type { Survey, SurveyPage, SurveyTab } from '@/types/survey'
 import { SURVEY_TABS } from '@/types/survey'
@@ -360,6 +361,10 @@ export default function SurveyEditor() {
             onRulesChange={handleLogicRulesChange}
             readOnly={survey.status === 'ACTIVE' || survey.status === 'CLOSED'}
           />
+        )}
+
+        {activeTab === 'participants' && (
+          <ParticipantsTab />
         )}
 
         {activeTab === 'distribute' && survey.surveyId && (
