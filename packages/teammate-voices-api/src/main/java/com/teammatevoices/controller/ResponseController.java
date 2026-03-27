@@ -4,6 +4,8 @@ import com.teammatevoices.dto.SurveyDTO;
 import com.teammatevoices.dto.SurveyResponseDTO;
 import com.teammatevoices.dto.request.SubmitSurveyRequest;
 import com.teammatevoices.model.Dispatch;
+import com.teammatevoices.model.Participant;
+import com.teammatevoices.repository.ParticipantRepository;
 import com.teammatevoices.service.DispatchService;
 import com.teammatevoices.service.ResponseService;
 import com.teammatevoices.service.SurveyService;
@@ -13,6 +15,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -24,26 +27,44 @@ public class ResponseController {
     private final ResponseService responseService;
     private final SurveyService surveyService;
     private final DispatchService dispatchService;
+    private final ParticipantRepository participantRepository;
 
     public ResponseController(ResponseService responseService,
                               SurveyService surveyService,
-                              DispatchService dispatchService) {
+                              DispatchService dispatchService,
+                              ParticipantRepository participantRepository) {
         this.responseService = responseService;
         this.surveyService = surveyService;
         this.dispatchService = dispatchService;
+        this.participantRepository = participantRepository;
     }
 
     /* ================================================================
        Token-based endpoints (tracked dispatch)
        ================================================================ */
 
-    /** Load survey for a respondent via dispatch token */
+    /** Load survey for a respondent via dispatch token.
+     *  Attaches participantContext (region, LOB, cohort, etc.) so audience-based
+     *  logic rules can be evaluated client-side without a separate API call. */
     @GetMapping("/respond/{token}")
     public ResponseEntity<SurveyDTO> getSurveyByToken(@PathVariable String token) {
         log.info("GET /respond/{}", token);
-        // Look up dispatch by token → get surveyId → return survey
         Dispatch dispatch = dispatchService.getDispatchByToken(token);
         SurveyDTO survey = surveyService.getSurveyById(dispatch.getSurveyId());
+
+        // Attach participant context for audience-based logic rules
+        if (dispatch.getParticipantId() != null) {
+            participantRepository.findById(dispatch.getParticipantId()).ifPresent(p -> {
+                Map<String, String> ctx = new HashMap<>();
+                ctx.put("region", p.getRegion() != null ? p.getRegion() : "");
+                ctx.put("lineOfBusiness", p.getLineOfBusiness() != null ? p.getLineOfBusiness() : "");
+                ctx.put("cohort", p.getCohort() != null ? p.getCohort() : "");
+                ctx.put("participantType", p.getParticipantType() != null ? p.getParticipantType() : "");
+                ctx.put("hierarchyCode", p.getHierarchyCode() != null ? p.getHierarchyCode() : "");
+                survey.setParticipantContext(ctx);
+            });
+        }
+
         return ResponseEntity.ok(survey);
     }
 

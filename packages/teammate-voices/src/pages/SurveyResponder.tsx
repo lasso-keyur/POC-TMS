@@ -107,21 +107,34 @@ function validateAnswer(q: SurveyQuestion, answer: string, logicRequired: boolea
   return null
 }
 
-function evalCond(c: LogicCondition, answers: Record<string, string>): boolean {
-  const ans = answers[c.questionId] ?? ''
+function evalCond(
+  c: LogicCondition,
+  answers: Record<string, string>,
+  participantCtx?: Record<string, string>,
+): boolean {
+  // Resolve the value to compare against
+  let ans: string
+  if (c.conditionType === 'participant') {
+    // Participant attribute condition — use context if available, else skip (return true = show)
+    if (!participantCtx) return true
+    ans = participantCtx[c.participantField ?? ''] ?? ''
+  } else {
+    ans = answers[c.questionId ?? ''] ?? ''
+  }
+
   const val = String(c.value ?? '')
   switch (c.operator) {
     case 'equals':       return ans === val
     case 'not_equals':   return ans !== val
     case 'greater_than': return Number(ans) > Number(val)
     case 'less_than':    return Number(ans) < Number(val)
-    case 'contains':     return ans.includes(val)
-    case 'not_contains': return !ans.includes(val)
+    case 'contains':     return ans.toLowerCase().includes(val.toLowerCase())
+    case 'not_contains': return !ans.toLowerCase().includes(val.toLowerCase())
     case 'is_empty':     return !ans
     case 'is_not_empty': return !!ans
     case 'any_of': {
       const vals = Array.isArray(c.value) ? c.value.map(String) : [val]
-      return vals.some(v => ans.includes(v))
+      return vals.some(v => ans === v || ans.includes(v))
     }
     case 'between': {
       const [lo, hi] = val.split(',').map(Number)
@@ -132,7 +145,11 @@ function evalCond(c: LogicCondition, answers: Record<string, string>): boolean {
   }
 }
 
-function evalRules(rules: LogicRule[], answers: Record<string, string>): LogicEvaluationResult {
+function evalRules(
+  rules: LogicRule[],
+  answers: Record<string, string>,
+  participantCtx?: Record<string, string>,
+): LogicEvaluationResult {
   const visibilityMap: Record<string, boolean> = {}
   const requiredMap: Record<string, boolean> = {}
   let skipTarget: string | undefined
@@ -141,7 +158,7 @@ function evalRules(rules: LogicRule[], answers: Record<string, string>): LogicEv
   for (const rule of rules) {
     const items = rule.conditions.items
     if (!items.length) continue
-    const results = items.map(c => evalCond(c, answers))
+    const results = items.map(c => evalCond(c, answers, participantCtx))
     const met = rule.conditions.operator === 'AND'
       ? results.every(Boolean) : results.some(Boolean)
 
@@ -371,6 +388,7 @@ export default function SurveyResponder() {
 
   const [survey, setSurvey] = useState<Partial<Survey> | null>(null)
   const [logicRules, setLogicRules] = useState<LogicRule[]>([])
+  const [participantContext, setParticipantContext] = useState<Record<string, string> | undefined>(undefined)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [submitted, setSubmitted] = useState(false)
@@ -406,6 +424,11 @@ export default function SurveyResponder() {
         }
 
         setSurvey(surveyData)
+
+        // Participant context for audience-based logic rules (token mode only)
+        if (data.participantContext) {
+          setParticipantContext(data.participantContext)
+        }
 
         // Load logic rules if survey has logicJson
         if (data.logicJson) {
@@ -460,7 +483,10 @@ export default function SurveyResponder() {
     setErrors(prev => { if (!prev[key]) return prev; const next = { ...prev }; delete next[key]; return next })
   }, [])
 
-  const logicResult = useMemo(() => evalRules(logicRules, answers), [logicRules, answers])
+  const logicResult = useMemo(
+    () => evalRules(logicRules, answers, participantContext),
+    [logicRules, answers, participantContext],
+  )
 
   const findPageForId = useCallback((targetId: string): number => {
     for (let pi = 0; pi < viewPages.length; pi++) {

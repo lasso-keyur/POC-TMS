@@ -67,12 +67,28 @@ public class LogicRuleDTO {
     }
 
     /**
-     * A single condition: "when [question] [operator] [value]".
+     * A single condition: "when [question/participant field] [operator] [value]".
+     *
+     * conditionType = "question"     → questionId identifies a survey question
+     * conditionType = "participant"  → participantField identifies a participant attribute
+     *                                  (region, lineOfBusiness, cohort, participantType, hierarchyCode)
      */
     public static class LogicCondition {
 
-        @NotBlank(message = "Condition questionId is required")
+        /**
+         * "question" (default) or "participant".
+         * Determines whether this condition evaluates a survey answer or a participant attribute.
+         */
+        private String conditionType = "question";
+
+        /** ID of the survey question — required when conditionType = "question" */
         private String questionId;
+
+        /**
+         * Participant attribute name — required when conditionType = "participant".
+         * Allowed values: region, lineOfBusiness, cohort, participantType, hierarchyCode
+         */
+        private String participantField;
 
         @NotBlank(message = "Condition operator is required")
         private String operator;
@@ -82,8 +98,14 @@ public class LogicRuleDTO {
 
         public LogicCondition() {}
 
+        public String getConditionType() { return conditionType == null ? "question" : conditionType; }
+        public void setConditionType(String conditionType) { this.conditionType = conditionType; }
+
         public String getQuestionId() { return questionId; }
         public void setQuestionId(String questionId) { this.questionId = questionId; }
+
+        public String getParticipantField() { return participantField; }
+        public void setParticipantField(String participantField) { this.participantField = participantField; }
 
         public String getOperator() { return operator; }
         public void setOperator(String operator) { this.operator = operator; }

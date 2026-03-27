@@ -30,6 +30,8 @@ public class ParticipantDTO {
     private LocalDate startDate;
     private LocalDate midPointDate;
     private LocalDate expectedEndDate;
+    private String region;
+    private String lineOfBusiness;
     private Boolean isActive;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
@@ -136,6 +138,22 @@ public class ParticipantDTO {
 
     public void setExpectedEndDate(LocalDate expectedEndDate) {
         this.expectedEndDate = expectedEndDate;
+    }
+
+    public String getRegion() {
+        return region;
+    }
+
+    public void setRegion(String region) {
+        this.region = region;
+    }
+
+    public String getLineOfBusiness() {
+        return lineOfBusiness;
+    }
+
+    public void setLineOfBusiness(String lineOfBusiness) {
+        this.lineOfBusiness = lineOfBusiness;
     }
 
     public Boolean getIsActive() {

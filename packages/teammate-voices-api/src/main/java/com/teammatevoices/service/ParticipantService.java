@@ -67,6 +67,8 @@ public class ParticipantService {
         dto.setStartDate(p.getStartDate());
         dto.setMidPointDate(p.getMidPointDate());
         dto.setExpectedEndDate(p.getExpectedEndDate());
+        dto.setRegion(p.getRegion());
+        dto.setLineOfBusiness(p.getLineOfBusiness());
         dto.setIsActive(p.getIsActive());
         dto.setCreatedAt(p.getCreatedAt());
         dto.setUpdatedAt(p.getUpdatedAt());
@@ -88,6 +90,8 @@ public class ParticipantService {
         p.setStartDate(dto.getStartDate());
         p.setMidPointDate(dto.getMidPointDate());
         p.setExpectedEndDate(dto.getExpectedEndDate());
+        p.setRegion(dto.getRegion());
+        p.setLineOfBusiness(dto.getLineOfBusiness());
         p.setIsActive(dto.getIsActive() != null ? dto.getIsActive() : true);
         return p;
     }

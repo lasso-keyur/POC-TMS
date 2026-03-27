@@ -6,6 +6,7 @@ import jakarta.validation.constraints.Size;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 public class SurveyDTO {
     private Long surveyId;
@@ -35,6 +36,13 @@ public class SurveyDTO {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private List<QuestionDTO> questions;
+
+    /**
+     * Participant attributes injected at survey load time for token-based (tracked) responses.
+     * Null for anonymous/public surveys. Used by the frontend rule evaluator to apply
+     * audience-based logic rules (region, lineOfBusiness, cohort, participantType, hierarchyCode).
+     */
+    private Map<String, String> participantContext;
 
     public Long getSurveyId() {
         return surveyId;
@@ -202,5 +210,13 @@ public class SurveyDTO {
 
     public void setQuestions(List<QuestionDTO> questions) {
         this.questions = questions;
+    }
+
+    public Map<String, String> getParticipantContext() {
+        return participantContext;
+    }
+
+    public void setParticipantContext(Map<String, String> participantContext) {
+        this.participantContext = participantContext;
     }
 }

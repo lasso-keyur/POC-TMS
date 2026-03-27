@@ -1,12 +1,13 @@
 import { Select, Input, Button } from '../../design-system'
 import type { SelectOption } from '../../design-system'
-import type { LogicCondition, LogicOperator } from '@/types/logic'
+import type { LogicCondition, LogicOperator, ConditionType } from '@/types/logic'
 import {
   OPERATOR_LABELS,
   CHOICE_OPERATORS,
   RATING_OPERATORS,
   TEXT_OPERATORS,
   MULTI_CHOICE_OPERATORS,
+  PARTICIPANT_FIELDS,
 } from '@/types/logic'
 
 interface QuestionInfo {
@@ -37,6 +38,23 @@ function needsValueInput(operator: LogicOperator): boolean {
   return operator !== 'is_empty' && operator !== 'is_not_empty'
 }
 
+const SOURCE_OPTIONS: SelectOption[] = [
+  { value: 'question', label: 'Survey Answer' },
+  { value: 'participant', label: 'Participant Attribute' },
+]
+
+const PARTICIPANT_FIELD_OPTIONS: SelectOption[] = PARTICIPANT_FIELDS.map(f => ({
+  value: f.value,
+  label: f.label,
+}))
+
+// Preset values for known participant fields shown as a dropdown
+const PARTICIPANT_FIELD_PRESETS: Record<string, string[]> = {
+  participantType: ['NEW_HIRE', 'EXISTING_RESOURCE'],
+  region: ['North America', 'APAC', 'EMEA', 'LATAM'],
+  lineOfBusiness: ['Retail Banking', 'Corporate Banking', 'Wealth Management', 'Insurance', 'Capital Markets'],
+}
+
 export default function LogicConditionRow({
   condition,
   questions,
@@ -44,10 +62,14 @@ export default function LogicConditionRow({
   onRemove,
   showConjunction,
 }: LogicConditionRowProps) {
+  const conditionType: ConditionType = condition.conditionType || 'question'
+  const isParticipant = conditionType === 'participant'
+
+  // Question-mode setup
   const selectedQuestion = questions.find(q => q.id === condition.questionId)
-  const operators = selectedQuestion
-    ? getOperatorsForType(selectedQuestion.type)
-    : TEXT_OPERATORS
+  const operators = isParticipant
+    ? TEXT_OPERATORS
+    : (selectedQuestion ? getOperatorsForType(selectedQuestion.type) : TEXT_OPERATORS)
 
   const questionOptions: SelectOption[] = questions.map(q => ({
     value: q.id,
@@ -59,12 +81,25 @@ export default function LogicConditionRow({
     label: OPERATOR_LABELS[op],
   }))
 
-  const hasChoiceOptions =
-    selectedQuestion?.options && selectedQuestion.options.length > 0
-
+  const hasChoiceOptions = !isParticipant && selectedQuestion?.options && selectedQuestion.options.length > 0
   const valueOptions: SelectOption[] = hasChoiceOptions
     ? selectedQuestion!.options!.map(opt => ({ value: opt, label: opt }))
     : []
+
+  // Participant-mode: preset options for known fields
+  const participantPresets = isParticipant && condition.participantField
+    ? (PARTICIPANT_FIELD_PRESETS[condition.participantField] || null)
+    : null
+
+  const handleSourceChange = (newType: ConditionType) => {
+    onChange({
+      conditionType: newType,
+      questionId: newType === 'question' ? (condition.questionId || '') : undefined,
+      participantField: newType === 'participant' ? (condition.participantField || PARTICIPANT_FIELDS[0].value) : undefined,
+      operator: 'equals',
+      value: '',
+    })
+  }
 
   return (
     <div className="logic-condition-row">
@@ -72,23 +107,57 @@ export default function LogicConditionRow({
         <span className="logic-condition-row__conjunction">{showConjunction}</span>
       )}
       <div className="logic-condition-row__fields">
-        <div className="logic-condition-row__field logic-condition-row__field--question">
+
+        {/* Source type selector */}
+        <div className="logic-condition-row__field logic-condition-row__field--source">
           <Select
-            options={questionOptions}
-            value={condition.questionId}
-            placeholder="Select question"
-            onChange={(e) =>
-              onChange({
-                ...condition,
-                questionId: e.target.value,
-                operator: 'equals',
-                value: '',
-              })
-            }
+            options={SOURCE_OPTIONS}
+            value={conditionType}
+            onChange={(e) => handleSourceChange(e.target.value as ConditionType)}
             fullWidth
           />
         </div>
 
+        {/* Question selector OR participant field selector */}
+        {isParticipant ? (
+          <div className="logic-condition-row__field logic-condition-row__field--question">
+            <Select
+              options={PARTICIPANT_FIELD_OPTIONS}
+              value={condition.participantField || ''}
+              placeholder="Select attribute"
+              onChange={(e) =>
+                onChange({
+                  ...condition,
+                  conditionType: 'participant',
+                  participantField: e.target.value,
+                  operator: 'equals',
+                  value: '',
+                })
+              }
+              fullWidth
+            />
+          </div>
+        ) : (
+          <div className="logic-condition-row__field logic-condition-row__field--question">
+            <Select
+              options={questionOptions}
+              value={condition.questionId || ''}
+              placeholder="Select question"
+              onChange={(e) =>
+                onChange({
+                  ...condition,
+                  conditionType: 'question',
+                  questionId: e.target.value,
+                  operator: 'equals',
+                  value: '',
+                })
+              }
+              fullWidth
+            />
+          </div>
+        )}
+
+        {/* Operator */}
         <div className="logic-condition-row__field logic-condition-row__field--operator">
           <Select
             options={operatorOptions}
@@ -100,11 +169,22 @@ export default function LogicConditionRow({
           />
         </div>
 
+        {/* Value input */}
         {needsValueInput(condition.operator) && (
           <div className="logic-condition-row__field logic-condition-row__field--value">
             {hasChoiceOptions ? (
               <Select
                 options={valueOptions}
+                value={String(condition.value || '')}
+                placeholder="Select value"
+                onChange={(e) =>
+                  onChange({ ...condition, value: e.target.value })
+                }
+                fullWidth
+              />
+            ) : participantPresets ? (
+              <Select
+                options={participantPresets.map(v => ({ value: v, label: v }))}
                 value={String(condition.value || '')}
                 placeholder="Select value"
                 onChange={(e) =>

@@ -8,8 +8,20 @@ export interface LogicRule {
   action: LogicAction
 }
 
+export type ConditionType = 'question' | 'participant'
+
+export const PARTICIPANT_FIELDS: { value: string; label: string }[] = [
+  { value: 'region', label: 'Region' },
+  { value: 'lineOfBusiness', label: 'Line of Business' },
+  { value: 'cohort', label: 'Cohort' },
+  { value: 'participantType', label: 'Participant Type' },
+  { value: 'hierarchyCode', label: 'Hierarchy Code' },
+]
+
 export interface LogicCondition {
-  questionId: string
+  conditionType?: ConditionType  // 'question' (default) | 'participant'
+  questionId?: string            // required when conditionType = 'question'
+  participantField?: string      // required when conditionType = 'participant'
   operator: LogicOperator
   value: string | number | string[]
 }

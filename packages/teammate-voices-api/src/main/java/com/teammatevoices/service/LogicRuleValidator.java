@@ -52,6 +52,11 @@ public class LogicRuleValidator {
 
     private static final Set<String> VALID_CONDITION_OPERATORS = Set.of("AND", "OR");
 
+    /** Allowed participant attribute names for audience-based rules */
+    private static final Set<String> VALID_PARTICIPANT_FIELDS = Set.of(
+            "region", "lineOfBusiness", "cohort", "participantType", "hierarchyCode"
+    );
+
     /** Maps rule type to its allowed action types */
     private static final Map<String, Set<String>> RULE_ACTION_COMPATIBILITY = Map.of(
             "visible_if", Set.of("show", "hide"),
@@ -213,8 +218,20 @@ public class LogicRuleValidator {
                     LogicCondition cond = conditions.getItems().get(j);
                     String condPrefix = prefix + ", condition " + (j + 1);
 
-                    if (cond.getQuestionId() == null || cond.getQuestionId().isBlank()) {
-                        errors.add(condPrefix + ": questionId is required");
+                    boolean isParticipantCond = "participant".equals(cond.getConditionType());
+                    if (isParticipantCond) {
+                        // Participant-based condition: validate participantField
+                        if (cond.getParticipantField() == null || cond.getParticipantField().isBlank()) {
+                            errors.add(condPrefix + ": participantField is required for participant conditions");
+                        } else if (!VALID_PARTICIPANT_FIELDS.contains(cond.getParticipantField())) {
+                            errors.add(condPrefix + ": invalid participantField '" + cond.getParticipantField()
+                                    + "'. Must be one of: " + VALID_PARTICIPANT_FIELDS);
+                        }
+                    } else {
+                        // Question-based condition: validate questionId
+                        if (cond.getQuestionId() == null || cond.getQuestionId().isBlank()) {
+                            errors.add(condPrefix + ": questionId is required");
+                        }
                     }
 
                     if (cond.getOperator() == null || cond.getOperator().isBlank()) {
@@ -254,10 +271,13 @@ public class LogicRuleValidator {
     private void validateReferences(LogicRuleDTO rule, String prefix,
                                     Set<String> validQuestionIds, Set<String> validPageIds,
                                     List<String> errors) {
-        // Check condition question references
+        // Check condition question references (skip for participant-type conditions)
         if (rule.getConditions() != null && rule.getConditions().getItems() != null) {
             for (int j = 0; j < rule.getConditions().getItems().size(); j++) {
                 LogicCondition cond = rule.getConditions().getItems().get(j);
+                if ("participant".equals(cond.getConditionType())) {
+                    continue; // Participant fields are validated in validateStructure
+                }
                 if (cond.getQuestionId() != null && !cond.getQuestionId().isBlank()
                         && !validQuestionIds.contains(cond.getQuestionId())) {
                     errors.add(prefix + ", condition " + (j + 1)
@@ -370,14 +390,18 @@ public class LogicRuleValidator {
                     + "). Maximum is " + MAX_CONDITIONS_PER_RULE + " per rule.");
         }
 
-        Set<String> seenQuestionIds = new HashSet<>();
+        Set<String> seenCondKeys = new HashSet<>();
         for (LogicCondition cond : rule.getConditions().getItems()) {
-            if (cond.getQuestionId() != null && !cond.getQuestionId().isBlank()) {
-                if (!seenQuestionIds.add(cond.getQuestionId())) {
-                    errors.add(prefix + ": duplicate condition on question '"
-                            + cond.getQuestionId()
-                            + "'. Use a single condition with 'any_of' or 'between' instead.");
-                }
+            // Build a key: for participant conditions use "participant:field", for question use "question:id"
+            String condKey = "participant".equals(cond.getConditionType())
+                    ? ("participant:" + (cond.getParticipantField() != null ? cond.getParticipantField() : ""))
+                    : ("question:" + (cond.getQuestionId() != null ? cond.getQuestionId() : ""));
+            if (!condKey.endsWith(":") && !seenCondKeys.add(condKey)) {
+                String label = "participant".equals(cond.getConditionType())
+                        ? "participant field '" + cond.getParticipantField() + "'"
+                        : "question '" + cond.getQuestionId() + "'";
+                errors.add(prefix + ": duplicate condition on " + label
+                        + ". Use a single condition with 'any_of' or 'between' instead.");
             }
         }
     }

@@ -5,6 +5,8 @@ export interface Participant {
   participantType: 'NEW_HIRE' | 'EXISTING_RESOURCE'
   trainingProgram?: string
   cohort?: string
+  region?: string
+  lineOfBusiness?: string
   startDate: string
   expectedEndDate?: string
   isActive: boolean

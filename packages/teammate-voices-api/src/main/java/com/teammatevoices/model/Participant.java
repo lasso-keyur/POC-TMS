@@ -51,6 +51,12 @@ public class Participant {
     @Column(name = "EXPECTED_END_DATE")
     private LocalDate expectedEndDate;
 
+    @Column(name = "REGION", length = 100)
+    private String region;
+
+    @Column(name = "LINE_OF_BUSINESS", length = 100)
+    private String lineOfBusiness;
+
     @Column(name = "IS_ACTIVE")
     private Boolean isActive = true;
 
@@ -205,5 +211,21 @@ public class Participant {
 
     public void setProgramId(Long programId) {
         this.programId = programId;
+    }
+
+    public String getRegion() {
+        return region;
+    }
+
+    public void setRegion(String region) {
+        this.region = region;
+    }
+
+    public String getLineOfBusiness() {
+        return lineOfBusiness;
+    }
+
+    public void setLineOfBusiness(String lineOfBusiness) {
+        this.lineOfBusiness = lineOfBusiness;
     }
 }
