@@ -193,6 +193,129 @@ public class DispatchService {
     }
 
     /**
+     * Ad-hoc dispatch: send a survey to a specific list of participant IDs
+     * and/or raw email addresses that may not be in the participant database.
+     *
+     * Use cases:
+     * - Pulse check to a hand-picked subset of employees
+     * - One-off send to external stakeholders via email only
+     * - Re-send to a specific group without re-dispatching everyone
+     *
+     * @param surveyId       the survey to send
+     * @param participantIds specific participant IDs to include (from DB)
+     * @param adhocEmails    raw email addresses not in the participant DB
+     * @param baseUrl        frontend base URL for building survey links
+     * @return dispatch summary
+     */
+    @Transactional
+    public DispatchResult adHocDispatch(Long surveyId, List<String> participantIds,
+                                        List<String> adhocEmails, String baseUrl) {
+        log.info("Ad-hoc dispatch survey {} → {} participants, {} ad-hoc emails",
+                surveyId, participantIds.size(), adhocEmails.size());
+
+        Survey survey = surveyRepository.findById(surveyId)
+                .orElseThrow(() -> new ResourceNotFoundException("Survey", surveyId));
+
+        // Survey must be ACTIVE to dispatch
+        if (!"ACTIVE".equalsIgnoreCase(survey.getStatus())) {
+            throw new BusinessRuleException(
+                    "Survey must be ACTIVE to dispatch. Current status: " + survey.getStatus());
+        }
+
+        // Guard: must have at least one recipient
+        if (participantIds.isEmpty() && adhocEmails.isEmpty()) {
+            throw new BusinessRuleException("At least one participant or email address is required.");
+        }
+
+        // Existing dispatches for this survey — avoid duplicates per participant
+        List<Dispatch> existingDispatches = dispatchRepository.findBySurveyId(surveyId);
+        Set<String> alreadyDispatchedParticipants = existingDispatches.stream()
+                .filter(d -> d.getParticipantId() != null)
+                .map(Dispatch::getParticipantId)
+                .collect(Collectors.toSet());
+
+        int created = 0;
+        int emailsSent = 0;
+        int skipped = 0;
+        List<String> errors = new ArrayList<>();
+
+        // --- Send to named participants (by ID) ---
+        if (!participantIds.isEmpty()) {
+            List<Participant> participants = participantRepository.findAllById(participantIds);
+            for (Participant participant : participants) {
+                if (alreadyDispatchedParticipants.contains(participant.getParticipantId())) {
+                    skipped++;
+                    continue;
+                }
+
+                String token = UUID.randomUUID().toString().replace("-", "");
+                Dispatch dispatch = new Dispatch();
+                dispatch.setParticipantId(participant.getParticipantId());
+                dispatch.setSurveyId(surveyId);
+                dispatch.setSurveyStage(survey.getSurveyStage() != null ? survey.getSurveyStage() : "GENERAL");
+                dispatch.setDispatchStatus("SENT");
+                dispatch.setDispatchToken(token);
+                dispatch.setSentAt(LocalDateTime.now());
+                dispatch.setReminderCount(0);
+                dispatchRepository.save(dispatch);
+                created++;
+
+                String surveyLink = baseUrl + "/respond/" + token;
+                try {
+                    boolean sent = emailSendingService.sendHtmlEmail(
+                            participant.getEmail(),
+                            "You're invited: " + survey.getTitle(),
+                            buildInvitationHtml(participant.getFullName(), survey.getTitle(), surveyLink),
+                            "Teammate Voices"
+                    );
+                    if (sent) emailsSent++;
+                } catch (Exception e) {
+                    log.error("Failed to send ad-hoc email to {}: {}", participant.getEmail(), e.getMessage());
+                    errors.add("Failed to email " + participant.getEmail() + ": " + e.getMessage());
+                }
+            }
+        }
+
+        // --- Send to ad-hoc email addresses (not in participant DB) ---
+        for (String email : adhocEmails) {
+            if (email == null || email.isBlank()) continue;
+            String trimmedEmail = email.trim();
+
+            String token = UUID.randomUUID().toString().replace("-", "");
+            // Create a dispatch with no participantId — anonymous ad-hoc recipient
+            Dispatch dispatch = new Dispatch();
+            dispatch.setParticipantId(null);
+            dispatch.setSurveyId(surveyId);
+            dispatch.setSurveyStage(survey.getSurveyStage() != null ? survey.getSurveyStage() : "GENERAL");
+            dispatch.setDispatchStatus("SENT");
+            dispatch.setDispatchToken(token);
+            dispatch.setSentAt(LocalDateTime.now());
+            dispatch.setReminderCount(0);
+            dispatchRepository.save(dispatch);
+            created++;
+
+            String surveyLink = baseUrl + "/respond/" + token;
+            try {
+                boolean sent = emailSendingService.sendHtmlEmail(
+                        trimmedEmail,
+                        "You're invited: " + survey.getTitle(),
+                        buildInvitationHtml(trimmedEmail, survey.getTitle(), surveyLink),
+                        "Teammate Voices"
+                );
+                if (sent) emailsSent++;
+            } catch (Exception e) {
+                log.error("Failed to send ad-hoc email to {}: {}", trimmedEmail, e.getMessage());
+                errors.add("Failed to email " + trimmedEmail + ": " + e.getMessage());
+            }
+        }
+
+        log.info("Ad-hoc dispatch complete: {} created, {} emails sent, {} skipped, {} errors",
+                created, emailsSent, skipped, errors.size());
+
+        return new DispatchResult(created, emailsSent, skipped, errors);
+    }
+
+    /**
      * Look up a survey via dispatch token.
      */
     @Transactional

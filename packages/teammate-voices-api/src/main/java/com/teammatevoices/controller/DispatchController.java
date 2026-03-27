@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -57,6 +58,47 @@ public class DispatchController {
             @RequestParam(defaultValue = "http://localhost:5175") String baseUrl) {
         log.info("POST /dispatches/survey/{}/send", surveyId);
         DispatchService.DispatchResult result = dispatchService.dispatchSurvey(surveyId, baseUrl);
+        return ResponseEntity.status(HttpStatus.CREATED).body(Map.of(
+                "created", result.created(),
+                "emailsSent", result.emailsSent(),
+                "skipped", result.skipped(),
+                "errors", result.errors()
+        ));
+    }
+
+    /**
+     * Ad-hoc dispatch: send to a specific list of participant IDs and/or
+     * raw email addresses. Useful for pulse checks, targeted follow-ups,
+     * and one-off sends outside the normal program dispatch flow.
+     *
+     * Request body:
+     * {
+     *   "participantIds": ["P001", "P002"],
+     *   "adhocEmails":    ["jane@example.com"],
+     *   "scheduledAt":    "2026-04-01T09:00:00" (optional, reserved for future scheduling)
+     * }
+     */
+    @PostMapping("/survey/{surveyId}/adhoc")
+    public ResponseEntity<Map<String, Object>> adHocDispatch(
+            @PathVariable Long surveyId,
+            @RequestParam(defaultValue = "http://localhost:5175") String baseUrl,
+            @RequestBody Map<String, Object> body) {
+
+        log.info("POST /dispatches/survey/{}/adhoc", surveyId);
+
+        @SuppressWarnings("unchecked")
+        List<String> participantIds = body.containsKey("participantIds")
+                ? (List<String>) body.get("participantIds")
+                : Collections.emptyList();
+
+        @SuppressWarnings("unchecked")
+        List<String> adhocEmails = body.containsKey("adhocEmails")
+                ? (List<String>) body.get("adhocEmails")
+                : Collections.emptyList();
+
+        DispatchService.DispatchResult result =
+                dispatchService.adHocDispatch(surveyId, participantIds, adhocEmails, baseUrl);
+
         return ResponseEntity.status(HttpStatus.CREATED).body(Map.of(
                 "created", result.created(),
                 "emailsSent", result.emailsSent(),

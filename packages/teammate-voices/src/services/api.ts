@@ -149,6 +149,24 @@ class TeammateVoicesAPI {
     })
   }
 
+  /**
+   * Ad-hoc dispatch: send to a specific list of participant IDs and/or
+   * ad-hoc email addresses that are not in the participant database.
+   */
+  async adHocDispatch(
+    surveyId: number,
+    participantIds: string[],
+    adhocEmails: string[],
+    scheduledAt?: string,
+    baseUrl?: string
+  ): Promise<{ created: number; emailsSent: number; skipped: number; errors: string[] }> {
+    const url = baseUrl || window.location.origin
+    return this.request(`/dispatches/survey/${surveyId}/adhoc?baseUrl=${encodeURIComponent(url)}`, {
+      method: 'POST',
+      body: JSON.stringify({ participantIds, adhocEmails, scheduledAt }),
+    })
+  }
+
   // Logic Rules
   async getLogicRules(surveyId: number): Promise<LogicRule[]> {
     return this.request<LogicRule[]>(`/surveys/${surveyId}/logic`)
