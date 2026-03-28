@@ -186,11 +186,21 @@ export default function SurveyEditor() {
         <div className="survey-editor__header-left">
           <h1 className="survey-editor__title">{pageTitle}</h1>
           <div className="survey-editor__status-row">
-            <span className="survey-editor__status-label">Build status:</span>
+            <span className="survey-editor__status-label">Survey status:</span>
+            <StatusPill
+              label={survey.status === 'ACTIVE' ? 'Active' : survey.status === 'CLOSED' ? 'Closed' : 'Draft'}
+              variant={survey.status === 'ACTIVE' ? 'active' : survey.status === 'CLOSED' ? 'closed' : 'draft'}
+            />
+            <span className="survey-editor__status-label" style={{ marginLeft: 12 }}>Build:</span>
             <StatusPill
               label={survey.buildStatus === 'PUBLISHED' ? 'Published' : 'Draft'}
               variant={survey.buildStatus === 'PUBLISHED' ? 'active' : 'draft'}
             />
+            {isLocked && (
+              <span style={{ marginLeft: 12, fontSize: 12, color: '#d97706', background: '#fefce8', border: '1px solid #fde68a', borderRadius: 6, padding: '3px 10px' }}>
+                🔒 Read-only — clone to edit
+              </span>
+            )}
           </div>
         </div>
         <div className="survey-editor__header-actions">
@@ -268,7 +278,12 @@ export default function SurveyEditor() {
 
             <div className="survey-editor__bottom-actions">
               {saveMessage && <span className="survey-editor__save-message">{saveMessage}</span>}
-              <Button variant="secondary" size="sm" onClick={handleSave} loading={saving}>Save</Button>
+              {isLocked && (
+                <span style={{ fontSize: 13, color: '#d97706', background: '#fefce8', border: '1px solid #fde68a', borderRadius: 8, padding: '6px 12px' }}>
+                  🔒 This survey is {survey.status?.toLowerCase()} — clone it to make changes
+                </span>
+              )}
+              <Button variant="secondary" size="sm" onClick={handleSave} loading={saving} disabled={isLocked}>Save</Button>
               <Button variant="primary" size="sm" onClick={handleNext}>Next</Button>
             </div>
           </>
@@ -362,8 +377,8 @@ export default function SurveyEditor() {
                   Email template assignments are managed centrally in the <strong>Email Templates</strong> module — assign templates to trigger events there and they will apply to this survey automatically.
                 </p>
               </div>
-              <Button variant="ghost" size="sm" onClick={() => navigate('/templates')}>
-                Go to Email Templates →
+              <Button variant="ghost" size="sm" onClick={() => navigate('/communications')}>
+                Go to Communications →
               </Button>
             </div>
           </div>
