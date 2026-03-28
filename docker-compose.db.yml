@@ -47,6 +47,7 @@ services:
       - "5175:5175"
     environment:
       VITE_API_URL: http://localhost:8081/api
+      BACKEND_URL: http://backend:8081
     depends_on:
       - backend
     networks:
