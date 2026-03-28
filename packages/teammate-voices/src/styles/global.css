@@ -5159,6 +5159,375 @@ input, textarea, select {
 }
 
 /* ================================================================
+   PROGRAM COMMUNICATIONS TAB
+   ================================================================ */
+
+.comm-tab {
+  padding: 28px 0;
+  max-width: 860px;
+}
+
+.comm-tab__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 32px;
+  gap: 16px;
+}
+
+.comm-tab__title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #1d1d1f;
+  margin: 0 0 6px;
+}
+
+.comm-tab__subtitle {
+  font-size: 14px;
+  color: #6b7280;
+  margin: 0;
+  max-width: 560px;
+  line-height: 1.5;
+}
+
+.comm-tab__progress-pill {
+  display: inline-block;
+  padding: 6px 14px;
+  background: #f0f0f5;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #3c3c43;
+  white-space: nowrap;
+}
+
+/* Journey timeline */
+.comm-tab__journey {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+/* Individual step */
+.comm-step {
+  position: relative;
+}
+
+.comm-step__connector {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 32px;
+  margin-left: 28px;
+  gap: 0;
+}
+
+.comm-step__connector-line {
+  flex: 1;
+  width: 0;
+  border-left: 2px dashed #e5e7eb;
+}
+
+.comm-step__connector-arrow {
+  font-size: 10px;
+  color: #d1d5db;
+  line-height: 1;
+  margin-top: -2px;
+}
+
+/* Step card */
+.comm-step__card {
+  border: 1.5px solid #e5e7eb;
+  border-radius: 14px;
+  padding: 20px 24px;
+  background: #fafafa;
+  transition: border-color 0.2s, background 0.2s;
+}
+
+.comm-step__card:hover {
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+}
+
+/* Step head row */
+.comm-step__head {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.comm-step__icon-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 52px;
+  height: 52px;
+  border-radius: 12px;
+  flex-shrink: 0;
+  gap: 2px;
+}
+
+.comm-step__icon {
+  font-size: 20px;
+  line-height: 1;
+}
+
+.comm-step__step-num {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  line-height: 1;
+}
+
+.comm-step__meta {
+  flex: 1;
+  min-width: 0;
+}
+
+.comm-step__label {
+  font-size: 15px;
+  font-weight: 700;
+  color: #1d1d1f;
+  margin: 0 0 3px;
+}
+
+.comm-step__desc {
+  font-size: 13px;
+  color: #6b7280;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.comm-step__status-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.comm-step__badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  border: 1px solid transparent;
+}
+
+.comm-step__badge--ok {
+  border-style: solid;
+}
+
+.comm-step__badge--empty {
+  background: #f3f4f6;
+  color: #9ca3af;
+  border-color: #e5e7eb;
+}
+
+/* Toggle */
+.comm-step__toggle-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.comm-step__toggle-input {
+  display: none;
+}
+
+.comm-step__toggle-track {
+  position: relative;
+  display: inline-block;
+  width: 34px;
+  height: 20px;
+  border-radius: 10px;
+  transition: background 0.2s;
+  flex-shrink: 0;
+}
+
+.comm-step__toggle-thumb {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 16px;
+  height: 16px;
+  background: #fff;
+  border-radius: 50%;
+  transition: transform 0.2s;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+
+.comm-step__toggle-input:checked ~ .comm-step__toggle-track .comm-step__toggle-thumb {
+  transform: translateX(14px);
+}
+
+.comm-step__toggle-label {
+  font-size: 12px;
+  color: #6b7280;
+  white-space: nowrap;
+}
+
+/* Config row */
+.comm-step__config {
+  display: flex;
+  gap: 16px;
+  align-items: flex-end;
+  flex-wrap: wrap;
+}
+
+.comm-step__field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  flex: 1;
+  min-width: 180px;
+}
+
+.comm-step__field--delay {
+  flex: 0 0 140px;
+  min-width: 120px;
+}
+
+.comm-step__field--timing {
+  flex: 0 0 120px;
+}
+
+.comm-step__field-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #86868b;
+}
+
+.comm-step__select {
+  width: 100%;
+  height: 38px;
+  padding: 0 10px;
+  border: 1.5px solid #d1d5db;
+  border-radius: 9px;
+  font-size: 13px;
+  color: #1d1d1f;
+  background: #fff;
+  outline: none;
+  transition: border-color 0.15s;
+  cursor: pointer;
+}
+
+.comm-step__select:focus {
+  border-color: #007aff;
+  box-shadow: 0 0 0 3px rgba(0,122,255,0.1);
+}
+
+.comm-step__field-hint {
+  font-size: 11px;
+  color: #9ca3af;
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.comm-step__delay-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.comm-step__delay-input {
+  width: 70px;
+  height: 38px;
+  padding: 0 10px;
+  border: 1.5px solid #d1d5db;
+  border-radius: 9px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #1d1d1f;
+  text-align: center;
+  outline: none;
+}
+
+.comm-step__delay-input:focus {
+  border-color: #007aff;
+  box-shadow: 0 0 0 3px rgba(0,122,255,0.1);
+}
+
+.comm-step__delay-unit {
+  font-size: 13px;
+  color: #6b7280;
+}
+
+.comm-step__timing-pill {
+  display: inline-block;
+  padding: 6px 12px;
+  background: #f0f0f5;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #6b7280;
+}
+
+.comm-step__actions {
+  display: flex;
+  gap: 8px;
+  align-items: flex-end;
+  flex-shrink: 0;
+  padding-bottom: 1px;
+}
+
+/* Footer */
+.comm-tab__footer {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  margin-top: 28px;
+  padding: 16px 20px;
+  background: #f9f9fb;
+  border-radius: 12px;
+  font-size: 13px;
+  color: #6b7280;
+  line-height: 1.5;
+}
+
+/* Program detail section tabs */
+.program-detail__tab-bar {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 24px;
+  border-bottom: 2px solid #f0f0f5;
+  padding-bottom: 0;
+}
+
+.program-detail__tab-btn {
+  padding: 10px 20px;
+  border: none;
+  background: none;
+  font-size: 14px;
+  font-weight: 500;
+  color: #6b7280;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  border-radius: 8px 8px 0 0;
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.program-detail__tab-btn:hover {
+  color: #1d1d1f;
+  background: #f9f9fb;
+}
+
+.program-detail__tab-btn--active {
+  color: #007aff;
+  font-weight: 600;
+  border-bottom-color: #007aff;
+  background: none;
+}
+
+/* ================================================================
    PROGRAM DETAIL PAGE
    ================================================================ */
 

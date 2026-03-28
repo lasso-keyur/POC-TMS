@@ -3,10 +3,13 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { Button } from '../design-system'
 import Breadcrumb from '@/components/Breadcrumb'
 import StatusPill from '@/components/StatusPill'
+import ProgramCommunicationsTab from '@/components/ProgramCommunicationsTab'
 import { AgGridReact } from 'ag-grid-react'
 import type { ColDef, SizeColumnsToFitGridStrategy } from 'ag-grid-community'
 import { api } from '@/services/api'
 import type { ProgramDetail as ProgramDetailType, ParticipantStatusRow } from '@/types/program'
+
+type ProgramTab = 'overview' | 'participants' | 'communications'
 
 function getStatusVariant(status: string): 'active' | 'draft' | 'closed' | 'default' {
   const s = status.toUpperCase()
@@ -69,6 +72,7 @@ export default function ProgramDetail() {
   const [loading, setLoading] = useState(true)
   const [quickFilterText, setQuickFilterText] = useState('')
   const [activeTab, setActiveTab] = useState('ALL')
+  const [activeSection, setActiveSection] = useState<ProgramTab>('overview')
 
   useEffect(() => {
     if (!programId) return
@@ -194,6 +198,32 @@ export default function ProgramDetail() {
         </div>
       </div>
 
+      {/* Section Tab Bar */}
+      <div className="program-detail__tab-bar">
+        {([
+          { key: 'overview',        label: '📋 Overview' },
+          { key: 'participants',    label: '👥 Participants' },
+          { key: 'communications',  label: '✉️ Communications' },
+        ] as { key: ProgramTab; label: string }[]).map(t => (
+          <button
+            key={t.key}
+            className={`program-detail__tab-btn${activeSection === t.key ? ' program-detail__tab-btn--active' : ''}`}
+            onClick={() => setActiveSection(t.key)}
+          >
+            {t.label}
+          </button>
+        ))}
+      </div>
+
+      {/* Communications tab */}
+      {activeSection === 'communications' && program.programId && (
+        <ProgramCommunicationsTab programId={program.programId} />
+      )}
+
+      {/* Overview + Participants tabs share the original content */}
+      {activeSection !== 'communications' && (
+      <>
+
       {/* Top Card: Program Information */}
       <div className="program-detail__info-card">
         <h3 className="program-detail__card-title">Program Information</h3>
@@ -253,8 +283,14 @@ export default function ProgramDetail() {
         </div>
       </div>
 
-      {/* Bottom Card: Participants AG Grid */}
-      <div className="survey-library__table-card">
+      {/* Bottom Card: Participants AG Grid — only on Participants tab */}
+      {activeSection === 'overview' && (
+        <div style={{ marginTop: 16, padding: '14px 20px', background: '#f9f9fb', borderRadius: 12, fontSize: 13, color: '#6b7280', display: 'flex', gap: 10, alignItems: 'center' }}>
+          <span>👥</span>
+          <span>Switch to the <strong>Participants</strong> tab to view and filter individual participant dispatch status.</span>
+        </div>
+      )}
+      <div className="survey-library__table-card" style={{ display: activeSection === 'participants' ? undefined : 'none' }}>
         <div className="survey-library__toolbar">
           <div className="survey-library__tabs">
             {Object.entries(statusFilters).map(([key, label]) => (
@@ -304,6 +340,9 @@ export default function ProgramDetail() {
           />
         </div>
       </div>
+
+      </> /* end overview + participants wrapper */
+      )}
     </div>
   )
 }
