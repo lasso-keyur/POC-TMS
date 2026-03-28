@@ -3,18 +3,6 @@ import Breadcrumb from '@/components/Breadcrumb'
 
 const ADMIN_CARDS = [
   {
-    title: 'Email Templates',
-    description: 'Create and manage email templates for survey invitations, reminders, thank-you messages, and program communications.',
-    icon: (
-      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#007aff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
-        <polyline points="22,6 12,13 2,6" />
-      </svg>
-    ),
-    path: '/templates',
-    count: null as string | null,
-  },
-  {
     title: 'User Management',
     description: 'Manage users, roles, and permissions for the platform.',
     icon: (

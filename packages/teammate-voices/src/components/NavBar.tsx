@@ -25,6 +25,7 @@ const NAV_ITEMS: NavItem[] = [
       { path: '/surveys/new', label: 'Create Survey' },
     ],
   },
+  { path: '/communications', label: 'Communications' },
   { path: '/reports', label: 'Reports' },
   { path: '/admin', label: 'Administration' },
 ]
@@ -45,8 +46,12 @@ export default function NavBar() {
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
 
-  const isActive = (item: NavItem) =>
-    location.pathname === item.path || location.pathname.startsWith(item.path + '/')
+  const isActive = (item: NavItem) => {
+    if (item.path === '/communications') {
+      return location.pathname.startsWith('/communications') || location.pathname.startsWith('/templates')
+    }
+    return location.pathname === item.path || location.pathname.startsWith(item.path + '/')
+  }
 
   return (
     <nav className="nav-bar">

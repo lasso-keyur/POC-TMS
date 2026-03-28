@@ -158,7 +158,7 @@ export default function EmailTemplateEditor() {
         setBodyHtml(t.bodyHtml)
         setStatus(t.status === 'ACTIVE' ? 'ACTIVE' : 'DRAFT')
       })
-      .catch(() => navigate('/templates'))
+      .catch(() => navigate('/communications'))
       .finally(() => setLoading(false))
   }, [templateId, navigate])
 
@@ -290,7 +290,7 @@ export default function EmailTemplateEditor() {
       } else {
         const created = await api.createEmailTemplate(payload)
         setSaveMessage('Template created!')
-        setTimeout(() => navigate(`/templates/${created.templateId}/edit`), 1500)
+        setTimeout(() => navigate(`/communications/${created.templateId}/edit`), 1500)
       }
       setTimeout(() => setSaveMessage(''), 3000)
     } catch (err) {
@@ -308,7 +308,7 @@ export default function EmailTemplateEditor() {
     <div className="email-editor">
       <Breadcrumb items={[
         { label: 'Administration', path: '/admin' },
-        { label: 'Email Templates', path: '/templates' },
+        { label: 'Email Templates', path: '/communications' },
         { label: isEditMode ? name || 'Edit template' : 'Create template' },
       ]} />
 
@@ -320,7 +320,7 @@ export default function EmailTemplateEditor() {
           </span>
         </div>
         <div className="email-editor__header-actions">
-          <Button variant="secondary" size="sm" onClick={() => navigate('/templates')}>Cancel</Button>
+          <Button variant="secondary" size="sm" onClick={() => navigate('/communications')}>Cancel</Button>
           <Button variant="primary" size="sm" onClick={handleSave} loading={saving}>
             {isEditMode ? 'Save' : 'Create'}
           </Button>

@@ -6,6 +6,12 @@
       "runtimeExecutable": "bash",
       "runtimeArgs": ["-c", "cd packages/teammate-voices && npx vite --port ${PORT}"],
       "port": 5200
+    },
+    {
+      "name": "workforce-management",
+      "runtimeExecutable": "bash",
+      "runtimeArgs": ["-c", "cd /Users/keyur/Arya-Desing-System/packages/workforce-management && npx vite --port ${PORT}"],
+      "port": 5201
     }
   ]
 }

@@ -151,7 +151,7 @@ export default function EmailTemplateList() {
       minWidth: 200,
       cellRenderer: (params: { data: EmailTemplate }) => params.data?.name || '',
       onCellClicked: (params) => {
-        if (params.data) navigate(`/templates/${(params.data as EmailTemplate).templateId}/edit`)
+        if (params.data) navigate(`/communications/${(params.data as EmailTemplate).templateId}/edit`)
       },
       cellStyle: { color: '#007aff', cursor: 'pointer', fontWeight: 500 },
     },
@@ -193,7 +193,7 @@ export default function EmailTemplateList() {
       filter: false,
       resizable: false,
       cellRendererParams: {
-        onEdit: (id: number) => navigate(`/templates/${id}/edit`),
+        onEdit: (id: number) => navigate(`/communications/${id}/edit`),
         onClone: handleClone,
         onDelete: handleDelete,
       },
@@ -261,7 +261,7 @@ export default function EmailTemplateList() {
               />
             </div>
 
-            <Button variant="primary" size="sm" onClick={() => navigate('/templates/new')}>
+            <Button variant="primary" size="sm" onClick={() => navigate('/communications/new')}>
               + Create Template
             </Button>
           </div>

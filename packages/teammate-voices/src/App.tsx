@@ -44,6 +44,10 @@ export default function App() {
           <Route path="/rules" element={<AssignmentRules />} />
           <Route path="/reports" element={<Reports />} />
           <Route path="/admin" element={<Administration />} />
+          <Route path="/communications" element={<EmailTemplateList />} />
+          <Route path="/communications/new" element={<EmailTemplateEditor />} />
+          <Route path="/communications/:templateId/edit" element={<EmailTemplateEditor />} />
+          {/* Legacy redirects */}
           <Route path="/templates" element={<EmailTemplateList />} />
           <Route path="/templates/new" element={<EmailTemplateEditor />} />
           <Route path="/templates/:templateId/edit" element={<EmailTemplateEditor />} />
