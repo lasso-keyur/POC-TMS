@@ -253,6 +253,10 @@ class TeammateVoicesAPI {
     return this.request<EmailTemplateAssignment[]>(`/email-templates/by-survey/${surveyId}`)
   }
 
+  async getAssignmentsByProgram(programId: number): Promise<EmailTemplateAssignment[]> {
+    return this.request<EmailTemplateAssignment[]>(`/email-templates/by-program/${programId}`)
+  }
+
   async sendTestEmail(templateId: number, email?: string): Promise<{ sent: boolean; to: string; message: string }> {
     return this.request(`/email-templates/${templateId}/send-test`, {
       method: 'POST',

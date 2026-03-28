@@ -147,6 +147,13 @@ public class EmailTemplateController {
         return ResponseEntity.ok(assignmentService.getAssignmentsForSurvey(surveyId));
     }
 
+    /** Get all assignments for a program (used by Program Communications tab) */
+    @GetMapping("/by-program/{programId}")
+    public ResponseEntity<List<EmailTemplateAssignmentDTO>> getAssignmentsByProgram(@PathVariable Long programId) {
+        log.info("GET /email-templates/by-program/{}", programId);
+        return ResponseEntity.ok(assignmentService.getAssignmentsForProgram(programId));
+    }
+
     // ===== EMAIL SENDING ENDPOINTS =====
 
     /** Send a test email with sample merge data */

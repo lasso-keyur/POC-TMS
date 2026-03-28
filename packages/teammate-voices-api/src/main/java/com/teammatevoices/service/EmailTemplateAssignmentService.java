@@ -38,6 +38,15 @@ public class EmailTemplateAssignmentService {
                 .collect(Collectors.toList());
     }
 
+    /** Get all assignments for a program (used by Program Communications tab) */
+    @Transactional(readOnly = true)
+    public List<EmailTemplateAssignmentDTO> getAssignmentsForProgram(Long programId) {
+        Map<Long, String> templateNames = getTemplateNameMap();
+        return assignmentRepository.findByProgramId(programId).stream()
+                .map(a -> toDTO(a, templateNames))
+                .collect(Collectors.toList());
+    }
+
     /** Get all assignments for a template (used in Email Template Settings tab) */
     @Transactional(readOnly = true)
     public List<EmailTemplateAssignmentDTO> getAssignmentsForTemplate(Long templateId) {

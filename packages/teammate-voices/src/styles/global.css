@@ -5201,6 +5201,57 @@ input, textarea, select {
   white-space: nowrap;
 }
 
+/* Survey selector tabs */
+.comm-tab__survey-tabs {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.comm-tab__survey-tabs-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-text-secondary, #86868b);
+  white-space: nowrap;
+  margin-right: 4px;
+}
+
+.comm-tab__survey-tab {
+  padding: 6px 14px;
+  border-radius: 20px;
+  border: 1.5px solid #d1d5db;
+  background: #fff;
+  font-size: 13px;
+  font-weight: 500;
+  color: #374151;
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s, background 0.15s;
+}
+
+.comm-tab__survey-tab:hover {
+  border-color: #007aff;
+  color: #007aff;
+}
+
+.comm-tab__survey-tab--active {
+  border-color: #007aff;
+  background: #eff6ff;
+  color: #007aff;
+}
+
+.comm-tab__no-surveys {
+  padding: 40px 32px;
+  text-align: center;
+  color: #86868b;
+  font-size: 14px;
+  background: #fafafa;
+  border-radius: 12px;
+  border: 1px dashed #e5e7eb;
+  margin-bottom: 20px;
+}
+
 /* Journey timeline */
 .comm-tab__journey {
   display: flex;

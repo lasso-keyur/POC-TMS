@@ -2,12 +2,13 @@ import { useState, useEffect } from 'react'
 import { Button } from '../design-system'
 import { api } from '@/services/api'
 import type { EmailTemplate, EmailTemplateAssignment } from '@/types/emailTemplate'
+import type { Survey } from '@/types/survey'
 
 interface Props {
   programId: number
 }
 
-// The 5 email steps in a program's communication journey
+// The 5 email steps in a survey's communication journey
 const PROGRAM_EMAIL_STEPS = [
   {
     trigger: 'PROGRAM_WELCOME',
@@ -79,16 +80,23 @@ interface StepConfig {
   assignmentId?: number
 }
 
-export default function ProgramCommunicationsTab({ programId }: Props) {
-  const [templates, setTemplates] = useState<EmailTemplate[]>([])
-  const [configs, setConfigs] = useState<Record<string, StepConfig>>(() =>
-    Object.fromEntries(PROGRAM_EMAIL_STEPS.map(s => [s.trigger, {
+function makeDefaultConfigs(): Record<string, StepConfig> {
+  return Object.fromEntries(
+    PROGRAM_EMAIL_STEPS.map(s => [s.trigger, {
       trigger: s.trigger,
       templateId: '',
       delayDays: s.defaultDelay,
       isActive: true,
-    }]))
+    }])
   )
+}
+
+export default function ProgramCommunicationsTab({ programId }: Props) {
+  const [templates, setTemplates] = useState<EmailTemplate[]>([])
+  const [surveys, setSurveys] = useState<Survey[]>([])
+  const [selectedSurveyId, setSelectedSurveyId] = useState<number | null>(null)
+  // Per-survey step configs: { [surveyId]: { [trigger]: StepConfig } }
+  const [allConfigs, setAllConfigs] = useState<Record<number, Record<string, StepConfig>>>({})
   const [saving, setSaving] = useState<string | null>(null)
   const [saved, setSaved] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
@@ -96,32 +104,53 @@ export default function ProgramCommunicationsTab({ programId }: Props) {
 
   useEffect(() => {
     Promise.all([
+      api.getSurveys(),
       api.getEmailTemplates(),
-      api.getAssignmentsBySurvey(programId).catch(() => [] as EmailTemplateAssignment[]),
-    ]).then(([tmpl, assignments]) => {
+      api.getAssignmentsByProgram(programId).catch(() => [] as EmailTemplateAssignment[]),
+    ]).then(([allSurveys, tmpl, assignments]) => {
+      const programSurveys = allSurveys.filter(s => s.programId === programId)
       setTemplates(tmpl)
-      // Pre-fill from existing assignments
-      if (assignments.length > 0) {
-        setConfigs(prev => {
-          const next = { ...prev }
-          assignments.forEach(a => {
-            if (next[a.triggerType]) {
-              next[a.triggerType] = {
-                trigger: a.triggerType,
-                templateId: a.templateId,
-                delayDays: a.sendDelayDays ?? 0,
-                isActive: a.isActive,
-                assignmentId: a.assignmentId,
-              }
-            }
-          })
-          return next
-        })
-      }
+      setSurveys(programSurveys)
+      if (programSurveys.length > 0) setSelectedSurveyId(programSurveys[0].surveyId)
+
+      // Build allConfigs keyed by surveyId, pre-filled from existing assignments
+      const bysurvey: Record<number, Record<string, StepConfig>> = {}
+      programSurveys.forEach(s => {
+        bysurvey[s.surveyId] = makeDefaultConfigs()
+      })
+      assignments.forEach(a => {
+        if (a.surveyId && bysurvey[a.surveyId]?.[a.triggerType]) {
+          bysurvey[a.surveyId][a.triggerType] = {
+            trigger: a.triggerType,
+            templateId: a.templateId,
+            delayDays: a.sendDelayDays ?? 0,
+            isActive: a.isActive,
+            assignmentId: a.assignmentId,
+          }
+        }
+      })
+      setAllConfigs(bysurvey)
     }).finally(() => setLoading(false))
   }, [programId])
 
+  // Derive the active survey's step configs
+  const configs: Record<string, StepConfig> = selectedSurveyId
+    ? (allConfigs[selectedSurveyId] ?? makeDefaultConfigs())
+    : {}
+
+  const updateConfig = (trigger: string, patch: Partial<StepConfig>) => {
+    if (!selectedSurveyId) return
+    setAllConfigs(prev => ({
+      ...prev,
+      [selectedSurveyId]: {
+        ...prev[selectedSurveyId],
+        [trigger]: { ...prev[selectedSurveyId][trigger], ...patch },
+      },
+    }))
+  }
+
   const handleSaveStep = async (trigger: string) => {
+    if (!selectedSurveyId) return
     const cfg = configs[trigger]
     if (!cfg.templateId) return
     setSaving(trigger)
@@ -129,6 +158,7 @@ export default function ProgramCommunicationsTab({ programId }: Props) {
       await api.saveTemplateAssignment(Number(cfg.templateId), {
         triggerType: trigger,
         programId,
+        surveyId: selectedSurveyId,
         sendDelayDays: cfg.delayDays,
         isActive: cfg.isActive,
       })
@@ -152,10 +182,6 @@ export default function ProgramCommunicationsTab({ programId }: Props) {
     }
   }
 
-  const updateConfig = (trigger: string, patch: Partial<StepConfig>) => {
-    setConfigs(prev => ({ ...prev, [trigger]: { ...prev[trigger], ...patch } }))
-  }
-
   const configuredCount = Object.values(configs).filter(c => !!c.templateId).length
 
   if (loading) {
@@ -170,7 +196,7 @@ export default function ProgramCommunicationsTab({ programId }: Props) {
         <div>
           <h2 className="comm-tab__title">Email Communications</h2>
           <p className="comm-tab__subtitle">
-            Configure the email journey for participants in this program. These settings apply to all surveys within the program.
+            Select a survey to configure its email journey. Each survey can have its own template assignments.
           </p>
         </div>
         <div className="comm-tab__header-badge">
@@ -180,146 +206,166 @@ export default function ProgramCommunicationsTab({ programId }: Props) {
         </div>
       </div>
 
-      {/* Journey timeline */}
-      <div className="comm-tab__journey">
-        {PROGRAM_EMAIL_STEPS.map((step, idx) => {
-          const cfg = configs[step.trigger]
-          const isConfigured = !!cfg?.templateId
-          const isSaving = saving === step.trigger
-          const isSaved = saved === step.trigger
-          const isTesting = testingSend === step.trigger
-          const availableTemplates = templates.filter(t =>
-            t.status === 'ACTIVE' && (t.category === step.category || t.category === 'CUSTOM')
-          )
-          const selectedTemplate = templates.find(t => t.templateId === cfg?.templateId)
+      {/* Survey selector tabs */}
+      {surveys.length === 0 ? (
+        <div className="comm-tab__no-surveys">No surveys linked to this program yet.</div>
+      ) : (
+        <div className="comm-tab__survey-tabs">
+          <span className="comm-tab__survey-tabs-label">Configure for:</span>
+          {surveys.map(s => (
+            <button
+              key={s.surveyId}
+              className={`comm-tab__survey-tab${selectedSurveyId === s.surveyId ? ' comm-tab__survey-tab--active' : ''}`}
+              onClick={() => setSelectedSurveyId(s.surveyId)}
+            >
+              {s.title}
+            </button>
+          ))}
+        </div>
+      )}
 
-          return (
-            <div key={step.trigger} className="comm-step">
-              {/* Timeline connector */}
-              {idx < PROGRAM_EMAIL_STEPS.length - 1 && (
-                <div className="comm-step__connector">
-                  <div className="comm-step__connector-line" style={{ borderColor: isConfigured ? step.color : '#e5e7eb' }} />
-                  <div className="comm-step__connector-arrow" style={{ color: isConfigured ? step.color : '#d1d5db' }}>▼</div>
-                </div>
-              )}
+      {/* Journey timeline — only shown when a survey is selected */}
+      {selectedSurveyId && (
+        <div className="comm-tab__journey">
+          {PROGRAM_EMAIL_STEPS.map((step, idx) => {
+            const cfg = configs[step.trigger]
+            const isConfigured = !!cfg?.templateId
+            const isSaving = saving === step.trigger
+            const isSaved = saved === step.trigger
+            const isTesting = testingSend === step.trigger
+            const availableTemplates = templates.filter(t =>
+              t.status === 'ACTIVE' && (t.category === step.category || t.category === 'CUSTOM')
+            )
+            const selectedTemplate = templates.find(t => t.templateId === cfg?.templateId)
 
-              {/* Step card */}
-              <div className="comm-step__card" style={{ borderColor: isConfigured ? step.border : '#e5e7eb', background: isConfigured ? step.bg : '#fafafa' }}>
-
-                {/* Step icon + label */}
-                <div className="comm-step__head">
-                  <div className="comm-step__icon-wrap" style={{ background: step.bg, border: `2px solid ${step.border}` }}>
-                    <span className="comm-step__icon">{step.icon}</span>
-                    <span className="comm-step__step-num" style={{ color: step.color }}>
-                      {String(idx + 1).padStart(2, '0')}
-                    </span>
+            return (
+              <div key={step.trigger} className="comm-step">
+                {/* Timeline connector */}
+                {idx < PROGRAM_EMAIL_STEPS.length - 1 && (
+                  <div className="comm-step__connector">
+                    <div className="comm-step__connector-line" style={{ borderColor: isConfigured ? step.color : '#e5e7eb' }} />
+                    <div className="comm-step__connector-arrow" style={{ color: isConfigured ? step.color : '#d1d5db' }}>▼</div>
                   </div>
-                  <div className="comm-step__meta">
-                    <h3 className="comm-step__label">{step.label}</h3>
-                    <p className="comm-step__desc">{step.description}</p>
-                  </div>
-                  <div className="comm-step__status-wrap">
-                    {isConfigured ? (
-                      <span className="comm-step__badge comm-step__badge--ok" style={{ color: step.color, background: step.bg, borderColor: step.border }}>
-                        ✓ Configured
+                )}
+
+                {/* Step card */}
+                <div className="comm-step__card" style={{ borderColor: isConfigured ? step.border : '#e5e7eb', background: isConfigured ? step.bg : '#fafafa' }}>
+
+                  {/* Step icon + label */}
+                  <div className="comm-step__head">
+                    <div className="comm-step__icon-wrap" style={{ background: step.bg, border: `2px solid ${step.border}` }}>
+                      <span className="comm-step__icon">{step.icon}</span>
+                      <span className="comm-step__step-num" style={{ color: step.color }}>
+                        {String(idx + 1).padStart(2, '0')}
                       </span>
-                    ) : (
-                      <span className="comm-step__badge comm-step__badge--empty">Not set</span>
-                    )}
-                    {/* Active toggle */}
-                    <label className="comm-step__toggle-wrap">
-                      <input
-                        type="checkbox"
-                        className="comm-step__toggle-input"
-                        checked={cfg?.isActive ?? true}
-                        onChange={e => updateConfig(step.trigger, { isActive: e.target.checked })}
-                      />
-                      <span className="comm-step__toggle-track" style={{ background: (cfg?.isActive ?? true) ? step.color : '#d1d5db' }}>
-                        <span className="comm-step__toggle-thumb" />
-                      </span>
-                      <span className="comm-step__toggle-label">{(cfg?.isActive ?? true) ? 'Enabled' : 'Disabled'}</span>
-                    </label>
-                  </div>
-                </div>
-
-                {/* Config row */}
-                <div className="comm-step__config">
-                  {/* Template selector */}
-                  <div className="comm-step__field">
-                    <label className="comm-step__field-label">Email Template</label>
-                    <select
-                      className="comm-step__select"
-                      style={{ borderColor: isConfigured ? step.border : '#d1d5db' }}
-                      value={cfg?.templateId ?? ''}
-                      onChange={e => updateConfig(step.trigger, { templateId: e.target.value ? Number(e.target.value) : '' })}
-                    >
-                      <option value="">Select template…</option>
-                      {availableTemplates.length > 0 ? (
-                        availableTemplates.map(t => (
-                          <option key={t.templateId} value={t.templateId}>{t.name}</option>
-                        ))
+                    </div>
+                    <div className="comm-step__meta">
+                      <h3 className="comm-step__label">{step.label}</h3>
+                      <p className="comm-step__desc">{step.description}</p>
+                    </div>
+                    <div className="comm-step__status-wrap">
+                      {isConfigured ? (
+                        <span className="comm-step__badge comm-step__badge--ok" style={{ color: step.color, background: step.bg, borderColor: step.border }}>
+                          ✓ Configured
+                        </span>
                       ) : (
-                        templates.filter(t => t.status === 'ACTIVE').map(t => (
-                          <option key={t.templateId} value={t.templateId}>{t.name} ({t.category})</option>
-                        ))
+                        <span className="comm-step__badge comm-step__badge--empty">Not set</span>
                       )}
-                    </select>
-                    {selectedTemplate && (
-                      <p className="comm-step__field-hint">Subject: {selectedTemplate.subject || '—'}</p>
-                    )}
+                      {/* Active toggle */}
+                      <label className="comm-step__toggle-wrap">
+                        <input
+                          type="checkbox"
+                          className="comm-step__toggle-input"
+                          checked={cfg?.isActive ?? true}
+                          onChange={e => updateConfig(step.trigger, { isActive: e.target.checked })}
+                        />
+                        <span className="comm-step__toggle-track" style={{ background: (cfg?.isActive ?? true) ? step.color : '#d1d5db' }}>
+                          <span className="comm-step__toggle-thumb" />
+                        </span>
+                        <span className="comm-step__toggle-label">{(cfg?.isActive ?? true) ? 'Enabled' : 'Disabled'}</span>
+                      </label>
+                    </div>
                   </div>
 
-                  {/* Delay (reminders only) */}
-                  {step.delayLabel && (
-                    <div className="comm-step__field comm-step__field--delay">
-                      <label className="comm-step__field-label">{step.delayLabel}</label>
-                      <div className="comm-step__delay-wrap">
-                        <input
-                          type="number"
-                          className="comm-step__delay-input"
-                          min={1}
-                          max={90}
-                          value={cfg?.delayDays ?? step.defaultDelay}
-                          onChange={e => updateConfig(step.trigger, { delayDays: Number(e.target.value) })}
-                        />
-                        <span className="comm-step__delay-unit">days</span>
+                  {/* Config row */}
+                  <div className="comm-step__config">
+                    {/* Template selector */}
+                    <div className="comm-step__field">
+                      <label className="comm-step__field-label">Email Template</label>
+                      <select
+                        className="comm-step__select"
+                        style={{ borderColor: isConfigured ? step.border : '#d1d5db' }}
+                        value={cfg?.templateId ?? ''}
+                        onChange={e => updateConfig(step.trigger, { templateId: e.target.value ? Number(e.target.value) : '' })}
+                      >
+                        <option value="">Select template…</option>
+                        {availableTemplates.length > 0 ? (
+                          availableTemplates.map(t => (
+                            <option key={t.templateId} value={t.templateId}>{t.name}</option>
+                          ))
+                        ) : (
+                          templates.filter(t => t.status === 'ACTIVE').map(t => (
+                            <option key={t.templateId} value={t.templateId}>{t.name} ({t.category})</option>
+                          ))
+                        )}
+                      </select>
+                      {selectedTemplate && (
+                        <p className="comm-step__field-hint">Subject: {selectedTemplate.subject || '—'}</p>
+                      )}
+                    </div>
+
+                    {/* Delay (reminders only) */}
+                    {step.delayLabel && (
+                      <div className="comm-step__field comm-step__field--delay">
+                        <label className="comm-step__field-label">{step.delayLabel}</label>
+                        <div className="comm-step__delay-wrap">
+                          <input
+                            type="number"
+                            className="comm-step__delay-input"
+                            min={1}
+                            max={90}
+                            value={cfg?.delayDays ?? step.defaultDelay}
+                            onChange={e => updateConfig(step.trigger, { delayDays: Number(e.target.value) })}
+                          />
+                          <span className="comm-step__delay-unit">days</span>
+                        </div>
                       </div>
-                    </div>
-                  )}
+                    )}
 
-                  {/* Timing info (non-reminder steps) */}
-                  {!step.delayLabel && (
-                    <div className="comm-step__field comm-step__field--timing">
-                      <label className="comm-step__field-label">Timing</label>
-                      <span className="comm-step__timing-pill">Automatic</span>
-                    </div>
-                  )}
+                    {/* Timing info (non-reminder steps) */}
+                    {!step.delayLabel && (
+                      <div className="comm-step__field comm-step__field--timing">
+                        <label className="comm-step__field-label">Timing</label>
+                        <span className="comm-step__timing-pill">Automatic</span>
+                      </div>
+                    )}
 
-                  {/* Actions */}
-                  <div className="comm-step__actions">
-                    <Button
-                      variant="primary"
-                      size="sm"
-                      onClick={() => handleSaveStep(step.trigger)}
-                      disabled={!cfg?.templateId || isSaving}
-                    >
-                      {isSaving ? 'Saving…' : isSaved ? '✓ Saved' : 'Save'}
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleTestSend(step.trigger)}
-                      disabled={!cfg?.templateId || isTesting}
-                    >
-                      {isTesting ? 'Sending…' : 'Send Test'}
-                    </Button>
+                    {/* Actions */}
+                    <div className="comm-step__actions">
+                      <Button
+                        variant="primary"
+                        size="sm"
+                        onClick={() => handleSaveStep(step.trigger)}
+                        disabled={!cfg?.templateId || isSaving}
+                      >
+                        {isSaving ? 'Saving…' : isSaved ? '✓ Saved' : 'Save'}
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleTestSend(step.trigger)}
+                        disabled={!cfg?.templateId || isTesting}
+                      >
+                        {isTesting ? 'Sending…' : 'Send Test'}
+                      </Button>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-          )
-        })}
-      </div>
+            )
+          })}
+        </div>
+      )}
 
       {/* Info footer */}
       <div className="comm-tab__footer">
