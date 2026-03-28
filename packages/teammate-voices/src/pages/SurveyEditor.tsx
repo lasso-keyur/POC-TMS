@@ -16,8 +16,6 @@ import type { Survey, SurveyPage, SurveyTab } from '@/types/survey'
 import { SURVEY_TABS } from '@/types/survey'
 import type { Program } from '@/types/program'
 import type { LogicRule } from '@/types/logic'
-import type { EmailTemplate, EmailTemplateAssignment } from '@/types/emailTemplate'
-import { TRIGGER_TYPES } from '@/types/emailTemplate'
 
 const FALLBACK_PROGRAMS: Program[] = [
   { programId: 1, name: 'Teammate Voices', description: 'Employee engagement', templateType: 'Teammate Voices', status: 'ACTIVE', surveyProgress: 'NOT_STARTED', createdAt: '', updatedAt: '' },
@@ -55,12 +53,6 @@ export default function SurveyEditor() {
   const [logicRules, setLogicRules] = useState<LogicRule[]>([])
 
   // Settings tab state
-  const [emailAssignments, setEmailAssignments] = useState<EmailTemplateAssignment[]>([])
-  const [emailTemplates, setEmailTemplates] = useState<EmailTemplate[]>([])
-  const [newTrigger, setNewTrigger] = useState('')
-  const [newTemplateId, setNewTemplateId] = useState<number | ''>('')
-  const [newDelayDays, setNewDelayDays] = useState(0)
-  const [sendingTest, setSendingTest] = useState<number | null>(null)
   const [testMessage, setTestMessage] = useState('')
   const [dispatchChecks, setDispatchChecks] = useState<Array<{ key: string; label: string; passed: boolean; detail: string }>>([])
   const [dispatchPassed, setDispatchPassed] = useState(false)
@@ -80,61 +72,6 @@ export default function SurveyEditor() {
       .finally(() => setLoading(false))
   }, [surveyId, navigate])
 
-  // Load email assignments and templates for Settings tab
-  useEffect(() => {
-    if (!surveyId) return
-    api.getAssignmentsBySurvey(Number(surveyId))
-      .then(setEmailAssignments)
-      .catch(() => {})
-    api.getEmailTemplates()
-      .then(setEmailTemplates)
-      .catch(() => {})
-  }, [surveyId])
-
-  const handleAddEmailAssignment = async () => {
-    if (!surveyId || !newTrigger || !newTemplateId) {
-      alert('Please select both a template and a trigger type.')
-      return
-    }
-    try {
-      const saved = await api.saveTemplateAssignment(Number(newTemplateId), {
-        triggerType: newTrigger,
-        surveyId: Number(surveyId),
-        sendDelayDays: newDelayDays,
-        isActive: true,
-      })
-      setEmailAssignments(prev => [...prev.filter(a => a.assignmentId !== saved.assignmentId), saved])
-      setNewTrigger('')
-      setNewTemplateId('')
-      setNewDelayDays(0)
-    } catch {
-      alert('Failed to save assignment.')
-    }
-  }
-
-  const handleDeleteEmailAssignment = async (assignmentId: number) => {
-    try {
-      await api.deleteTemplateAssignment(assignmentId)
-      setEmailAssignments(prev => prev.filter(a => a.assignmentId !== assignmentId))
-    } catch {
-      alert('Failed to delete assignment.')
-    }
-  }
-
-  const handleSendTestEmail = async (templateId: number) => {
-    setSendingTest(templateId)
-    setTestMessage('')
-    try {
-      const result = await api.sendTestEmail(templateId)
-      setTestMessage(result.message)
-    } catch {
-      setTestMessage('Failed to send test email.')
-    } finally {
-      setSendingTest(null)
-      setTimeout(() => setTestMessage(''), 5000)
-    }
-  }
-
   // Run dispatch validation when Settings tab is active
   useEffect(() => {
     if (activeTab !== 'settings' || !surveyId) return
@@ -146,7 +83,7 @@ export default function SurveyEditor() {
       })
       .catch(() => {})
       .finally(() => setCheckingDispatch(false))
-  }, [activeTab, surveyId, emailAssignments])
+  }, [activeTab, surveyId])
 
   const isActive = survey.status === 'ACTIVE'
   const isLocked = survey.status === 'ACTIVE' || survey.status === 'CLOSED'
@@ -416,94 +353,19 @@ export default function SurveyEditor() {
               </div>
             )}
 
-            {/* Current Assignments */}
-            {emailAssignments.length > 0 && (
-              <div style={{ marginBottom: 32 }}>
-                <h4 style={{ fontSize: 14, fontWeight: 600, color: '#1d1d1f', marginBottom: 12 }}>Active Email Assignments</h4>
-                <table className="assignment-table">
-                  <thead>
-                    <tr>
-                      <th>Trigger Event</th>
-                      <th>Email Template</th>
-                      <th>Delay</th>
-                      <th>Status</th>
-                      <th style={{ width: 160 }}></th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {emailAssignments.map(a => {
-                      const trigger = TRIGGER_TYPES.find(t => t.value === a.triggerType)
-                      const template = emailTemplates.find(t => t.templateId === a.templateId)
-                      return (
-                        <tr key={a.assignmentId}>
-                          <td>
-                            <span className="assignment-trigger-pill">{trigger?.label || a.triggerType}</span>
-                          </td>
-                          <td>{template?.name || a.templateName || `Template #${a.templateId}`}</td>
-                          <td>{a.sendDelayDays ? `${a.sendDelayDays} day${a.sendDelayDays > 1 ? 's' : ''}` : 'Immediate'}</td>
-                          <td>
-                            <span className={`assignment-status ${a.isActive ? 'assignment-status--active' : 'assignment-status--inactive'}`}>
-                              {a.isActive ? 'Active' : 'Inactive'}
-                            </span>
-                          </td>
-                          <td style={{ display: 'flex', gap: 8 }}>
-                            <button
-                              className="assignment-delete-btn"
-                              style={{ color: '#012169' }}
-                              onClick={() => handleSendTestEmail(a.templateId)}
-                              disabled={sendingTest === a.templateId}
-                            >
-                              {sendingTest === a.templateId ? 'Sending...' : 'Send Test'}
-                            </button>
-                            <button
-                              className="assignment-delete-btn"
-                              onClick={() => handleDeleteEmailAssignment(a.assignmentId)}
-                            >
-                              Remove
-                            </button>
-                          </td>
-                        </tr>
-                      )
-                    })}
-                  </tbody>
-                </table>
+            {/* Email Assignments — managed centrally in Email Templates */}
+            <div style={{ border: '1px solid #d2d2d7', borderRadius: 12, padding: 24, background: '#f9f9fb', display: 'flex', alignItems: 'center', gap: 20 }}>
+              <div style={{ fontSize: 32 }}>✉️</div>
+              <div style={{ flex: 1 }}>
+                <h4 style={{ fontSize: 14, fontWeight: 600, color: '#1d1d1f', margin: '0 0 4px' }}>Email Assignments</h4>
+                <p style={{ fontSize: 13, color: '#86868b', margin: 0 }}>
+                  Email template assignments are managed centrally in the <strong>Email Templates</strong> module — assign templates to trigger events there and they will apply to this survey automatically.
+                </p>
               </div>
-            )}
-
-            {/* Add New Assignment */}
-            <div style={{ border: '1px solid #d2d2d7', borderRadius: 12, padding: 24 }}>
-              <h4 style={{ fontSize: 14, fontWeight: 600, color: '#1d1d1f', marginBottom: 16 }}>Add Email Assignment</h4>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 100px', gap: 16, alignItems: 'end' }}>
-                <FormField label="Trigger Event">
-                  <select className="email-editor__select" value={newTrigger} onChange={e => setNewTrigger(e.target.value)}>
-                    <option value="">Select trigger...</option>
-                    {TRIGGER_TYPES.map(t => (
-                      <option key={t.value} value={t.value}>{t.label}</option>
-                    ))}
-                  </select>
-                </FormField>
-                <FormField label="Email Template">
-                  <select className="email-editor__select" value={newTemplateId} onChange={e => setNewTemplateId(e.target.value ? Number(e.target.value) : '')}>
-                    <option value="">Select template...</option>
-                    {emailTemplates.filter(t => t.status === 'ACTIVE').map(t => (
-                      <option key={t.templateId} value={t.templateId}>{t.name} ({t.category})</option>
-                    ))}
-                  </select>
-                </FormField>
-                <FormField label="Delay (days)">
-                  <input className="email-editor__input" type="number" min={0} max={365} value={newDelayDays} onChange={e => setNewDelayDays(Number(e.target.value))} />
-                </FormField>
-              </div>
-              <div style={{ marginTop: 16 }}>
-                <Button variant="primary" size="sm" onClick={handleAddEmailAssignment}>+ Add Assignment</Button>
-              </div>
+              <Button variant="ghost" size="sm" onClick={() => navigate('/templates')}>
+                Go to Email Templates →
+              </Button>
             </div>
-
-            {emailAssignments.length === 0 && (
-              <p style={{ color: '#86868b', fontSize: 13, marginTop: 16, textAlign: 'center' }}>
-                No email assignments yet. Add one above to configure survey notifications.
-              </p>
-            )}
           </div>
         )}
         </div>
