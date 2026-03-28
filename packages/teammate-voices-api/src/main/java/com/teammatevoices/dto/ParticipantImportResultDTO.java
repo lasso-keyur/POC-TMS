@@ -4,34 +4,35 @@ import java.util.List;
 
 public class ParticipantImportResultDTO {
 
-    private int totalRows;
-    private int created;
-    private int updated;
-    private int skipped;
-    private List<String> errors;
+    private int totalRows;      // Total data rows in the file
+    private int uploaded;       // New records successfully created
+    private int alreadyExists;  // Records skipped — email already in DB
+    private int errors;         // Rows that failed due to validation/data errors
+    private List<String> errorDetails; // Human-readable error messages per row
 
     public ParticipantImportResultDTO() {}
 
-    public ParticipantImportResultDTO(int totalRows, int created, int updated, int skipped, List<String> errors) {
+    public ParticipantImportResultDTO(int totalRows, int uploaded, int alreadyExists,
+                                      int errors, List<String> errorDetails) {
         this.totalRows = totalRows;
-        this.created = created;
-        this.updated = updated;
-        this.skipped = skipped;
+        this.uploaded = uploaded;
+        this.alreadyExists = alreadyExists;
         this.errors = errors;
+        this.errorDetails = errorDetails;
     }
 
-    public int getTotalRows() { return totalRows; }
-    public void setTotalRows(int totalRows) { this.totalRows = totalRows; }
+    public int getTotalRows()                   { return totalRows; }
+    public void setTotalRows(int v)             { this.totalRows = v; }
 
-    public int getCreated() { return created; }
-    public void setCreated(int created) { this.created = created; }
+    public int getUploaded()                    { return uploaded; }
+    public void setUploaded(int v)              { this.uploaded = v; }
 
-    public int getUpdated() { return updated; }
-    public void setUpdated(int updated) { this.updated = updated; }
+    public int getAlreadyExists()               { return alreadyExists; }
+    public void setAlreadyExists(int v)         { this.alreadyExists = v; }
 
-    public int getSkipped() { return skipped; }
-    public void setSkipped(int skipped) { this.skipped = skipped; }
+    public int getErrors()                      { return errors; }
+    public void setErrors(int v)                { this.errors = v; }
 
-    public List<String> getErrors() { return errors; }
-    public void setErrors(List<String> errors) { this.errors = errors; }
+    public List<String> getErrorDetails()       { return errorDetails; }
+    public void setErrorDetails(List<String> v) { this.errorDetails = v; }
 }

@@ -37,21 +37,21 @@ public class ParticipantImportService {
      * region, lineOfBusiness, managerName, hierarchyCode, startDate, expectedEndDate, isActive
      */
     public ParticipantImportResultDTO importFromExcel(MultipartFile file) throws IOException {
-        int created = 0, updated = 0, skipped = 0;
-        List<String> errors = new ArrayList<>();
+        int uploaded = 0, alreadyExists = 0, errorCount = 0;
+        List<String> errorDetails = new ArrayList<>();
 
         try (Workbook workbook = new XSSFWorkbook(file.getInputStream())) {
             Sheet sheet = workbook.getSheetAt(0);
             Row headerRow = sheet.getRow(0);
             if (headerRow == null) {
-                errors.add("Sheet is empty");
-                return new ParticipantImportResultDTO(0, 0, 0, 0, errors);
+                errorDetails.add("File is empty — no header row found");
+                return new ParticipantImportResultDTO(0, 0, 0, 1, errorDetails);
             }
 
-            // Build header index map
+            // Build header → column index map (normalise to lowercase, strip spaces/hyphens)
             Map<String, Integer> colIndex = new HashMap<>();
             for (Cell cell : headerRow) {
-                String header = getCellString(cell).trim().toLowerCase().replaceAll("[\\s_-]", "");
+                String header = getCellString(cell).trim().toLowerCase().replaceAll("[\\s_\\-]", "");
                 colIndex.put(header, cell.getColumnIndex());
             }
 
@@ -62,39 +62,44 @@ public class ParticipantImportService {
                 totalRows++;
 
                 try {
+                    // ── Validate required: email ──────────────────────────────
                     String email = getCol(row, colIndex, "email");
                     if (email == null || email.isBlank()) {
-                        errors.add("Row " + (i + 1) + ": email is required — skipped");
-                        skipped++;
+                        errorDetails.add("Row " + (i + 1) + ": email is required");
+                        errorCount++;
                         continue;
                     }
                     email = email.trim().toLowerCase();
 
+                    // ── Validate required: fullName ───────────────────────────
                     String fullName = getCol(row, colIndex, "fullname");
                     if (fullName == null || fullName.isBlank()) {
-                        errors.add("Row " + (i + 1) + ": fullName is required — skipped");
-                        skipped++;
+                        errorDetails.add("Row " + (i + 1) + " (" + email + "): fullName is required");
+                        errorCount++;
                         continue;
                     }
 
+                    // ── Validate required: startDate ──────────────────────────
                     String startDateStr = getCol(row, colIndex, "startdate");
                     LocalDate startDate = parseDate(startDateStr);
                     if (startDate == null) {
-                        errors.add("Row " + (i + 1) + " (" + email + "): invalid or missing startDate — skipped");
-                        skipped++;
+                        errorDetails.add("Row " + (i + 1) + " (" + email + "): startDate is missing or invalid"
+                                + (startDateStr != null && !startDateStr.isBlank() ? " ('" + startDateStr + "')" : "")
+                                + " — use MM/dd/yyyy or yyyy-MM-dd");
+                        errorCount++;
                         continue;
                     }
 
-                    // Upsert by email
-                    Optional<Participant> existing = participantRepository.findByEmail(email);
-                    Participant p = existing.orElseGet(Participant::new);
-                    boolean isNew = existing.isEmpty();
-
-                    // Set participantId only for new records (use provided or generate)
-                    if (isNew) {
-                        String pid = getCol(row, colIndex, "participantid");
-                        p.setParticipantId(pid != null && !pid.isBlank() ? pid.trim() : UUID.randomUUID().toString());
+                    // ── Skip if participant already exists (match by email) ───
+                    if (participantRepository.findByEmail(email).isPresent()) {
+                        alreadyExists++;
+                        continue;
                     }
+
+                    // ── Create new participant ────────────────────────────────
+                    Participant p = new Participant();
+                    String pid = getCol(row, colIndex, "participantid");
+                    p.setParticipantId(pid != null && !pid.isBlank() ? pid.trim() : UUID.randomUUID().toString());
 
                     p.setEmail(email);
                     p.setFullName(fullName.trim());
@@ -109,27 +114,22 @@ public class ParticipantImportService {
                     p.setManagerName(getColTrimmed(row, colIndex, "managername"));
                     p.setHierarchyCode(getColTrimmed(row, colIndex, "hierarchycode"));
                     p.setStartDate(startDate);
-
-                    String endDateStr = getCol(row, colIndex, "expectedenddate");
-                    p.setExpectedEndDate(parseDate(endDateStr));
+                    p.setExpectedEndDate(parseDate(getCol(row, colIndex, "expectedenddate")));
 
                     String activeStr = getCol(row, colIndex, "isactive");
-                    if (activeStr != null && !activeStr.isBlank()) {
-                        p.setIsActive(!"false".equalsIgnoreCase(activeStr.trim()) && !"0".equals(activeStr.trim()));
-                    } else if (isNew) {
-                        p.setIsActive(true);
-                    }
+                    p.setIsActive(activeStr == null || activeStr.isBlank()
+                            || (!"false".equalsIgnoreCase(activeStr.trim()) && !"0".equals(activeStr.trim())));
 
                     participantRepository.save(p);
-                    if (isNew) created++; else updated++;
+                    uploaded++;
 
                 } catch (Exception e) {
-                    errors.add("Row " + (i + 1) + ": " + e.getMessage());
-                    skipped++;
+                    errorDetails.add("Row " + (i + 1) + ": unexpected error — " + e.getMessage());
+                    errorCount++;
                 }
             }
 
-            return new ParticipantImportResultDTO(totalRows, created, updated, skipped, errors);
+            return new ParticipantImportResultDTO(totalRows, uploaded, alreadyExists, errorCount, errorDetails);
         }
     }
 

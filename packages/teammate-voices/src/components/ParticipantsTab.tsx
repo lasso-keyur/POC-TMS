@@ -5,10 +5,10 @@ import type { Participant } from '@/types/participant'
 
 interface ImportResult {
   totalRows: number
-  created: number
-  updated: number
-  skipped: number
-  errors: string[]
+  uploaded: number
+  alreadyExists: number
+  errors: number
+  errorDetails: string[]
 }
 
 export default function ParticipantsTab() {
@@ -107,22 +107,39 @@ export default function ParticipantsTab() {
 
       {/* Import result banner */}
       {importResult && (
-        <div className={`ptab__banner ptab__banner--${importResult.errors.length > 0 ? 'warn' : 'success'}`}>
-          <div className="ptab__banner-title">
-            Import complete — {importResult.totalRows} rows processed
-          </div>
+        <div className={`ptab__banner ptab__banner--${importResult.errors > 0 ? 'warn' : importResult.uploaded === 0 ? 'info' : 'success'}`}>
+          <div className="ptab__banner-title">Import complete</div>
+
+          {/* 4-count summary row */}
           <div className="ptab__banner-stats">
-            <span className="ptab__banner-stat ptab__banner-stat--created">✓ {importResult.created} created</span>
-            <span className="ptab__banner-stat ptab__banner-stat--updated">↑ {importResult.updated} updated</span>
-            {importResult.skipped > 0 && (
-              <span className="ptab__banner-stat ptab__banner-stat--skipped">⚠ {importResult.skipped} skipped</span>
-            )}
+            <div className="ptab__banner-stat-card ptab__banner-stat-card--total">
+              <span className="ptab__banner-stat-number">{importResult.totalRows}</span>
+              <span className="ptab__banner-stat-label">Total in file</span>
+            </div>
+            <div className="ptab__banner-stat-card ptab__banner-stat-card--uploaded">
+              <span className="ptab__banner-stat-number">{importResult.uploaded}</span>
+              <span className="ptab__banner-stat-label">Uploaded</span>
+            </div>
+            <div className="ptab__banner-stat-card ptab__banner-stat-card--exists">
+              <span className="ptab__banner-stat-number">{importResult.alreadyExists}</span>
+              <span className="ptab__banner-stat-label">Already exists</span>
+            </div>
+            <div className="ptab__banner-stat-card ptab__banner-stat-card--error">
+              <span className="ptab__banner-stat-number">{importResult.errors}</span>
+              <span className="ptab__banner-stat-label">Not uploaded</span>
+            </div>
           </div>
-          {importResult.errors.length > 0 && (
-            <ul className="ptab__banner-errors">
-              {importResult.errors.map((err, i) => <li key={i}>{err}</li>)}
-            </ul>
+
+          {/* Error details */}
+          {importResult.errorDetails.length > 0 && (
+            <div className="ptab__banner-errors-wrap">
+              <p className="ptab__banner-errors-title">⚠ Error details:</p>
+              <ul className="ptab__banner-errors">
+                {importResult.errorDetails.map((err, i) => <li key={i}>{err}</li>)}
+              </ul>
+            </div>
           )}
+
           <button className="ptab__banner-dismiss" onClick={() => setImportResult(null)}>Dismiss</button>
         </div>
       )}
