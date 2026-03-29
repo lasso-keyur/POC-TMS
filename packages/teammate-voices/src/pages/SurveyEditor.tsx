@@ -259,7 +259,7 @@ export default function SurveyEditor() {
               </FormField>
             </div>
 
-            <div className="survey-editor__form-row survey-editor__form-row--program">
+            <div className="survey-editor__form-row survey-editor__form-row--meta">
               <FormField label="Program" required helper="Map the survey to a program." htmlFor="survey-program">
                 <select
                   id="survey-program"
@@ -272,6 +272,26 @@ export default function SurveyEditor() {
                     <option key={p.programId} value={String(p.programId)}>{p.name}</option>
                   ))}
                 </select>
+              </FormField>
+
+              <FormField label="Start Date" htmlFor="survey-start-date">
+                <Input
+                  id="survey-start-date"
+                  type="date"
+                  value={survey.startDate ?? ''}
+                  onChange={(e) => setSurvey({ ...survey, startDate: e.target.value || null })}
+                  fullWidth
+                />
+              </FormField>
+
+              <FormField label="End Date" htmlFor="survey-end-date">
+                <Input
+                  id="survey-end-date"
+                  type="date"
+                  value={survey.endDate ?? ''}
+                  onChange={(e) => setSurvey({ ...survey, endDate: e.target.value || null })}
+                  fullWidth
+                />
               </FormField>
             </div>
 

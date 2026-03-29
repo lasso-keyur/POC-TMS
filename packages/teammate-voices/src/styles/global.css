@@ -1185,6 +1185,11 @@ input, textarea, select {
   max-width: 660px;
 }
 
+.survey-editor__form-row--meta {
+  grid-template-columns: 1fr 1fr 1fr;
+  max-width: 900px;
+}
+
 .survey-editor__divider {
   border: none;
   border-top: 1px solid #e5e5ea;

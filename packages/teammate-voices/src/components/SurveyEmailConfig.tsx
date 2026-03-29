@@ -96,7 +96,6 @@ export default function SurveyEmailConfig({ surveyId, programId }: Props) {
   const [saving, setSaving] = useState<string | null>(null)
   const [saved, setSaved] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
-  const [testingSend, setTestingSend] = useState<string | null>(null)
 
   useEffect(() => {
     Promise.all([
@@ -148,17 +147,6 @@ export default function SurveyEmailConfig({ surveyId, programId }: Props) {
     }
   }
 
-  const handleTestSend = async (trigger: string) => {
-    const cfg = configs[trigger]
-    if (!cfg.templateId) return
-    setTestingSend(trigger)
-    try {
-      await api.sendTestEmail(Number(cfg.templateId))
-    } finally {
-      setTestingSend(null)
-    }
-  }
-
   const configuredCount = Object.values(configs).filter(c => !!c.templateId).length
 
   return (
@@ -187,7 +175,6 @@ export default function SurveyEmailConfig({ surveyId, programId }: Props) {
             const isConfigured = !!cfg?.templateId
             const isSaving = saving === step.trigger
             const isSaved = saved === step.trigger
-            const isTesting = testingSend === step.trigger
             const availableTemplates = templates.filter(t =>
               t.status === 'ACTIVE' && (t.category === step.category || t.category === 'CUSTOM')
             )
@@ -304,14 +291,6 @@ export default function SurveyEmailConfig({ surveyId, programId }: Props) {
                         disabled={!cfg?.templateId || isSaving}
                       >
                         {isSaving ? 'Saving…' : isSaved ? '✓ Saved' : 'Save'}
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleTestSend(step.trigger)}
-                        disabled={!cfg?.templateId || isTesting}
-                      >
-                        {isTesting ? 'Sending…' : 'Send Test'}
                       </Button>
                     </div>
                   </div>
