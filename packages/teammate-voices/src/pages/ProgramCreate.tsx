@@ -15,6 +15,8 @@ export default function ProgramCreate() {
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
   const [isActive, setIsActive] = useState(false)
+  const [startDate, setStartDate] = useState('')
+  const [endDate, setEndDate] = useState('')
   const [loading, setLoading] = useState(false)
   const [pageLoading, setPageLoading] = useState(isEditMode)
   const [successMessage, setSuccessMessage] = useState('')
@@ -29,6 +31,8 @@ export default function ProgramCreate() {
         setDescription(program.description || '')
         setTemplate(program.templateType || '')
         setIsActive(program.status === 'ACTIVE' || program.status === 'Active')
+        setStartDate(program.startDate ?? '')
+        setEndDate(program.endDate ?? '')
       })
       .catch(() => {
         setErrorMessage('Failed to load program.')
@@ -49,6 +53,8 @@ export default function ProgramCreate() {
           description: description.trim(),
           templateType: template || 'CUSTOM',
           status: isActive ? 'ACTIVE' : 'INACTIVE',
+          startDate: startDate || null,
+          endDate: endDate || null,
         })
         setSuccessMessage('Program updated successfully!')
       } else {
@@ -58,6 +64,8 @@ export default function ProgramCreate() {
           templateType: template || 'CUSTOM',
           status: isActive ? 'ACTIVE' : 'INACTIVE',
           surveyProgress: 'NOT_STARTED',
+          startDate: startDate || null,
+          endDate: endDate || null,
         })
         setSuccessMessage('Program saved successfully!')
       }
@@ -146,6 +154,36 @@ export default function ProgramCreate() {
               checked={isActive}
               onChange={setIsActive}
             />
+          </div>
+        </div>
+
+        <div className="program-create__row">
+          <div className="program-create__field">
+            <label className="program-create__label" htmlFor="start-date">
+              Start Date
+            </label>
+            <input
+              id="start-date"
+              className="program-create__input"
+              type="date"
+              value={startDate}
+              onChange={e => setStartDate(e.target.value)}
+            />
+            <span className="program-create__helper">When does this program begin?</span>
+          </div>
+
+          <div className="program-create__field">
+            <label className="program-create__label" htmlFor="end-date">
+              End Date
+            </label>
+            <input
+              id="end-date"
+              className="program-create__input"
+              type="date"
+              value={endDate}
+              onChange={e => setEndDate(e.target.value)}
+            />
+            <span className="program-create__helper">When does this program conclude?</span>
           </div>
         </div>
 

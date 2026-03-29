@@ -251,6 +251,18 @@ export default function ProgramDetail() {
               {program.updatedAt ? new Date(program.updatedAt).toLocaleDateString() : '—'}
             </span>
           </div>
+          <div className="program-detail__info-item">
+            <span className="program-detail__info-label">Start Date</span>
+            <span className="program-detail__info-value">
+              {program.startDate ? new Date(program.startDate).toLocaleDateString() : '—'}
+            </span>
+          </div>
+          <div className="program-detail__info-item">
+            <span className="program-detail__info-label">End Date</span>
+            <span className="program-detail__info-value">
+              {program.endDate ? new Date(program.endDate).toLocaleDateString() : '—'}
+            </span>
+          </div>
         </div>
 
         {/* Summary metrics */}

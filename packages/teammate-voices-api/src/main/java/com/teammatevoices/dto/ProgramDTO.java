@@ -3,6 +3,7 @@ package com.teammatevoices.dto;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 public class ProgramDTO {
@@ -18,6 +19,8 @@ public class ProgramDTO {
     private String templateType;
     private String status;
     private String surveyProgress;
+    private LocalDate startDate;
+    private LocalDate endDate;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
@@ -67,6 +70,22 @@ public class ProgramDTO {
 
     public void setSurveyProgress(String surveyProgress) {
         this.surveyProgress = surveyProgress;
+    }
+
+    public LocalDate getStartDate() {
+        return startDate;
+    }
+
+    public void setStartDate(LocalDate startDate) {
+        this.startDate = startDate;
+    }
+
+    public LocalDate getEndDate() {
+        return endDate;
+    }
+
+    public void setEndDate(LocalDate endDate) {
+        this.endDate = endDate;
     }
 
     public LocalDateTime getCreatedAt() {

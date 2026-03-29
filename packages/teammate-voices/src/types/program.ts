@@ -8,6 +8,8 @@ export interface Program {
   templateType?: string
   status: ProgramStatus
   surveyProgress: SurveyProgress
+  startDate?: string | null
+  endDate?: string | null
   createdAt: string
   updatedAt: string
 }

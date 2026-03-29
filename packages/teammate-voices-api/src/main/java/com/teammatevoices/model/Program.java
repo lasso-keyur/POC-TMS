@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
@@ -30,6 +31,12 @@ public class Program {
 
     @Column(name = "SURVEY_PROGRESS", nullable = false, length = 30)
     private String surveyProgress = "NOT_STARTED";
+
+    @Column(name = "START_DATE")
+    private LocalDate startDate;
+
+    @Column(name = "END_DATE")
+    private LocalDate endDate;
 
     @CreationTimestamp
     @Column(name = "CREATED_AT", updatable = false)
@@ -99,6 +106,22 @@ public class Program {
 
     public void setSurveyProgress(String surveyProgress) {
         this.surveyProgress = surveyProgress;
+    }
+
+    public LocalDate getStartDate() {
+        return startDate;
+    }
+
+    public void setStartDate(LocalDate startDate) {
+        this.startDate = startDate;
+    }
+
+    public LocalDate getEndDate() {
+        return endDate;
+    }
+
+    public void setEndDate(LocalDate endDate) {
+        this.endDate = endDate;
     }
 
     public LocalDateTime getCreatedAt() {
