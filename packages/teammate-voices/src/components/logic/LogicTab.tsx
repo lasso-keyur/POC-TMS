@@ -46,7 +46,7 @@ export default function LogicTab({ surveyId, pages, logicRules, onRulesChange, r
     setLoading(true)
     api.getLogicRules(surveyId)
       .then(rules => {
-        if (rules && rules.length > 0) onRulesChange(rules)
+        onRulesChange(rules ?? [])
       })
       .catch(() => {})
       .finally(() => setLoading(false))
