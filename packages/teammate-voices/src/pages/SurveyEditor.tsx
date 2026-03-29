@@ -12,6 +12,7 @@ import { LogicTab } from '@/components/logic'
 import DistributeTab from '@/components/DistributeTab'
 import ParticipantsTab from '@/components/ParticipantsTab'
 import SurveyEmailConfig from '@/components/SurveyEmailConfig'
+import PublishPreflightModal from '@/components/PublishPreflightModal'
 import { api } from '@/services/api'
 import type { Survey, SurveyPage, SurveyTab } from '@/types/survey'
 import { SURVEY_TABS } from '@/types/survey'
@@ -53,11 +54,8 @@ export default function SurveyEditor() {
   const [saveMessage, setSaveMessage] = useState('')
   const [logicRules, setLogicRules] = useState<LogicRule[]>([])
 
-  // Settings tab state
-  const [testMessage, setTestMessage] = useState('')
-  const [dispatchChecks, setDispatchChecks] = useState<Array<{ key: string; label: string; passed: boolean; detail: string }>>([])
-  const [dispatchPassed, setDispatchPassed] = useState(false)
-  const [checkingDispatch, setCheckingDispatch] = useState(false)
+  // Preflight modal state
+  const [showPreflight, setShowPreflight] = useState(false)
 
   useEffect(() => {
     api.getPrograms()
@@ -72,19 +70,6 @@ export default function SurveyEditor() {
       .catch(() => navigate('/surveys'))
       .finally(() => setLoading(false))
   }, [surveyId, navigate])
-
-  // Run dispatch validation when Settings tab is active
-  useEffect(() => {
-    if (activeTab !== 'settings' || !surveyId) return
-    setCheckingDispatch(true)
-    api.validateDispatch(Number(surveyId))
-      .then(result => {
-        setDispatchChecks(result.checks)
-        setDispatchPassed(result.passed)
-      })
-      .catch(() => {})
-      .finally(() => setCheckingDispatch(false))
-  }, [activeTab, surveyId])
 
   const isActive = survey.status === 'ACTIVE'
   const isLocked = survey.status === 'ACTIVE' || survey.status === 'CLOSED'
@@ -121,17 +106,17 @@ export default function SurveyEditor() {
     }
   }
 
-  const handlePublish = async () => {
+  const handlePublishClick = async () => {
     if (!survey.surveyId) {
       await handleSave()
-      return
     }
-    try {
-      const updated = await api.publishSurvey(survey.surveyId)
-      setSurvey(updated)
-    } catch {
-      alert('Failed to publish survey')
-    }
+    setShowPreflight(true)
+  }
+
+  const handleConfirmPublish = async () => {
+    if (!survey.surveyId) return
+    const updated = await api.publishSurvey(survey.surveyId)
+    setSurvey(updated)
   }
 
   const handleClone = async () => {
@@ -212,7 +197,7 @@ export default function SurveyEditor() {
           {isLocked ? (
             <Button variant="primary" size="sm" onClick={handleClone}>Clone</Button>
           ) : (
-            <Button variant="secondary" size="sm" onClick={handlePublish}>Publish</Button>
+            <Button variant="secondary" size="sm" onClick={handlePublishClick}>Publish</Button>
           )}
         </div>
       </div>
@@ -349,62 +334,6 @@ export default function SurveyEditor() {
           />
         )}
 
-        {activeTab === 'settings' && (
-          <div className="email-editor__form" style={{ padding: '24px 28px' }}>
-            <h3 style={{ fontSize: 17, fontWeight: 600, color: '#1d1d1f', marginBottom: 8 }}>Email Configuration</h3>
-            <p style={{ color: '#86868b', fontSize: 14, marginBottom: 24 }}>
-              Assign email templates to survey lifecycle events. Notifications are sent to <strong>keyur@me.com</strong>.
-            </p>
-
-            {/* Pre-flight Dispatch Checklist */}
-            <div style={{ border: '1px solid #d2d2d7', borderRadius: 12, padding: 20, marginBottom: 24, background: dispatchPassed ? '#f0fdf4' : '#fefce8' }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
-                <h4 style={{ fontSize: 14, fontWeight: 600, color: '#1d1d1f', margin: 0 }}>
-                  {dispatchPassed ? 'Ready to send emails' : 'Pre-flight checklist'} {dispatchPassed ? '  ' : '  '}
-                </h4>
-                {checkingDispatch && <span style={{ fontSize: 12, color: '#86868b' }}>Checking...</span>}
-              </div>
-              {dispatchChecks.length > 0 && (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                  {dispatchChecks.map(check => (
-                    <div key={check.key} style={{ display: 'flex', alignItems: 'flex-start', gap: 10, fontSize: 13 }}>
-                      <span style={{ flexShrink: 0, width: 20, textAlign: 'center', fontSize: 14 }}>
-                        {check.passed ? '\u2705' : '\u274C'}
-                      </span>
-                      <div>
-                        <span style={{ fontWeight: 500, color: check.passed ? '#166534' : '#92400e' }}>{check.label}</span>
-                        <span style={{ color: '#86868b', marginLeft: 8 }}>{check.detail}</span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-              {dispatchChecks.length === 0 && !checkingDispatch && (
-                <p style={{ fontSize: 13, color: '#86868b', margin: 0 }}>Save the survey to run validation checks.</p>
-              )}
-            </div>
-
-            {testMessage && (
-              <div style={{ padding: '10px 16px', background: testMessage.includes('Failed') ? '#fef2f2' : '#dcfce7', borderRadius: 8, marginBottom: 16, fontSize: 13, color: testMessage.includes('Failed') ? '#dc2626' : '#166534' }}>
-                {testMessage}
-              </div>
-            )}
-
-            {/* Email Assignments — managed centrally in Email Templates */}
-            <div style={{ border: '1px solid #d2d2d7', borderRadius: 12, padding: 24, background: '#f9f9fb', display: 'flex', alignItems: 'center', gap: 20 }}>
-              <div style={{ fontSize: 32 }}>✉️</div>
-              <div style={{ flex: 1 }}>
-                <h4 style={{ fontSize: 14, fontWeight: 600, color: '#1d1d1f', margin: '0 0 4px' }}>Email Assignments</h4>
-                <p style={{ fontSize: 13, color: '#86868b', margin: 0 }}>
-                  Email template assignments are managed centrally in the <strong>Email Templates</strong> module — assign templates to trigger events there and they will apply to this survey automatically.
-                </p>
-              </div>
-              <Button variant="ghost" size="sm" onClick={() => navigate('/communications')}>
-                Go to Communications →
-              </Button>
-            </div>
-          </div>
-        )}
         </div>
       </div>
 
@@ -418,6 +347,16 @@ export default function SurveyEditor() {
             />
           </div>
         </div>
+      )}
+
+      {/* Publish pre-flight modal */}
+      {showPreflight && survey.surveyId && (
+        <PublishPreflightModal
+          open={showPreflight}
+          surveyId={survey.surveyId}
+          onClose={() => setShowPreflight(false)}
+          onConfirm={handleConfirmPublish}
+        />
       )}
     </div>
   )

@@ -32,7 +32,7 @@ export interface SurveyPage {
   questions: SurveyQuestion[]
 }
 
-export type SurveyTab = 'details' | 'formBuilder' | 'formViewer' | 'logic' | 'participants' | 'distribute' | 'settings'
+export type SurveyTab = 'details' | 'formBuilder' | 'formViewer' | 'logic' | 'participants' | 'distribute'
 
 export const SURVEY_TABS: Array<{ key: SurveyTab; label: string }> = [
   { key: 'details', label: 'Details' },
@@ -41,7 +41,6 @@ export const SURVEY_TABS: Array<{ key: SurveyTab; label: string }> = [
   { key: 'logic', label: 'Configuration' },
   { key: 'participants', label: 'Participants' },
   { key: 'distribute', label: 'Distribute' },
-  { key: 'settings', label: 'Settings' },
 ]
 
 export interface SurveyQuestion {

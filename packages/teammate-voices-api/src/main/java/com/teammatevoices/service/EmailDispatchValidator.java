@@ -102,7 +102,7 @@ public class EmailDispatchValidator {
         boolean hasAssignments = !assignments.isEmpty();
         checks.add(new CheckItem("has_email_assignments", "Email templates are assigned", hasAssignments,
                 hasAssignments ? assignments.size() + " assignment(s) configured"
-                        : "No email templates assigned — go to Survey Settings tab"));
+                        : "No email templates assigned — go to the Details tab"));
 
         // 6. All assigned templates are ACTIVE
         if (hasAssignments) {
