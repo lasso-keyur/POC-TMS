@@ -95,7 +95,6 @@ export default function ProgramCommunicationsTab({ programId }: Props) {
   const [templates, setTemplates] = useState<EmailTemplate[]>([])
   const [surveys, setSurveys] = useState<Survey[]>([])
   const [selectedSurveyId, setSelectedSurveyId] = useState<number | null>(null)
-  // Per-survey step configs: { [surveyId]: { [trigger]: StepConfig } }
   const [allConfigs, setAllConfigs] = useState<Record<number, Record<string, StepConfig>>>({})
   const [saving, setSaving] = useState<string | null>(null)
   const [saved, setSaved] = useState<string | null>(null)
@@ -104,8 +103,8 @@ export default function ProgramCommunicationsTab({ programId }: Props) {
 
   useEffect(() => {
     Promise.all([
-      api.getSurveys(),
-      api.getEmailTemplates(),
+      api.getSurveys().catch(() => [] as Survey[]),
+      api.getEmailTemplates().catch(() => [] as EmailTemplate[]),
       api.getAssignmentsByProgram(programId).catch(() => [] as EmailTemplateAssignment[]),
     ]).then(([allSurveys, tmpl, assignments]) => {
       const programSurveys = allSurveys.filter(s => s.programId === programId)
@@ -113,7 +112,7 @@ export default function ProgramCommunicationsTab({ programId }: Props) {
       setSurveys(programSurveys)
       if (programSurveys.length > 0) setSelectedSurveyId(programSurveys[0].surveyId)
 
-      // Build allConfigs keyed by surveyId, pre-filled from existing assignments
+      // Build per-survey step configs, pre-filled from existing assignments
       const bysurvey: Record<number, Record<string, StepConfig>> = {}
       programSurveys.forEach(s => {
         bysurvey[s.surveyId] = makeDefaultConfigs()
@@ -183,6 +182,7 @@ export default function ProgramCommunicationsTab({ programId }: Props) {
   }
 
   const configuredCount = Object.values(configs).filter(c => !!c.templateId).length
+  const selectedSurvey = surveys.find(s => s.surveyId === selectedSurveyId)
 
   if (loading) {
     return <p style={{ padding: 40, color: '#86868b', textAlign: 'center' }}>Loading communications…</p>
@@ -196,35 +196,62 @@ export default function ProgramCommunicationsTab({ programId }: Props) {
         <div>
           <h2 className="comm-tab__title">Email Communications</h2>
           <p className="comm-tab__subtitle">
-            Select a survey to configure its email journey. Each survey can have its own template assignments.
+            Select a survey below, then assign an email template to each step of its communication journey.
           </p>
         </div>
-        <div className="comm-tab__header-badge">
-          <span className="comm-tab__progress-pill">
-            {configuredCount} / {PROGRAM_EMAIL_STEPS.length} configured
-          </span>
-        </div>
+        {selectedSurveyId && (
+          <div className="comm-tab__header-badge">
+            <span className="comm-tab__progress-pill">
+              {configuredCount} / {PROGRAM_EMAIL_STEPS.length} configured
+            </span>
+          </div>
+        )}
       </div>
 
-      {/* Survey selector tabs */}
+      {/* ── Step 1: Survey picker ─────────────────────────────────── */}
       {surveys.length === 0 ? (
-        <div className="comm-tab__no-surveys">No surveys linked to this program yet.</div>
+        <div className="comm-tab__no-surveys">
+          No surveys are linked to this program yet. Create and link surveys from the Surveys page.
+        </div>
       ) : (
-        <div className="comm-tab__survey-tabs">
-          <span className="comm-tab__survey-tabs-label">Configure for:</span>
-          {surveys.map(s => (
-            <button
-              key={s.surveyId}
-              className={`comm-tab__survey-tab${selectedSurveyId === s.surveyId ? ' comm-tab__survey-tab--active' : ''}`}
-              onClick={() => setSelectedSurveyId(s.surveyId)}
+        <div className="comm-tab__survey-picker">
+          <div className="comm-tab__survey-picker-icon">📋</div>
+          <div className="comm-tab__survey-picker-body">
+            <label className="comm-tab__survey-picker-label" htmlFor="survey-picker-select">
+              Step 1 — Select a Survey
+            </label>
+            <p className="comm-tab__survey-picker-hint">
+              Each survey has its own independent email journey. Switch surveys using this dropdown to configure them separately.
+            </p>
+            <select
+              id="survey-picker-select"
+              className="comm-tab__survey-picker-select"
+              value={selectedSurveyId ?? ''}
+              onChange={e => setSelectedSurveyId(Number(e.target.value))}
             >
-              {s.title}
-            </button>
-          ))}
+              {surveys.map(s => (
+                <option key={s.surveyId} value={s.surveyId}>
+                  {s.title}
+                  {s.status === 'ACTIVE' ? ' — Active' : s.status === 'CLOSED' ? ' — Closed' : ' — Draft'}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
       )}
 
-      {/* Journey timeline — only shown when a survey is selected */}
+      {/* Connector from picker to first step */}
+      {selectedSurveyId && surveys.length > 0 && (
+        <div className="comm-tab__picker-connector">
+          <div className="comm-tab__picker-connector-line" />
+          <div className="comm-tab__picker-connector-arrow">▼</div>
+          <p className="comm-tab__picker-connector-label">
+            Configuring: <strong>{selectedSurvey?.title}</strong>
+          </p>
+        </div>
+      )}
+
+      {/* ── Step 2: Journey timeline (scoped to selected survey) ──── */}
       {selectedSurveyId && (
         <div className="comm-tab__journey">
           {PROGRAM_EMAIL_STEPS.map((step, idx) => {

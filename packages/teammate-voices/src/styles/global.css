@@ -5201,44 +5201,88 @@ input, textarea, select {
   white-space: nowrap;
 }
 
-/* Survey selector tabs */
-.comm-tab__survey-tabs {
+/* Survey picker card */
+.comm-tab__survey-picker {
   display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 20px;
-  flex-wrap: wrap;
-}
-
-.comm-tab__survey-tabs-label {
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--color-text-secondary, #86868b);
-  white-space: nowrap;
-  margin-right: 4px;
-}
-
-.comm-tab__survey-tab {
-  padding: 6px 14px;
-  border-radius: 20px;
-  border: 1.5px solid #d1d5db;
+  gap: 16px;
+  align-items: flex-start;
   background: #fff;
+  border: 2px solid #007aff;
+  border-radius: 14px;
+  padding: 20px 24px;
+  margin-bottom: 0;
+  box-shadow: 0 2px 12px rgba(0, 122, 255, 0.1);
+}
+
+.comm-tab__survey-picker-icon {
+  font-size: 28px;
+  line-height: 1;
+  padding-top: 2px;
+  flex-shrink: 0;
+}
+
+.comm-tab__survey-picker-body {
+  flex: 1;
+}
+
+.comm-tab__survey-picker-label {
+  display: block;
+  font-size: 15px;
+  font-weight: 700;
+  color: #1d1d1f;
+  margin-bottom: 4px;
+}
+
+.comm-tab__survey-picker-hint {
   font-size: 13px;
+  color: #86868b;
+  margin: 0 0 12px;
+  line-height: 1.5;
+}
+
+.comm-tab__survey-picker-select {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1.5px solid #007aff;
+  border-radius: 8px;
+  font-size: 14px;
   font-weight: 500;
-  color: #374151;
+  color: #1d1d1f;
+  background: #f0f6ff;
   cursor: pointer;
-  transition: border-color 0.15s, color 0.15s, background 0.15s;
 }
 
-.comm-tab__survey-tab:hover {
-  border-color: #007aff;
-  color: #007aff;
+/* Connector between picker card and first email step */
+.comm-tab__picker-connector {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 6px 0 0;
 }
 
-.comm-tab__survey-tab--active {
-  border-color: #007aff;
-  background: #eff6ff;
+.comm-tab__picker-connector-line {
+  width: 2px;
+  height: 20px;
+  background: #007aff;
+  opacity: 0.3;
+}
+
+.comm-tab__picker-connector-arrow {
   color: #007aff;
+  font-size: 14px;
+  opacity: 0.5;
+  margin-top: -4px;
+}
+
+.comm-tab__picker-connector-label {
+  font-size: 12px;
+  color: #86868b;
+  margin: 4px 0 8px;
+  text-align: center;
+}
+
+.comm-tab__picker-connector-label strong {
+  color: #1d1d1f;
 }
 
 .comm-tab__no-surveys {
