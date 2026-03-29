@@ -288,16 +288,6 @@ export default function SurveyEditor() {
               <Button variant="primary" size="sm" onClick={handleNext}>Next</Button>
             </div>
 
-            {/* Email Communications — only shown for saved surveys */}
-            {isEditMode && survey.surveyId && (
-              <>
-                <hr className="survey-editor__divider" />
-                <SurveyEmailConfig
-                  surveyId={survey.surveyId}
-                  programId={survey.programId}
-                />
-              </>
-            )}
           </>
         )}
 
@@ -397,6 +387,18 @@ export default function SurveyEditor() {
         )}
         </div>
       </div>
+
+      {/* Email Communications — separate card, shown in Details tab for saved surveys */}
+      {activeTab === 'details' && isEditMode && survey.surveyId && (
+        <div className="survey-editor__card survey-editor__email-card">
+          <div className="survey-editor__content">
+            <SurveyEmailConfig
+              surveyId={survey.surveyId}
+              programId={survey.programId}
+            />
+          </div>
+        </div>
+      )}
     </div>
   )
 }

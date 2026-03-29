@@ -1148,6 +1148,10 @@ input, textarea, select {
   overflow: hidden;
 }
 
+.survey-editor__email-card {
+  margin-top: 20px;
+}
+
 .survey-editor__card .dashboard__tabs {
   padding: 0 32px;
   margin-bottom: 0;
