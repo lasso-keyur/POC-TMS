@@ -3,13 +3,12 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { Button } from '../design-system'
 import Breadcrumb from '@/components/Breadcrumb'
 import StatusPill from '@/components/StatusPill'
-import ProgramCommunicationsTab from '@/components/ProgramCommunicationsTab'
 import { AgGridReact } from 'ag-grid-react'
 import type { ColDef, SizeColumnsToFitGridStrategy } from 'ag-grid-community'
 import { api } from '@/services/api'
 import type { ProgramDetail as ProgramDetailType, ParticipantStatusRow } from '@/types/program'
 
-type ProgramTab = 'overview' | 'participants' | 'communications'
+type ProgramTab = 'overview' | 'participants'
 
 function getStatusVariant(status: string): 'active' | 'draft' | 'closed' | 'default' {
   const s = status.toUpperCase()
@@ -201,9 +200,8 @@ export default function ProgramDetail() {
       {/* Section Tab Bar */}
       <div className="program-detail__tab-bar">
         {([
-          { key: 'overview',        label: '📋 Overview' },
-          { key: 'participants',    label: '👥 Participants' },
-          { key: 'communications',  label: '✉️ Communications' },
+          { key: 'overview',     label: '📋 Overview' },
+          { key: 'participants', label: '👥 Participants' },
         ] as { key: ProgramTab; label: string }[]).map(t => (
           <button
             key={t.key}
@@ -215,13 +213,6 @@ export default function ProgramDetail() {
         ))}
       </div>
 
-      {/* Communications tab */}
-      {activeSection === 'communications' && program.programId && (
-        <ProgramCommunicationsTab programId={program.programId} />
-      )}
-
-      {/* Overview + Participants tabs share the original content */}
-      {activeSection !== 'communications' && (
       <>
 
       {/* Top Card: Program Information */}
@@ -341,8 +332,7 @@ export default function ProgramDetail() {
         </div>
       </div>
 
-      </> /* end overview + participants wrapper */
-      )}
+      </>
     </div>
   )
 }

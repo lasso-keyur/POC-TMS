@@ -11,6 +11,7 @@ import ToggleSwitch from '@/components/ToggleSwitch'
 import { LogicTab } from '@/components/logic'
 import DistributeTab from '@/components/DistributeTab'
 import ParticipantsTab from '@/components/ParticipantsTab'
+import SurveyEmailConfig from '@/components/SurveyEmailConfig'
 import { api } from '@/services/api'
 import type { Survey, SurveyPage, SurveyTab } from '@/types/survey'
 import { SURVEY_TABS } from '@/types/survey'
@@ -286,6 +287,17 @@ export default function SurveyEditor() {
               <Button variant="secondary" size="sm" onClick={handleSave} loading={saving} disabled={isLocked}>Save</Button>
               <Button variant="primary" size="sm" onClick={handleNext}>Next</Button>
             </div>
+
+            {/* Email Communications — only shown for saved surveys */}
+            {isEditMode && survey.surveyId && (
+              <>
+                <hr className="survey-editor__divider" />
+                <SurveyEmailConfig
+                  surveyId={survey.surveyId}
+                  programId={survey.programId}
+                />
+              </>
+            )}
           </>
         )}
 

@@ -5574,6 +5574,13 @@ input, textarea, select {
 }
 
 /* Footer */
+.comm-tab__loading {
+  padding: 32px;
+  text-align: center;
+  color: #86868b;
+  font-size: 14px;
+}
+
 .comm-tab__footer {
   display: flex;
   gap: 10px;
