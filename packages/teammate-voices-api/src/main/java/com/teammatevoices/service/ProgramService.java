@@ -73,8 +73,6 @@ public class ProgramService {
     @Transactional
     public ProgramDTO updateProgram(Long id, ProgramDTO dto) {
         log.info("Updating program: {}", id);
-        requireEditableProgram(id);
-
         Program program = programRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Program", id));
 

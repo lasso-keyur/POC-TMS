@@ -2,6 +2,10 @@ spring:
   application:
     name: teammate-voices-api
 
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+
   datasource:
     url: jdbc:oracle:thin:@${DB_HOST:localhost}:${DB_PORT:1521}/${DB_SERVICE:FREEPDB1}
     username: ${DB_USER:teammate_voices}
