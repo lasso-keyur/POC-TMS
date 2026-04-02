@@ -4929,6 +4929,59 @@ input, textarea, select {
 .wysiwyg-editor p { margin: 0 0 12px; }
 .wysiwyg-editor a { color: #007aff; }
 .wysiwyg-editor ul, .wysiwyg-editor ol { padding-left: 24px; margin: 0 0 12px; }
+/* TipTap focus ring reset */
+.wysiwyg-editor:focus { outline: none; }
+
+/* Active toolbar button state */
+.wysiwyg-toolbar__btn--active {
+  background: #e5e5ea;
+  color: #007aff;
+  font-weight: 700;
+}
+
+/* Inline input popover (link URL / CTA button form) */
+.wysiwyg-inline-input {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  z-index: 200;
+  background: #fff;
+  border: 1px solid #d2d2d7;
+  border-radius: 10px;
+  padding: 8px 12px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.10);
+  min-width: 280px;
+}
+.wysiwyg-inline-input--wide { min-width: 340px; flex-wrap: wrap; }
+.wysiwyg-inline-input__field {
+  flex: 1;
+  min-width: 0;
+  padding: 6px 10px;
+  border: 1.5px solid #d2d2d7;
+  border-radius: 6px;
+  font-size: 13px;
+  outline: none;
+}
+.wysiwyg-inline-input__field:focus { border-color: #007aff; }
+.wysiwyg-inline-input__btn {
+  padding: 6px 12px;
+  border: 1.5px solid #d2d2d7;
+  border-radius: 6px;
+  background: #fff;
+  font-size: 13px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.wysiwyg-inline-input__btn:hover { background: #f5f5f7; }
+.wysiwyg-inline-input__btn--primary {
+  background: #007aff;
+  color: #fff;
+  border-color: #007aff;
+}
+.wysiwyg-inline-input__btn--primary:hover { background: #0062d1; border-color: #0062d1; }
 
 /* Merge field chips in editor */
 .merge-field-chip {
