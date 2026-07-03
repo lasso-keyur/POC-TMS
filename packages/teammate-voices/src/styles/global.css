@@ -7282,3 +7282,41 @@ input, textarea, select {
   .m360-phase__dates { grid-template-columns: 1fr 1fr; }
   .m360-report-bar { grid-template-columns: 1fr; gap: 6px; }
 }
+
+/* M360 — upload participant/raters */
+.m360-upload { display: flex; flex-direction: column; gap: 8px; max-width: 560px; }
+.m360-upload__labels { display: flex; justify-content: space-between; align-items: center; }
+.m360-upload__row { display: flex; align-items: center; gap: 8px; }
+.m360-upload__filebox {
+  flex: 1; display: flex; justify-content: space-between; align-items: center; gap: 10px;
+  border: 1.5px solid #d2d2d7; border-radius: 8px; padding: 10px 14px; font-size: 13.5px; cursor: pointer;
+  background: #fff;
+}
+.m360-upload__filebox:hover { border-color: #86868b; }
+.m360-upload__icon { color: #012169; font-size: 16px; }
+.m360-upload__progress { display: flex; align-items: center; gap: 12px; }
+.m360-upload__progress-track { flex: 1; height: 6px; background: #f0f0f2; border-radius: 3px; overflow: hidden; }
+.m360-upload__progress-fill { height: 100%; background: #0a5fff; border-radius: 3px; transition: width 0.25s ease; }
+.m360-upload__success { margin: 2px 0 0; font-size: 13px; color: #16a34a; font-weight: 600; }
+.m360-upload__error { margin: 2px 0 0; font-size: 13px; color: #dc2626; font-weight: 600; }
+
+/* M360 — sortable table headers */
+.m360-sort-btn {
+  border: none; background: none; padding: 0; cursor: pointer; display: inline-flex; align-items: center; gap: 5px;
+  font-size: 12px; font-weight: 600; color: #6e6e73; font-family: inherit;
+}
+.m360-sort-btn:hover { color: #1d1d1f; }
+.m360-sort-btn__icon { font-size: 10px; opacity: 0.55; }
+.m360-sort-btn__icon--active { opacity: 1; color: #012169; }
+
+/* M360 — dashboard section header with right-aligned links */
+.m360-activities__header-row {
+  display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; flex-wrap: wrap; margin-bottom: 10px;
+}
+.m360-activities__header-row .m360-activities__title { margin-bottom: 2px; }
+.m360-activities__header-links { display: flex; align-items: center; gap: 8px; }
+
+/* M360 — per-activity toggle column + disabled row state */
+.m360-activities-table__toggle-cell { width: 56px; }
+.m360-activities-table__toggle-cell .toggle-switch__track { transform: scale(0.85); }
+.m360-activities-table__row--off td:not(.m360-activities-table__toggle-cell) { opacity: 0.45; }

@@ -17,6 +17,7 @@ public class ProgramDTO {
     private String description;
 
     private String templateType;
+    private String programKey;
     private String status;
     private String surveyProgress;
     private LocalDate startDate;
@@ -47,6 +48,9 @@ public class ProgramDTO {
     public void setDescription(String description) {
         this.description = description;
     }
+
+    public String getProgramKey() { return programKey; }
+    public void setProgramKey(String programKey) { this.programKey = programKey; }
 
     public String getTemplateType() {
         return templateType;

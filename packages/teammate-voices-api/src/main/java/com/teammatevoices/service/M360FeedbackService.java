@@ -305,6 +305,30 @@ public class M360FeedbackService {
         return activities;
     }
 
+    /** Available reports for the dashboard: one row per COMPLETED enrollment. */
+    @Transactional(readOnly = true)
+    public List<Map<String, Object>> getAvailableReports() {
+        List<Map<String, Object>> reports = new ArrayList<>();
+        for (M360Cycle cycle : cycleRepository.findAll()) {
+            String surveyName = cycle.getSurveyId() != null
+                    ? surveyRepository.findById(cycle.getSurveyId()).map(Survey::getTitle).orElse("360 Survey")
+                    : "360 Survey";
+            for (M360Enrollment e : enrollmentRepository.findByCycleIdOrderByEnrollmentIdAsc(cycle.getCycleId())) {
+                if (!"COMPLETED".equals(e.getStatus())) continue;
+                String participantName = participantRepository.findById(e.getParticipantId())
+                        .map(Participant::getFullName).orElse(e.getParticipantId());
+                Map<String, Object> row = new HashMap<>();
+                row.put("report", "Manager 360 Report for " + participantName + " is ready for review");
+                row.put("surveyName", surveyName);
+                row.put("cycleName", cycle.getName());
+                row.put("datePublished", e.getUpdatedAt());
+                row.put("linkPath", "/m360/report/" + cycle.getCycleId() + "/" + e.getParticipantId());
+                reports.add(row);
+            }
+        }
+        return reports;
+    }
+
     // ── helpers ───────────────────────────────────────────────────────────────
 
     private M360RaterAssignment findByToken(String token) {

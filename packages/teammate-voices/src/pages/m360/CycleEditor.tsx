@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { Button } from '../../design-system'
 import Breadcrumb from '@/components/Breadcrumb'
@@ -102,6 +102,13 @@ export default function CycleEditor() {
   const [permHr, setPermHr] = useState(true)
   const [permSelf, setPermSelf] = useState(true)
   const [permManager, setPermManager] = useState(false)
+
+  // Bulk upload state (Upload participant/raters)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+  const [uploadFileName, setUploadFileName] = useState<string | null>(null)
+  const [uploadProgress, setUploadProgress] = useState<number | null>(null)
+  const [uploadSuccess, setUploadSuccess] = useState<string | null>(null)
+  const [uploadError, setUploadError] = useState<string | null>(null)
 
   const savedCycleId = useMemo(() => (cycleId ? Number(cycleId) : null), [cycleId])
 
@@ -277,6 +284,44 @@ export default function CycleEditor() {
     setCriteria(prev => prev.map(c => (c.category === category ? { ...c, ...patch } : c)))
   }
 
+  async function handleFileUpload(file: File) {
+    if (!savedCycleId) { setUploadError('Save Cycle information first.'); return }
+    if (file.size > 25 * 1024 * 1024) {
+      setUploadError('Error! Maximum upload file size is 25 MB.')
+      return
+    }
+    setUploadFileName(file.name)
+    setUploadError(null)
+    setUploadSuccess(null)
+    setUploadProgress(15)
+    const ticker = window.setInterval(() => {
+      setUploadProgress(p => (p != null && p < 85 ? p + 10 : p))
+    }, 200)
+    try {
+      const result = await api.importM360Enrollments(savedCycleId, file)
+      window.clearInterval(ticker)
+      setUploadProgress(100)
+      const { importResult, enrollments: updated } = result
+      const total = importResult.uploaded + importResult.alreadyExists
+      setUploadSuccess(`Success! ${total} record${total === 1 ? '' : 's'} have been uploaded`
+        + (importResult.errors > 0 ? ` (${importResult.errors} row${importResult.errors === 1 ? '' : 's'} had errors).` : '.'))
+      setEnrollments(updated)
+    } catch (e) {
+      window.clearInterval(ticker)
+      setUploadProgress(null)
+      setUploadError('Error! There was an issue with the file you are trying to upload. Please try again.'
+        + (e instanceof Error && e.message ? ` (${e.message})` : ''))
+    }
+  }
+
+  function clearUpload() {
+    setUploadFileName(null)
+    setUploadProgress(null)
+    setUploadSuccess(null)
+    setUploadError(null)
+    if (fileInputRef.current) fileInputRef.current.value = ''
+  }
+
   const availableParticipants = participants.filter(
     p => !enrollments.some(e => e.participantId === p.participantId),
   )
@@ -411,6 +456,7 @@ export default function CycleEditor() {
                           <table className="m360-activities-table">
                             <thead>
                               <tr>
+                                <th></th>
                                 <th>Activity</th>
                                 <th>Comms template</th>
                                 <th>Activity date</th>
@@ -420,7 +466,18 @@ export default function CycleEditor() {
                             </thead>
                             <tbody>
                               {phase.activities.map((a, i) => (
-                                <tr key={i}>
+                                <tr key={i} className={a.isEnabled === false ? 'm360-activities-table__row--off' : ''}>
+                                  <td className="m360-activities-table__toggle-cell">
+                                    <button
+                                      role="switch"
+                                      type="button"
+                                      aria-checked={a.isEnabled !== false}
+                                      className={`toggle-switch__track${a.isEnabled !== false ? ' toggle-switch__track--on' : ''}`}
+                                      onClick={() => updateActivity(phase.phaseType, i, { isEnabled: a.isEnabled === false })}
+                                    >
+                                      <span className="toggle-switch__thumb" />
+                                    </button>
+                                  </td>
                                   <td>
                                     <input className="program-create__input m360-activities-table__name" value={a.activityName}
                                       placeholder="Activity name"
@@ -526,6 +583,49 @@ export default function CycleEditor() {
                 <ToggleSwitch label="HR Partners" checked={permHr} onChange={setPermHr} />
                 <ToggleSwitch label="Participant (Self)" checked={permSelf} onChange={setPermSelf} />
                 <ToggleSwitch label="Manager" checked={permManager} onChange={setPermManager} />
+              </div>
+
+              <h3 className="m360-section-title">Upload participant/raters</h3>
+              <div className="m360-upload">
+                <div className="m360-upload__labels">
+                  <span className="form-field__label">File upload</span>
+                  <a className="m360-add-link" href="/360_ParticipantList_Template.xlsx" download>Bulk upload template</a>
+                </div>
+                <div className="m360-upload__row">
+                  <div className="m360-upload__filebox" onClick={() => fileInputRef.current?.click()}>
+                    <span className={uploadFileName ? '' : 'm360-muted'}>
+                      {uploadFileName ?? 'Choose a .xlsx file…'}
+                    </span>
+                    <span className="m360-upload__icon">⇪</span>
+                  </div>
+                  {uploadFileName && (
+                    <button className="m360-icon-btn" title="Clear" onClick={clearUpload}>🗑</button>
+                  )}
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept=".xlsx"
+                    style={{ display: 'none' }}
+                    onChange={e => { const f = e.target.files?.[0]; if (f) handleFileUpload(f) }}
+                  />
+                </div>
+                <span className="m360-muted">Maximum upload file size: 25 MB</span>
+                {uploadProgress != null && (
+                  <div className="m360-upload__progress">
+                    <div className="m360-upload__progress-track">
+                      <div className="m360-upload__progress-fill" style={{ width: `${uploadProgress}%` }} />
+                    </div>
+                    <span className="m360-muted">
+                      {uploadProgress < 100 ? `Uploading… ${uploadProgress}%` : '100% complete'}
+                    </span>
+                  </div>
+                )}
+                {uploadSuccess && (
+                  <p className="m360-upload__success">✓ {uploadSuccess}</p>
+                )}
+                {uploadError && (
+                  <p className="m360-upload__error">⚠ {uploadError}</p>
+                )}
               </div>
 
               <h3 className="m360-section-title">Participants</h3>

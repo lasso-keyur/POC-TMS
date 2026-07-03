@@ -79,6 +79,7 @@ public class ProgramService {
         program.setName(dto.getName());
         program.setDescription(dto.getDescription());
         if (dto.getTemplateType() != null) program.setTemplateType(dto.getTemplateType());
+        if (dto.getProgramKey() != null) program.setProgramKey(dto.getProgramKey());
         if (dto.getStatus() != null) program.setStatus(dto.getStatus());
         if (dto.getSurveyProgress() != null) program.setSurveyProgress(dto.getSurveyProgress());
         program.setStartDate(dto.getStartDate());
@@ -166,6 +167,7 @@ public class ProgramService {
         dto.setName(program.getName());
         dto.setDescription(program.getDescription());
         dto.setTemplateType(program.getTemplateType());
+        dto.setProgramKey(program.getProgramKey());
         dto.setStatus(program.getStatus());
         dto.setSurveyProgress(program.getSurveyProgress());
         dto.setStartDate(program.getStartDate());
@@ -180,6 +182,7 @@ public class ProgramService {
         program.setName(dto.getName());
         program.setDescription(dto.getDescription());
         program.setTemplateType(dto.getTemplateType() != null ? dto.getTemplateType() : "CUSTOM");
+        program.setProgramKey(dto.getProgramKey());
         program.setStatus(dto.getStatus() != null ? dto.getStatus() : "INACTIVE");
         program.setSurveyProgress(dto.getSurveyProgress() != null ? dto.getSurveyProgress() : "NOT_STARTED");
         program.setStartDate(dto.getStartDate());

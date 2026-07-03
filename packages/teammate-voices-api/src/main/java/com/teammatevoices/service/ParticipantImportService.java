@@ -39,6 +39,7 @@ public class ParticipantImportService {
     public ParticipantImportResultDTO importFromExcel(MultipartFile file) throws IOException {
         int uploaded = 0, alreadyExists = 0, errorCount = 0;
         List<String> errorDetails = new ArrayList<>();
+        List<String> participantIds = new ArrayList<>();
 
         try (Workbook workbook = new XSSFWorkbook(file.getInputStream())) {
             Sheet sheet = workbook.getSheetAt(0);
@@ -91,8 +92,10 @@ public class ParticipantImportService {
                     }
 
                     // ── Skip if participant already exists (match by email) ───
-                    if (participantRepository.findByEmail(email).isPresent()) {
+                    var existing = participantRepository.findByEmail(email);
+                    if (existing.isPresent()) {
                         alreadyExists++;
+                        participantIds.add(existing.get().getParticipantId());
                         continue;
                     }
 
@@ -121,6 +124,7 @@ public class ParticipantImportService {
                             || (!"false".equalsIgnoreCase(activeStr.trim()) && !"0".equals(activeStr.trim())));
 
                     participantRepository.save(p);
+                    participantIds.add(p.getParticipantId());
                     uploaded++;
 
                 } catch (Exception e) {
@@ -129,7 +133,10 @@ public class ParticipantImportService {
                 }
             }
 
-            return new ParticipantImportResultDTO(totalRows, uploaded, alreadyExists, errorCount, errorDetails);
+            ParticipantImportResultDTO result =
+                    new ParticipantImportResultDTO(totalRows, uploaded, alreadyExists, errorCount, errorDetails);
+            result.setParticipantIds(participantIds);
+            return result;
         }
     }
 

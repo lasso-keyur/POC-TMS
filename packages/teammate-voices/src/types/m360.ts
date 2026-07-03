@@ -179,3 +179,20 @@ export interface M360Report {
   categoryScores: M360CategoryScore[]
   questionRows: M360ReportQuestionRow[]
 }
+
+export interface M360AvailableReport {
+  report: string
+  surveyName: string
+  cycleName: string
+  datePublished?: string | null
+  linkPath: string
+}
+
+export interface M360ImportResult {
+  totalRows: number
+  uploaded: number
+  alreadyExists: number
+  errors: number
+  errorDetails: string[]
+  participantIds: string[]
+}

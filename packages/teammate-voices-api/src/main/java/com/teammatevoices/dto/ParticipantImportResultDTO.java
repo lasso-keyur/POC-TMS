@@ -9,6 +9,7 @@ public class ParticipantImportResultDTO {
     private int alreadyExists;  // Records skipped — email already in DB
     private int errors;         // Rows that failed due to validation/data errors
     private List<String> errorDetails; // Human-readable error messages per row
+    private List<String> participantIds = new java.util.ArrayList<>(); // IDs of created + matched participants
 
     public ParticipantImportResultDTO() {}
 
@@ -35,4 +36,7 @@ public class ParticipantImportResultDTO {
 
     public List<String> getErrorDetails()       { return errorDetails; }
     public void setErrorDetails(List<String> v) { this.errorDetails = v; }
+
+    public List<String> getParticipantIds()       { return participantIds; }
+    public void setParticipantIds(List<String> v) { this.participantIds = v; }
 }

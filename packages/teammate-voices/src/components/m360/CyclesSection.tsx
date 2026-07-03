@@ -13,11 +13,14 @@ function fmtDate(iso?: string | null): string {
   return d.toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' })
 }
 
+type CycleCol = 'name' | 'versionLabel' | 'participantCount' | 'scheduleStartAt' | 'scheduleEndAt' | 'status'
+
 export default function CyclesSection({ programId }: CyclesSectionProps) {
   const navigate = useNavigate()
   const [cycles, setCycles] = useState<M360Cycle[]>([])
   const [menuOpenFor, setMenuOpenFor] = useState<number | null>(null)
   const [deleteTarget, setDeleteTarget] = useState<M360Cycle | null>(null)
+  const [sort, setSort] = useState<{ key: CycleCol; dir: 'asc' | 'desc' } | null>(null)
 
   const load = useCallback(() => {
     api.getM360Cycles(programId).then(setCycles).catch(() => setCycles([]))
@@ -39,6 +42,28 @@ export default function CyclesSection({ programId }: CyclesSectionProps) {
     load()
   }
 
+  function toggleSort(key: CycleCol) {
+    setSort(prev => (prev?.key === key && prev.dir === 'asc' ? { key, dir: 'desc' } : { key, dir: 'asc' }))
+  }
+
+  const sortedCycles = sort
+    ? [...cycles].sort((a, b) => {
+        const dir = sort.dir === 'asc' ? 1 : -1
+        return String(a[sort.key] ?? '').localeCompare(String(b[sort.key] ?? ''), undefined, { numeric: true }) * dir
+      })
+    : cycles
+
+  const header = (label: string, key: CycleCol) => (
+    <th>
+      <button className="m360-sort-btn" onClick={() => toggleSort(key)}>
+        {label}
+        <span className={`m360-sort-btn__icon${sort?.key === key ? ' m360-sort-btn__icon--active' : ''}`}>
+          {sort?.key === key ? (sort.dir === 'asc' ? '▲' : '▼') : '⇅'}
+        </span>
+      </button>
+    </th>
+  )
+
   return (
     <div className="m360-cycles-card">
       <div className="m360-cycles-card__header">
@@ -54,17 +79,17 @@ export default function CyclesSection({ programId }: CyclesSectionProps) {
         <table className="m360-cycles-table">
           <thead>
             <tr>
-              <th>Cycle name</th>
-              <th>Version</th>
-              <th>Participants</th>
-              <th>Schedule start date</th>
-              <th>Schedule end date</th>
-              <th>Status</th>
+              {header('Cycle name', 'name')}
+              {header('Version', 'versionLabel')}
+              {header('Participants', 'participantCount')}
+              {header('Schedule start date', 'scheduleStartAt')}
+              {header('Schedule end date', 'scheduleEndAt')}
+              {header('Status', 'status')}
               <th>Actions</th>
             </tr>
           </thead>
           <tbody>
-            {cycles.map(c => (
+            {sortedCycles.map(c => (
               <tr key={c.cycleId}>
                 <td>
                   <button className="m360-link" onClick={() => navigate(`/programs/${programId}/cycles/${c.cycleId}`)}>

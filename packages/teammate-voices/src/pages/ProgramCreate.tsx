@@ -3,7 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { Button } from '../design-system'
 import Breadcrumb from '@/components/Breadcrumb'
 import ToggleSwitch from '@/components/ToggleSwitch'
-import { PROGRAM_TEMPLATES } from '@/types/program'
+import { PROGRAM_TEMPLATES, PROGRAM_KEYS } from '@/types/program'
 import { api } from '@/services/api'
 
 export default function ProgramCreate() {
@@ -12,6 +12,7 @@ export default function ProgramCreate() {
   const isEditMode = !!programId
 
   const [template, setTemplate] = useState('')
+  const [programKey, setProgramKey] = useState('')
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
   const [isActive, setIsActive] = useState(false)
@@ -30,6 +31,7 @@ export default function ProgramCreate() {
         setName(program.name || '')
         setDescription(program.description || '')
         setTemplate(program.templateType || '')
+        setProgramKey(program.programKey || '')
         setIsActive(program.status === 'ACTIVE' || program.status === 'Active')
         setStartDate(program.startDate ?? '')
         setEndDate(program.endDate ?? '')
@@ -52,6 +54,7 @@ export default function ProgramCreate() {
           name: name.trim(),
           description: description.trim(),
           templateType: template || 'CUSTOM',
+          programKey: programKey || null,
           status: isActive ? 'ACTIVE' : 'INACTIVE',
           startDate: startDate || null,
           endDate: endDate || null,
@@ -62,6 +65,7 @@ export default function ProgramCreate() {
           name: name.trim(),
           description: description.trim(),
           templateType: template || 'CUSTOM',
+          programKey: programKey || null,
           status: isActive ? 'ACTIVE' : 'INACTIVE',
           surveyProgress: 'NOT_STARTED',
           startDate: startDate || null,
@@ -115,6 +119,24 @@ export default function ProgramCreate() {
               ))}
             </select>
             <span className="program-create__helper">Choose a pre-defined template</span>
+          </div>
+
+          <div className="program-create__field">
+            <label className="program-create__label" htmlFor="program-key">
+              Program key
+            </label>
+            <select
+              id="program-key"
+              className="program-create__select"
+              value={programKey}
+              onChange={e => setProgramKey(e.target.value)}
+            >
+              <option value="">Choose key</option>
+              {PROGRAM_KEYS.map(k => (
+                <option key={k} value={k}>{k}</option>
+              ))}
+            </select>
+            <span className="program-create__helper">Choose a key for the program</span>
           </div>
 
           <div className="program-create__field">

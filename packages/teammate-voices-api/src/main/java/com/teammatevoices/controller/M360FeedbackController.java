@@ -46,4 +46,10 @@ public class M360FeedbackController {
     public ResponseEntity<List<M360ActivityDTO>> getActivities() {
         return ResponseEntity.ok(feedbackService.getActivities());
     }
+
+    /** Dashboard "Available reports" rows — one per completed 360 review. */
+    @GetMapping("/reports")
+    public ResponseEntity<List<Map<String, Object>>> getAvailableReports() {
+        return ResponseEntity.ok(feedbackService.getAvailableReports());
+    }
 }

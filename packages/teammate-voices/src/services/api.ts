@@ -7,6 +7,7 @@ import type { SurveyAnalytics } from '@/types/analytics'
 import type {
   M360Cycle, CyclePhase, RaterCriteria, M360Enrollment, M360SelectionView,
   M360PersonSearchResult, M360Rater, M360Activity, M360Report,
+  M360AvailableReport, M360ImportResult,
 } from '@/types/m360'
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8081/api'
@@ -390,6 +391,26 @@ class TeammateVoicesAPI {
 
   async getM360Activities(): Promise<M360Activity[]> {
     return this.request<M360Activity[]>('/m360/activities')
+  }
+
+  async getM360AvailableReports(): Promise<M360AvailableReport[]> {
+    return this.request<M360AvailableReport[]>('/m360/reports')
+  }
+
+  /** Bulk upload: multipart — bypasses the JSON Content-Type set by request() */
+  async importM360Enrollments(cycleId: number, file: File): Promise<{ importResult: M360ImportResult; enrollments: M360Enrollment[] }> {
+    const form = new FormData()
+    form.append('file', file)
+    const response = await fetch(`${this.baseUrl}/m360/cycles/${cycleId}/enrollments/import`, {
+      method: 'POST',
+      body: form,
+    })
+    if (!response.ok) {
+      let data: Record<string, unknown> = {}
+      try { data = await response.json() } catch { /* not JSON */ }
+      throw new Error((data.message as string) || `Upload failed (${response.status})`)
+    }
+    return response.json()
   }
 
   async getM360Report(cycleId: number, participantId: string): Promise<M360Report> {

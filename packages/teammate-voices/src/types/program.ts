@@ -6,6 +6,7 @@ export interface Program {
   name: string
   description: string
   templateType?: string
+  programKey?: string | null
   status: ProgramStatus
   surveyProgress: SurveyProgress
   startDate?: string | null
@@ -39,8 +40,16 @@ export interface ProgramDetail {
 
 export const PROGRAM_TEMPLATES = [
   'Teammate Voices',
+  'Enterprise 360',
   'Intern Program',
   'Engagement Survey',
   'NPS Survey',
   'Custom',
+] as const
+
+export const PROGRAM_KEYS = [
+  '360',
+  'TMV',
+  'ESAT',
+  'LMO',
 ] as const

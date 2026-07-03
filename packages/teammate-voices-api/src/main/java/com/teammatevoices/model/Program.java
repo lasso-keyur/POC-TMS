@@ -26,6 +26,9 @@ public class Program {
     @Column(name = "TEMPLATE_TYPE", length = 50)
     private String templateType = "CUSTOM";
 
+    @Column(name = "PROGRAM_KEY", length = 50)
+    private String programKey;
+
     @Column(name = "STATUS", nullable = false, length = 20)
     private String status = "INACTIVE";
 
@@ -86,6 +89,14 @@ public class Program {
 
     public String getTemplateType() {
         return templateType;
+    }
+
+    public String getProgramKey() {
+        return programKey;
+    }
+
+    public void setProgramKey(String programKey) {
+        this.programKey = programKey;
     }
 
     public void setTemplateType(String templateType) {
