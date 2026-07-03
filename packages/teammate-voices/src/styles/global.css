@@ -7320,3 +7320,127 @@ input, textarea, select {
 .m360-activities-table__toggle-cell { width: 56px; }
 .m360-activities-table__toggle-cell .toggle-switch__track { transform: scale(0.85); }
 .m360-activities-table__row--off td:not(.m360-activities-table__toggle-cell) { opacity: 0.45; }
+
+/* ═══════════════════════ BANK OF AMERICA THEME (overrides) ═══════════════════════
+   Matches the Figma mockups: warm putty background, white brand bar with flagscape,
+   navy #012169 primary, BofA link blue #0052C2, pill buttons, underline tabs. */
+
+:root {
+  --bofa-navy: #012169;
+  --bofa-navy-hover: #01143f;
+  --bofa-red: #E31837;
+  --bofa-link: #0052C2;
+  --bofa-bg: #F4F3F0;
+  --bofa-card: #FFFFFF;
+  --bofa-text: #141414;
+  --bofa-muted: #5f5e5b;
+  --bofa-border: #E5E3DE;
+}
+
+body,
+.layout,
+.layout__main {
+  background: var(--bofa-bg);
+  color: var(--bofa-text);
+  font-family: "Connections", "Roboto", "Helvetica Neue", Arial, -apple-system, sans-serif;
+}
+
+/* ── Brand bar: navy → white with dark wordmark ── */
+.brand-bar {
+  background-color: #fff;
+  color: var(--bofa-text);
+  border-bottom: 1px solid var(--bofa-border);
+}
+.brand-bar__inner { height: 56px; }
+.brand-bar__name {
+  color: var(--bofa-navy);
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  font-size: 15px;
+}
+.brand-bar__app-name { color: #333; font-size: 15px; }
+.brand-bar__divider { background: #cfcdc8; }
+.brand-bar__greeting { color: var(--bofa-text); }
+.brand-bar__avatar { background: transparent; }
+
+/* ── Nav bar ── */
+.nav-bar { background: #fff; border-bottom: 1px solid var(--bofa-border); }
+.nav-bar__link { color: var(--bofa-text); }
+.nav-bar__link--active { font-weight: 700; border-bottom-color: var(--bofa-navy); }
+.nav-bar__dropdown { border-color: var(--bofa-border); }
+
+/* ── Buttons: BofA pills ── */
+.tv-button { border-radius: 9999px; font-weight: 600; }
+.tv-button--primary { background: var(--bofa-navy); }
+.tv-button--primary:hover:not(:disabled) { background: var(--bofa-navy-hover); }
+.tv-button--secondary {
+  background: #fff;
+  color: var(--bofa-text);
+  border: 1.5px solid #5f5e5b;
+}
+.tv-button--secondary:hover:not(:disabled) { background: #f4f3f0; border-color: var(--bofa-text); }
+.m360-btn--primary { background: var(--bofa-navy); }
+.m360-btn--primary:hover { background: var(--bofa-navy-hover); }
+.m360-btn--secondary { border-color: #5f5e5b; }
+.m360-btn--danger { background: #a41034; }
+
+/* ── Links ── */
+a { color: var(--bofa-link); }
+.m360-link, .m360-add-link, .breadcrumb a, .breadcrumb__link { color: var(--bofa-link); }
+
+/* ── Tabs (TabBar) ── */
+.dashboard__tabs { border-bottom: 1px solid var(--bofa-border); gap: 8px; }
+.dashboard__tab { font-size: 13.5px; color: #444; border-bottom-width: 3px; }
+.dashboard__tab--active { color: var(--bofa-text); font-weight: 700; border-bottom-color: var(--bofa-navy); }
+
+/* ── Cards: warm borders on the putty background ── */
+.survey-editor__card,
+.m360-cycles-card,
+.m360-activities,
+.m360-report-card,
+.m360-raters-card,
+.m360-profile-card,
+.program-detail__info-card,
+.program-create__form,
+.survey-library__table-card,
+.dashboard__chart-card {
+  background: var(--bofa-card);
+  border: 1px solid var(--bofa-border);
+  border-radius: 12px;
+}
+
+/* ── Status pills per mockup (Active = navy pill, progress = soft tints) ── */
+.status-pill--active { background: var(--bofa-navy); color: #fff; }
+.status-pill--draft { background: #EFEDE7; color: #5f5e5b; }
+.program-detail__progress-badge[data-progress="NOT_STARTED"] { background: #F0E9DC; color: #6b5d40; }
+.program-detail__progress-badge[data-progress="IN_PROGRESS"] { background: #D9E8F5; color: #1e4f7a; }
+.program-detail__progress-badge[data-progress="COMPLETED"] { background: #DDEEDD; color: #2d6a2f; }
+
+/* ── Inputs ── */
+.program-create__input,
+.program-create__select,
+.survey-library__search {
+  border-radius: 6px;
+  border-color: #8c8a85;
+  background: #fff;
+}
+.program-create__input:focus,
+.program-create__select:focus { border-color: var(--bofa-navy); box-shadow: 0 0 0 1px var(--bofa-navy); }
+
+/* ── M360 accents follow the theme ── */
+.m360-info-banner { border-color: var(--bofa-navy); background: #fff; }
+.m360-review { background: var(--bofa-bg); }
+.m360-review__topbar { gap: 12px; }
+.m360-review__breadcrumb { color: var(--bofa-link); }
+.m360-upload__progress-fill { background: var(--bofa-navy); }
+.m360-sort-btn__icon--active { color: var(--bofa-navy); }
+.m360-wizard__nav-item--active { border-color: var(--bofa-navy); }
+.m360-feedback-banner { background: #EEF3FA; border-color: #b9cbe4; color: #143a66; }
+
+/* ── Footer ── */
+.site-footer { background: transparent; border-top: none; }
+.site-footer__brand { color: var(--bofa-navy); font-weight: 700; letter-spacing: 0.3px; }
+.site-footer__copy { color: var(--bofa-muted); }
+
+/* ── Survey responder (rater feedback) picks up the warm bg too ── */
+.fv { background: var(--bofa-bg); }

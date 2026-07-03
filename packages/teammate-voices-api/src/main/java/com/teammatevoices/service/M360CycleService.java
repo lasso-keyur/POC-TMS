@@ -120,6 +120,8 @@ public class M360CycleService {
         log.info("Saving phases for cycle {}", cycleId);
         M360Cycle cycle = findCycle(cycleId);
         cycle.getPhases().clear();
+        // Flush orphan deletes before re-inserting the same phase types (UQ cycle_id+phase_type)
+        cycleRepository.saveAndFlush(cycle);
         if (phaseDtos != null) {
             for (PhaseDTO p : phaseDtos) {
                 M360CyclePhase phase = new M360CyclePhase();
@@ -156,6 +158,8 @@ public class M360CycleService {
         log.info("Saving criteria for cycle {}", cycleId);
         M360Cycle cycle = findCycle(cycleId);
         cycle.getCriteria().clear();
+        // Flush orphan deletes before re-inserting the same categories (UQ cycle_id+category)
+        cycleRepository.saveAndFlush(cycle);
         if (criteriaDtos != null) {
             for (CriteriaDTO c : criteriaDtos) {
                 M360RaterCriteria criteria = new M360RaterCriteria();

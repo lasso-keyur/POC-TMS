@@ -2,6 +2,8 @@ import { useState, useEffect, useMemo, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { Button } from '../../design-system'
 import Breadcrumb from '@/components/Breadcrumb'
+import TabBar from '@/components/TabBar'
+import StatusPill from '@/components/StatusPill'
 import FormField from '@/components/FormField'
 import ToggleSwitch from '@/components/ToggleSwitch'
 import { api } from '@/services/api'
@@ -16,11 +18,11 @@ import { CYCLE_PHASES, RATER_CATEGORY_LABELS } from '@/types/m360'
 
 type WizardStep = 'cycleInfo' | 'schedule' | 'enrollment' | 'review'
 
-const STEPS: { key: WizardStep; label: string }[] = [
-  { key: 'cycleInfo',  label: 'Cycle information' },
+const CYCLE_TABS: { key: WizardStep; label: string }[] = [
+  { key: 'cycleInfo',  label: 'Cycle Information' },
   { key: 'schedule',   label: 'Schedule' },
   { key: 'enrollment', label: 'Enrollment' },
-  { key: 'review',     label: 'Survey review' },
+  { key: 'review',     label: 'Survey Review' },
 ]
 
 // Default comm activities per phase (from the design mockups)
@@ -240,6 +242,13 @@ export default function CycleEditor() {
 
   // ── Phase helpers ───────────────────────────────────────────────────────────
 
+  /** Header Save button saves whichever tab is active. */
+  function saveActiveTab() {
+    if (step === 'cycleInfo') saveCycleInfo()
+    else if (step === 'schedule') saveSchedule()
+    else if (step === 'enrollment') saveEnrollment()
+  }
+
   function updatePhase(type: CyclePhaseType, patch: Partial<CyclePhase>) {
     setPhases(prev => prev.map(p => (p.phaseType === type ? { ...p, ...patch } : p)))
   }
@@ -329,7 +338,7 @@ export default function CycleEditor() {
   const programName = program?.name ?? 'Program'
 
   return (
-    <div className="page-container">
+    <div className="survey-editor">
       <Breadcrumb items={[
         { label: 'Programs', path: '/programs' },
         { label: programName, path: `/programs/${programId}` },
@@ -347,27 +356,37 @@ export default function CycleEditor() {
         </div>
       )}
 
-      <h1 className="program-detail__title" style={{ marginBottom: 24 }}>{isEdit ? 'Edit Cycle' : 'Add Cycle'}</h1>
+      <div className="survey-editor__header">
+        <div className="survey-editor__header-left">
+          <h1 className="survey-editor__title">{isEdit ? name || 'Edit Cycle' : 'Add Cycle'}</h1>
+          <div className="survey-editor__status-row">
+            <span className="survey-editor__status-label">Cycle status:</span>
+            <StatusPill label={active ? 'Active' : 'Inactive'} variant={active ? 'active' : 'draft'} />
+            {enrollments.length > 0 && (
+              <span className="survey-editor__status-label" style={{ marginLeft: 12 }}>
+                {enrollments.length} participant{enrollments.length === 1 ? '' : 's'} enrolled
+              </span>
+            )}
+          </div>
+        </div>
+        <div className="survey-editor__header-actions">
+          <Button variant="secondary" size="sm" onClick={() => navigate(`/programs/${programId}`)}>Cancel</Button>
+          {step === 'review' ? (
+            <Button variant="primary" size="sm" onClick={() => navigate(`/programs/${programId}`)}>Done</Button>
+          ) : (
+            <Button variant="primary" size="sm" onClick={saveActiveTab} loading={saving}>Save</Button>
+          )}
+        </div>
+      </div>
 
-      <div className="m360-wizard">
-        {/* Left sidebar */}
-        <aside className="m360-wizard__sidebar">
-          <h3 className="m360-wizard__sidebar-title">Configurations</h3>
-          <nav className="m360-wizard__nav">
-            {STEPS.map(s => (
-              <button
-                key={s.key}
-                className={`m360-wizard__nav-item${step === s.key ? ' m360-wizard__nav-item--active' : ''}`}
-                onClick={() => setStep(s.key)}
-              >
-                {s.label}
-              </button>
-            ))}
-          </nav>
-        </aside>
+      <div className="survey-editor__card">
+        <TabBar
+          tabs={CYCLE_TABS}
+          activeTab={step}
+          onChange={key => setStep(key as WizardStep)}
+        />
 
-        {/* Step content */}
-        <section className="m360-wizard__content">
+        <div className="survey-editor__content">
           {error && (
             <div className="m360-error-banner">
               <span className="m360-error-banner__icon">⚠</span>
@@ -380,7 +399,7 @@ export default function CycleEditor() {
 
           {step === 'cycleInfo' && (
             <>
-              <h2 className="m360-wizard__step-title">Cycle information</h2>
+              <h2 className="survey-editor__section-title">Cycle information</h2>
               <p className="m360-wizard__step-desc">Set the basics for this 360 cycle: name it, describe it, choose the survey template, and pick when it starts.</p>
               <div className="program-create__row">
                 <div className="program-create__field">
@@ -413,16 +432,12 @@ export default function CycleEditor() {
                   <ToggleSwitch label={active ? 'Active' : 'Inactive'} checked={active} onChange={setActive} />
                 </div>
               </div>
-              <div className="m360-wizard__footer">
-                <Button variant="secondary" onClick={() => navigate(`/programs/${programId}`)}>Cancel</Button>
-                <Button variant="primary" onClick={saveCycleInfo} disabled={saving}>Save</Button>
-              </div>
             </>
           )}
 
           {step === 'schedule' && (
             <>
-              <h2 className="m360-wizard__step-title">Schedule</h2>
+              <h2 className="survey-editor__section-title">Schedule</h2>
               <p className="m360-wizard__step-desc">Toggle the phases this cycle uses. Each enabled phase needs a start and end date/time (Eastern Time) and can send scheduled communications.</p>
               {phases.map(phase => {
                 const label = CYCLE_PHASES.find(p => p.type === phase.phaseType)?.label ?? phase.phaseType
@@ -512,16 +527,12 @@ export default function CycleEditor() {
                   </div>
                 )
               })}
-              <div className="m360-wizard__footer">
-                <Button variant="secondary" onClick={() => setStep('cycleInfo')}>Cancel</Button>
-                <Button variant="primary" onClick={saveSchedule} disabled={saving}>Save</Button>
-              </div>
             </>
           )}
 
           {step === 'enrollment' && (
             <>
-              <h2 className="m360-wizard__step-title">Enrollment</h2>
+              <h2 className="survey-editor__section-title">Enrollment</h2>
               <p className="m360-wizard__step-desc">Define who can be selected as a rater and how many of each, who is allowed to build the rater list, and enroll the participants for this cycle.</p>
 
               <h3 className="m360-section-title">Rater selection criteria</h3>
@@ -677,16 +688,12 @@ export default function CycleEditor() {
                 </div>
               )}
 
-              <div className="m360-wizard__footer">
-                <Button variant="secondary" onClick={() => setStep('schedule')}>Cancel</Button>
-                <Button variant="primary" onClick={saveEnrollment} disabled={saving}>Save</Button>
-              </div>
             </>
           )}
 
           {step === 'review' && (
             <>
-              <h2 className="m360-wizard__step-title">Survey review</h2>
+              <h2 className="survey-editor__section-title">Survey review</h2>
               <p className="m360-wizard__step-desc">Read-only summary of this cycle's configuration.</p>
               <div className="program-detail__info-grid">
                 <div className="program-detail__info-item">
@@ -731,13 +738,9 @@ export default function CycleEditor() {
                   </Button>
                 </div>
               )}
-              <div className="m360-wizard__footer">
-                <Button variant="secondary" onClick={() => setStep('enrollment')}>Back</Button>
-                <Button variant="primary" onClick={() => navigate(`/programs/${programId}`)}>Done</Button>
-              </div>
             </>
           )}
-        </section>
+        </div>
       </div>
     </div>
   )

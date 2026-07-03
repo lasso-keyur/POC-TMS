@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useParams, useLocation } from 'react-router-dom'
 import { api } from '@/services/api'
+import { BofaFlag } from '@/components/BrandBar'
 import type { M360SelectionView, M360PersonSearchResult, RaterCategory } from '@/types/m360'
 
 const SELECTABLE_RELATIONSHIPS: RaterCategory[] = [
@@ -196,7 +197,8 @@ export default function RaterSelectionReview() {
   return (
     <div className="m360-review">
       <header className="m360-review__topbar">
-        <span className="m360-review__brand">TEAMMATE VOICES</span>
+        <BofaFlag width={30} />
+        <span className="m360-review__brand">BANK OF AMERICA</span>
         <span className="m360-review__brand-sub">Employee Survey</span>
       </header>
 
