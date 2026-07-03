@@ -95,4 +95,9 @@ public class M360CycleController {
     public ResponseEntity<M360ReportDTO> getReport(@PathVariable Long cycleId, @PathVariable String participantId) {
         return ResponseEntity.ok(feedbackService.getReport(cycleId, participantId));
     }
+
+    @GetMapping("/{cycleId}/audit")
+    public ResponseEntity<List<com.teammatevoices.model.WorkflowAuditLog>> getAuditTrail(@PathVariable Long cycleId) {
+        return ResponseEntity.ok(cycleService.getAuditTrail(cycleId));
+    }
 }

@@ -38,6 +38,9 @@ public class M360PhaseActivity {
     @Column(name = "SORT_ORDER")
     private Integer sortOrder = 0;
 
+    @Column(name = "SENT_AT")
+    private LocalDateTime sentAt;
+
     @CreationTimestamp
     @Column(name = "CREATED_AT", updatable = false)
     private LocalDateTime createdAt;
@@ -72,6 +75,9 @@ public class M360PhaseActivity {
 
     public Integer getSortOrder() { return sortOrder; }
     public void setSortOrder(Integer sortOrder) { this.sortOrder = sortOrder; }
+
+    public LocalDateTime getSentAt() { return sentAt; }
+    public void setSentAt(LocalDateTime sentAt) { this.sentAt = sentAt; }
 
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }

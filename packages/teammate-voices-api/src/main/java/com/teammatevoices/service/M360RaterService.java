@@ -10,10 +10,12 @@ import com.teammatevoices.model.*;
 import com.teammatevoices.repository.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -24,6 +26,10 @@ import java.util.stream.Collectors;
 public class M360RaterService {
 
     private static final Logger log = LoggerFactory.getLogger(M360RaterService.class);
+    private static final DateTimeFormatter WINDOW_FMT = DateTimeFormatter.ofPattern("MMM d, yyyy h:mm a");
+
+    @Value("${app.base-url:http://localhost:5200}")
+    private String baseUrl;
 
     private final M360EnrollmentRepository enrollmentRepository;
     private final M360RaterAssignmentRepository raterRepository;
@@ -31,19 +37,59 @@ public class M360RaterService {
     private final ParticipantRepository participantRepository;
     private final EmailTemplateRepository emailTemplateRepository;
     private final EmailSendingService emailSendingService;
+    private final WorkflowAuditLogRepository auditRepository;
 
     public M360RaterService(M360EnrollmentRepository enrollmentRepository,
                             M360RaterAssignmentRepository raterRepository,
                             M360CycleRepository cycleRepository,
                             ParticipantRepository participantRepository,
                             EmailTemplateRepository emailTemplateRepository,
-                            EmailSendingService emailSendingService) {
+                            EmailSendingService emailSendingService,
+                            WorkflowAuditLogRepository auditRepository) {
         this.enrollmentRepository = enrollmentRepository;
         this.raterRepository = raterRepository;
         this.cycleRepository = cycleRepository;
         this.participantRepository = participantRepository;
         this.emailTemplateRepository = emailTemplateRepository;
         this.emailSendingService = emailSendingService;
+        this.auditRepository = auditRepository;
+    }
+
+    /**
+     * Phase-window guard: mutations are only allowed while their phase is open.
+     * Lenient when the phase is missing, disabled, or has no dates configured.
+     */
+    private void requireWithinPhase(Resolved r, String phaseType, String actionLabel) {
+        r.cycle.getPhases().stream()
+                .filter(p -> phaseType.equals(p.getPhaseType()) && Boolean.TRUE.equals(p.getIsEnabled()))
+                .findFirst()
+                .ifPresent(p -> {
+                    LocalDateTime now = LocalDateTime.now();
+                    if (p.getStartAt() != null && now.isBefore(p.getStartAt())) {
+                        throw new BusinessRuleException(actionLabel + " has not opened yet. The window opens "
+                                + p.getStartAt().format(WINDOW_FMT) + " (Eastern Time).");
+                    }
+                    if (p.getEndAt() != null && now.isAfter(p.getEndAt())) {
+                        throw new BusinessRuleException(actionLabel + " is closed. The window ended "
+                                + p.getEndAt().format(WINDOW_FMT) + " (Eastern Time).");
+                    }
+                });
+    }
+
+    private void requireActionWindow(Resolved r) {
+        if (r.isManager) {
+            requireWithinPhase(r, "RATER_APPROVAL", "Rater approval");
+        } else {
+            requireWithinPhase(r, "RATER_SELECTION", "Rater selection");
+        }
+    }
+
+    private void audit(Resolved r, String action, String from, String to, String details) {
+        auditRepository.save(WorkflowAuditLog
+                .create("M360_ENROLLMENT", r.enrollment.getEnrollmentId(), action)
+                .withStateChange(from, to)
+                .withPerformedBy(r.isManager ? "manager-token" : "participant-token")
+                .withDetails(details));
     }
 
     // ── View (selection + approval share one screen) ──────────────────────────
@@ -87,6 +133,7 @@ public class M360RaterService {
     @Transactional
     public SelectionViewDTO addRater(String token, M360RaterDTO dto) {
         Resolved r = resolve(token);
+        requireActionWindow(r);
         if (raterRepository.existsByEnrollmentIdAndRaterEmail(r.enrollment.getEnrollmentId(), dto.getRaterEmail())) {
             throw new BusinessRuleException("This person is already in the rater list.");
         }
@@ -107,6 +154,7 @@ public class M360RaterService {
     @Transactional
     public SelectionViewDTO removeRater(String token, Long raterAssignmentId) {
         Resolved r = resolve(token);
+        requireActionWindow(r);
         M360RaterAssignment rater = findOwnedRater(r, raterAssignmentId);
         if ("SYSTEM".equals(rater.getAddedBy())) {
             throw new BusinessRuleException("Self and Manager raters cannot be removed.");
@@ -131,14 +179,17 @@ public class M360RaterService {
     @Transactional
     public SelectionViewDTO submitSelection(String token) {
         Resolved r = resolve(token);
+        requireWithinPhase(r, "RATER_SELECTION", "Rater selection");
         validateMinimums(r);
+        String previous = r.enrollment.getStatus();
         r.enrollment.setStatus("RATERS_SUBMITTED");
         r.enrollment.setRatersSubmittedAt(LocalDateTime.now());
         enrollmentRepository.save(r.enrollment);
+        audit(r, "RATERS_SUBMITTED", previous, "RATERS_SUBMITTED", null);
 
         if (r.enrollment.getManagerEmail() != null) {
             Map<String, String> data = baseMergeData(r);
-            data.put("approval_link", "http://localhost:5200/m360/approval/" + r.enrollment.getManagerToken());
+            data.put("approval_link", baseUrl + "/m360/approval/" + r.enrollment.getManagerToken());
             sendByTemplateName("360-T5", r.enrollment.getManagerEmail(), data);
         }
         return buildView(r);
@@ -147,16 +198,20 @@ public class M360RaterService {
     @Transactional
     public SelectionViewDTO approveRater(String token, Long raterAssignmentId) {
         Resolved r = requireManager(token);
+        requireWithinPhase(r, "RATER_APPROVAL", "Rater approval");
         M360RaterAssignment rater = findOwnedRater(r, raterAssignmentId);
+        String previous = rater.getStatus();
         rater.setStatus("APPROVED");
         rater.setRejectionReason(null);
         raterRepository.save(rater);
+        audit(r, "RATER_APPROVED", previous, "APPROVED", "{\"rater\":\"" + rater.getRaterName() + "\"}");
         return buildView(r);
     }
 
     @Transactional
     public SelectionViewDTO rejectRater(String token, Long raterAssignmentId, String reason) {
         Resolved r = requireManager(token);
+        requireWithinPhase(r, "RATER_APPROVAL", "Rater approval");
         if (reason == null || reason.isBlank()) {
             throw new BusinessRuleException("A rejection reason is required.");
         }
@@ -164,9 +219,12 @@ public class M360RaterService {
         if ("SYSTEM".equals(rater.getAddedBy())) {
             throw new BusinessRuleException("Self and Manager raters cannot be rejected.");
         }
+        String previous = rater.getStatus();
         rater.setStatus("REJECTED");
         rater.setRejectionReason(reason.trim());
         raterRepository.save(rater);
+        audit(r, "RATER_REJECTED", previous, "REJECTED",
+                "{\"rater\":\"" + rater.getRaterName() + "\",\"reason\":\"" + reason.trim().replace("\"", "'") + "\"}");
         return buildView(r);
     }
 
@@ -178,6 +236,7 @@ public class M360RaterService {
     @Transactional
     public SelectionViewDTO completeApproval(String token) {
         Resolved r = requireManager(token);
+        requireWithinPhase(r, "RATER_APPROVAL", "Rater approval");
         List<M360RaterAssignment> raters =
                 raterRepository.findByEnrollmentIdOrderByRaterAssignmentIdAsc(r.enrollment.getEnrollmentId());
 
@@ -186,10 +245,12 @@ public class M360RaterService {
             throw new BusinessRuleException("All raters must be approved or rejected before completing the review.");
         }
 
+        String previous = r.enrollment.getStatus();
         boolean anyRejected = raters.stream().anyMatch(x -> "REJECTED".equals(x.getStatus()));
         if (anyRejected) {
             r.enrollment.setStatus("ENROLLED");
             enrollmentRepository.save(r.enrollment);
+            audit(r, "REVIEW_RETURNED", previous, "ENROLLED", "{\"outcome\":\"changes requested\"}");
             Participant subject = participantRepository.findById(r.enrollment.getParticipantId()).orElse(null);
             if (subject != null) {
                 Map<String, String> data = baseMergeData(r);
@@ -198,7 +259,7 @@ public class M360RaterService {
                         .map(x -> x.getRaterName() + ": " + x.getRejectionReason())
                         .collect(Collectors.joining("; "));
                 data.put("rejection_reason", reasons);
-                data.put("selection_link", "http://localhost:5200/m360/rater-selection/" + r.enrollment.getParticipantToken());
+                data.put("selection_link", baseUrl + "/m360/rater-selection/" + r.enrollment.getParticipantToken());
                 sendByTemplateName("360-T7", subject.getEmail(), data);
             }
         } else {
@@ -206,6 +267,7 @@ public class M360RaterService {
             r.enrollment.setRatersApprovedAt(LocalDateTime.now());
             enrollmentRepository.save(r.enrollment);
 
+            int invited = 0;
             for (M360RaterAssignment rater : raters) {
                 if (!"APPROVED".equals(rater.getStatus())) continue;
                 rater.setStatus("INVITED");
@@ -216,13 +278,15 @@ public class M360RaterService {
                 Map<String, String> data = baseMergeData(r);
                 data.put("rater_name", rater.getRaterName());
                 data.put("relationship", rater.getRelationship());
-                data.put("feedback_link", "http://localhost:5200/m360/feedback/" + rater.getFeedbackToken());
+                data.put("feedback_link", baseUrl + "/m360/feedback/" + rater.getFeedbackToken());
                 boolean sent = sendByTemplateName("360-T8", rater.getRaterEmail(), data);
                 rater.setEmailStatus(sent ? "SENT" : "FAILED");
                 emailTemplateRepository.findByName("360-T8")
                         .ifPresent(t -> rater.setEmailTemplateId(t.getTemplateId()));
                 raterRepository.save(rater);
+                invited++;
             }
+            audit(r, "REVIEW_COMPLETED", previous, "RATERS_APPROVED", "{\"ratersInvited\":" + invited + "}");
         }
         return buildView(r);
     }

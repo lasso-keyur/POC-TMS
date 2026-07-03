@@ -30,19 +30,37 @@ public class M360CycleService {
     private final ParticipantRepository participantRepository;
     private final EmailTemplateRepository emailTemplateRepository;
     private final SurveyRepository surveyRepository;
+    private final WorkflowAuditLogRepository auditRepository;
 
     public M360CycleService(M360CycleRepository cycleRepository,
                             M360EnrollmentRepository enrollmentRepository,
                             M360RaterAssignmentRepository raterRepository,
                             ParticipantRepository participantRepository,
                             EmailTemplateRepository emailTemplateRepository,
-                            SurveyRepository surveyRepository) {
+                            SurveyRepository surveyRepository,
+                            WorkflowAuditLogRepository auditRepository) {
         this.cycleRepository = cycleRepository;
         this.enrollmentRepository = enrollmentRepository;
         this.raterRepository = raterRepository;
         this.participantRepository = participantRepository;
         this.emailTemplateRepository = emailTemplateRepository;
         this.surveyRepository = surveyRepository;
+        this.auditRepository = auditRepository;
+    }
+
+    /** Full audit trail for a cycle: scheduler actions on the cycle + all enrollment transitions. */
+    @Transactional(readOnly = true)
+    public List<WorkflowAuditLog> getAuditTrail(Long cycleId) {
+        findCycle(cycleId);
+        List<WorkflowAuditLog> trail = new java.util.ArrayList<>(
+                auditRepository.findByEntityTypeAndEntityIdOrderByCreatedAtDesc("M360_CYCLE", cycleId));
+        for (M360Enrollment e : enrollmentRepository.findByCycleIdOrderByEnrollmentIdAsc(cycleId)) {
+            trail.addAll(auditRepository.findByEntityTypeAndEntityIdOrderByCreatedAtDesc(
+                    "M360_ENROLLMENT", e.getEnrollmentId()));
+        }
+        trail.sort(Comparator.comparing(WorkflowAuditLog::getCreatedAt,
+                Comparator.nullsLast(Comparator.reverseOrder())));
+        return trail;
     }
 
     @Transactional(readOnly = true)

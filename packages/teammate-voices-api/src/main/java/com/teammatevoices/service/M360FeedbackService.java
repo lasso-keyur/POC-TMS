@@ -40,6 +40,7 @@ public class M360FeedbackService {
     private final SurveyQuestionRepository questionRepository;
     private final SurveyService surveyService;
     private final ResponseService responseService;
+    private final WorkflowAuditLogRepository auditRepository;
 
     public M360FeedbackService(M360RaterAssignmentRepository raterRepository,
                                M360EnrollmentRepository enrollmentRepository,
@@ -50,7 +51,8 @@ public class M360FeedbackService {
                                SurveyAnswerRepository answerRepository,
                                SurveyQuestionRepository questionRepository,
                                SurveyService surveyService,
-                               ResponseService responseService) {
+                               ResponseService responseService,
+                               WorkflowAuditLogRepository auditRepository) {
         this.raterRepository = raterRepository;
         this.enrollmentRepository = enrollmentRepository;
         this.cycleRepository = cycleRepository;
@@ -61,6 +63,23 @@ public class M360FeedbackService {
         this.questionRepository = questionRepository;
         this.surveyService = surveyService;
         this.responseService = responseService;
+        this.auditRepository = auditRepository;
+    }
+
+    /** Feedback is only accepted while the Rater Feedback phase is open (lenient when unconfigured). */
+    private void requireFeedbackWindow(M360Cycle cycle) {
+        cycle.getPhases().stream()
+                .filter(p -> "RATER_FEEDBACK".equals(p.getPhaseType()) && Boolean.TRUE.equals(p.getIsEnabled()))
+                .findFirst()
+                .ifPresent(p -> {
+                    LocalDateTime now = LocalDateTime.now();
+                    if (p.getStartAt() != null && now.isBefore(p.getStartAt())) {
+                        throw new BusinessRuleException("The feedback window has not opened yet.");
+                    }
+                    if (p.getEndAt() != null && now.isAfter(p.getEndAt())) {
+                        throw new BusinessRuleException("The feedback window has closed.");
+                    }
+                });
     }
 
     /** Load the survey for a rater feedback token, with "you are rating X as Y" context. */
@@ -77,6 +96,10 @@ public class M360FeedbackService {
         if ("SUBMITTED".equals(rater.getStatus())) {
             throw new BusinessRuleException("Feedback has already been submitted for this link.");
         }
+        if ("EXPIRED".equals(rater.getStatus())) {
+            throw new BusinessRuleException("This feedback invitation has expired.");
+        }
+        requireFeedbackWindow(cycle);
 
         SurveyDTO survey = surveyService.getSurveyById(cycle.getSurveyId());
 
@@ -104,10 +127,14 @@ public class M360FeedbackService {
         if ("SUBMITTED".equals(rater.getStatus())) {
             throw new BusinessRuleException("Feedback has already been submitted for this link.");
         }
+        if ("EXPIRED".equals(rater.getStatus())) {
+            throw new BusinessRuleException("This feedback invitation has expired.");
+        }
         M360Enrollment enrollment = enrollmentRepository.findById(rater.getEnrollmentId())
                 .orElseThrow(() -> new ResourceNotFoundException("Enrollment", rater.getEnrollmentId()));
         M360Cycle cycle = cycleRepository.findById(enrollment.getCycleId())
                 .orElseThrow(() -> new ResourceNotFoundException("Cycle", enrollment.getCycleId()));
+        requireFeedbackWindow(cycle);
         Survey survey = surveyRepository.findById(cycle.getSurveyId())
                 .orElseThrow(() -> new ResourceNotFoundException("Survey", cycle.getSurveyId()));
 
@@ -135,6 +162,13 @@ public class M360FeedbackService {
                 .allMatch(x -> "SUBMITTED".equals(x.getStatus()));
         enrollment.setStatus(allDone ? "COMPLETED" : "FEEDBACK_IN_PROGRESS");
         enrollmentRepository.save(enrollment);
+
+        auditRepository.save(WorkflowAuditLog
+                .create("M360_ENROLLMENT", enrollment.getEnrollmentId(), "FEEDBACK_SUBMITTED")
+                .withStateChange("INVITED", "SUBMITTED")
+                .withPerformedBy("rater-token")
+                .withDetails("{\"rater\":\"" + rater.getRaterName() + "\",\"relationship\":\""
+                        + rater.getRelationship() + "\",\"responseId\":" + response.getResponseId() + "}"));
 
         log.info("M360 feedback submitted: rater assignment {}, response {}",
                 rater.getRaterAssignmentId(), response.getResponseId());
