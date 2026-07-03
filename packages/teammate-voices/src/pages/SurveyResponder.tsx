@@ -385,6 +385,8 @@ export default function SurveyResponder() {
   const effectiveToken = token || tokenFromQuery
 
   const isPublicMode = !!surveyId && !effectiveToken
+  // M360 rater feedback mode — same renderer, different endpoints + subject context banner
+  const isM360Mode = typeof window !== 'undefined' && window.location.pathname.includes('/m360/feedback/')
 
   const [survey, setSurvey] = useState<Partial<Survey> | null>(null)
   const [logicRules, setLogicRules] = useState<LogicRule[]>([])
@@ -399,7 +401,9 @@ export default function SurveyResponder() {
     const loadSurvey = async () => {
       try {
         let url: string
-        if (isPublicMode) {
+        if (isM360Mode && effectiveToken) {
+          url = `${API_BASE}/m360/feedback/${effectiveToken}`
+        } else if (isPublicMode) {
           url = `${API_BASE}/surveys/${surveyId}/public`
         } else if (effectiveToken) {
           url = `${API_BASE}/respond/${effectiveToken}`
@@ -530,7 +534,9 @@ export default function SurveyResponder() {
     setSubmitting(true)
     try {
       let url: string
-      if (isPublicMode) {
+      if (isM360Mode) {
+        url = `${API_BASE}/m360/feedback/${effectiveToken}/submit`
+      } else if (isPublicMode) {
         url = `${API_BASE}/surveys/${surveyId}/public/submit`
       } else {
         url = `${API_BASE}/respond/${effectiveToken}/submit`
@@ -604,6 +610,13 @@ export default function SurveyResponder() {
     <div className="fv" style={{ minHeight: '100vh', paddingTop: 48, paddingBottom: 80 }}>
       {/* Survey header */}
       <div className="fv__header">
+        {isM360Mode && participantContext?.m360SubjectName && (
+          <div className="m360-feedback-banner">
+            You are providing feedback for <strong>{participantContext.m360SubjectName}</strong>
+            {participantContext.m360Relationship ? <> as their <strong>{participantContext.m360Relationship.replace(/_/g, ' ').toLowerCase()}</strong></> : null}
+            {participantContext.m360CycleName ? <> — {participantContext.m360CycleName}</> : null}
+          </div>
+        )}
         <h1 className="fv__title">{survey?.title || 'Survey'}</h1>
         {survey?.description && <p className="fv__subtitle">{survey.description}</p>}
         <div className="fv__meta">

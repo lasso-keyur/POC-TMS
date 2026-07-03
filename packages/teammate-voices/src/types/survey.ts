@@ -2,7 +2,7 @@ export interface Survey {
   surveyId: number
   title: string
   description: string
-  templateType: 'CUSTOM' | 'TEAM_MATE_VOICES' | 'ENGAGEMENT' | 'NPS'
+  templateType: 'CUSTOM' | 'TEAM_MATE_VOICES' | 'ENGAGEMENT' | 'NPS' | 'M360'
   status: 'DRAFT' | 'ACTIVE' | 'CLOSED' | 'ARCHIVED'
   buildStatus?: 'DRAFT' | 'PUBLISHED'
   programId?: number

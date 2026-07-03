@@ -42,7 +42,7 @@ public class SecurityConfig {
                         // Permit all API endpoints until login flow is implemented
                         .requestMatchers("/programs/**", "/surveys/**", "/participants/**",
                                 "/dispatches/**", "/assignment-rules/**",
-                                "/email-templates/**", "/respond/**").permitAll()
+                                "/email-templates/**", "/respond/**", "/m360/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);

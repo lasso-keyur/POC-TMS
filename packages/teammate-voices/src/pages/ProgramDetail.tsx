@@ -6,6 +6,7 @@ import StatusPill from '@/components/StatusPill'
 import { AgGridReact } from 'ag-grid-react'
 import type { ColDef, SizeColumnsToFitGridStrategy } from 'ag-grid-community'
 import { api } from '@/services/api'
+import CyclesSection from '@/components/m360/CyclesSection'
 import type { ProgramDetail as ProgramDetailType, ParticipantStatusRow } from '@/types/program'
 
 type ProgramTab = 'overview' | 'participants'
@@ -285,6 +286,11 @@ export default function ProgramDetail() {
           </div>
         </div>
       </div>
+
+      {/* Cycles (360 reviews) — shown on Overview tab */}
+      {activeSection === 'overview' && (
+        <CyclesSection programId={Number(programId)} />
+      )}
 
       {/* Bottom Card: Participants AG Grid — only on Participants tab */}
       {activeSection === 'overview' && (

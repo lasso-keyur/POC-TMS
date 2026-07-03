@@ -32,6 +32,9 @@ public class SurveyResponse {
     @Column(name = "PARTICIPANT_ID", length = 100)
     private String participantId;
 
+    @Column(name = "RATER_ASSIGNMENT_ID")
+    private Long raterAssignmentId;
+
     @Column(name = "SUBMITTED_AT")
     private LocalDateTime submittedAt;
 
@@ -122,4 +125,7 @@ public class SurveyResponse {
 
     public String getParticipantId() { return participantId; }
     public void setParticipantId(String participantId) { this.participantId = participantId; }
+
+    public Long getRaterAssignmentId() { return raterAssignmentId; }
+    public void setRaterAssignmentId(Long raterAssignmentId) { this.raterAssignmentId = raterAssignmentId; }
 }

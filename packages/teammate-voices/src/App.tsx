@@ -13,6 +13,9 @@ import Reports from '@/pages/Reports'
 import Administration from '@/pages/Administration'
 import EmailTemplateList from '@/pages/EmailTemplateList'
 import EmailTemplateEditor from '@/pages/EmailTemplateEditor'
+import CycleEditor from '@/pages/m360/CycleEditor'
+import RaterSelectionReview from '@/pages/m360/RaterSelectionReview'
+import CycleReport from '@/pages/m360/CycleReport'
 
 function LayoutWrapper() {
   return (
@@ -30,6 +33,11 @@ export default function App() {
         <Route path="/respond/:token" element={<SurveyResponder />} />
         <Route path="/survey/:surveyId/respond" element={<SurveyResponder />} />
 
+        {/* M360 token routes — standalone (participant / manager / rater links) */}
+        <Route path="/m360/rater-selection/:token" element={<RaterSelectionReview />} />
+        <Route path="/m360/approval/:token" element={<RaterSelectionReview />} />
+        <Route path="/m360/feedback/:token" element={<SurveyResponder />} />
+
         {/* Admin routes — inside Layout with nav/header */}
         <Route element={<LayoutWrapper />}>
           <Route path="/" element={<Dashboard />} />
@@ -37,6 +45,9 @@ export default function App() {
           <Route path="/programs/new" element={<ProgramCreate />} />
           <Route path="/programs/:programId" element={<ProgramDetail />} />
           <Route path="/programs/:programId/edit" element={<ProgramCreate />} />
+          <Route path="/programs/:programId/cycles/new" element={<CycleEditor />} />
+          <Route path="/programs/:programId/cycles/:cycleId" element={<CycleEditor />} />
+          <Route path="/m360/report/:cycleId/:participantId" element={<CycleReport />} />
           <Route path="/surveys" element={<SurveyList />} />
           <Route path="/surveys/new" element={<SurveyEditor />} />
           <Route path="/surveys/:surveyId/edit" element={<SurveyEditor />} />

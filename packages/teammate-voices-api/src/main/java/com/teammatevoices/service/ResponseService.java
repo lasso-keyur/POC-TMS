@@ -137,7 +137,8 @@ public class ResponseService {
 
     // --- private helpers ---
 
-    private SurveyResponse buildResponse(Survey survey, Map<String, String> answers) {
+    /** Package-private so M360FeedbackService can persist feedback responses through the same path. */
+    SurveyResponse buildResponse(Survey survey, Map<String, String> answers) {
         SurveyResponse response = new SurveyResponse();
         response.setSurvey(survey);
         response.setIsComplete(true);

@@ -4,6 +4,10 @@ import type { Participant, AssignmentRule, Dispatch } from '@/types/participant'
 import type { LogicRule, LogicEvaluationResult } from '@/types/logic'
 import type { EmailTemplate, EmailTemplateAssignment } from '@/types/emailTemplate'
 import type { SurveyAnalytics } from '@/types/analytics'
+import type {
+  M360Cycle, CyclePhase, RaterCriteria, M360Enrollment, M360SelectionView,
+  M360PersonSearchResult, M360Rater, M360Activity, M360Report,
+} from '@/types/m360'
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8081/api'
 
@@ -270,6 +274,126 @@ class TeammateVoicesAPI {
 
   async validateDispatch(surveyId: number): Promise<{ passed: boolean; checks: Array<{ key: string; label: string; passed: boolean; detail: string }> }> {
     return this.request(`/email-templates/validate-dispatch/${surveyId}`)
+  }
+
+  // M360 — cycles (admin)
+  async getM360Cycles(programId?: number): Promise<M360Cycle[]> {
+    const q = programId != null ? `?programId=${programId}` : ''
+    return this.request<M360Cycle[]>(`/m360/cycles${q}`)
+  }
+
+  async getM360Cycle(cycleId: number): Promise<M360Cycle> {
+    return this.request<M360Cycle>(`/m360/cycles/${cycleId}`)
+  }
+
+  async createM360Cycle(cycle: Partial<M360Cycle>): Promise<M360Cycle> {
+    return this.request<M360Cycle>('/m360/cycles', { method: 'POST', body: JSON.stringify(cycle) })
+  }
+
+  async updateM360Cycle(cycleId: number, cycle: Partial<M360Cycle>): Promise<M360Cycle> {
+    return this.request<M360Cycle>(`/m360/cycles/${cycleId}`, { method: 'PUT', body: JSON.stringify(cycle) })
+  }
+
+  async saveM360Phases(cycleId: number, phases: CyclePhase[]): Promise<M360Cycle> {
+    return this.request<M360Cycle>(`/m360/cycles/${cycleId}/phases`, { method: 'PUT', body: JSON.stringify(phases) })
+  }
+
+  async saveM360Criteria(cycleId: number, criteria: RaterCriteria[]): Promise<M360Cycle> {
+    return this.request<M360Cycle>(`/m360/cycles/${cycleId}/criteria`, { method: 'PUT', body: JSON.stringify(criteria) })
+  }
+
+  async duplicateM360Cycle(cycleId: number): Promise<M360Cycle> {
+    return this.request<M360Cycle>(`/m360/cycles/${cycleId}/duplicate`, { method: 'POST' })
+  }
+
+  async deleteM360Cycle(cycleId: number): Promise<void> {
+    return this.request<void>(`/m360/cycles/${cycleId}`, { method: 'DELETE' })
+  }
+
+  async getM360Enrollments(cycleId: number): Promise<M360Enrollment[]> {
+    return this.request<M360Enrollment[]>(`/m360/cycles/${cycleId}/enrollments`)
+  }
+
+  async enrollM360Participants(cycleId: number, participantIds: string[]): Promise<M360Enrollment[]> {
+    return this.request<M360Enrollment[]>(`/m360/cycles/${cycleId}/enrollments`, {
+      method: 'POST',
+      body: JSON.stringify({ participantIds }),
+    })
+  }
+
+  async removeM360Enrollment(cycleId: number, enrollmentId: number): Promise<void> {
+    return this.request<void>(`/m360/cycles/${cycleId}/enrollments/${enrollmentId}`, { method: 'DELETE' })
+  }
+
+  // M360 — rater selection / approval (token routes; same screen, mode from token type)
+  async getM360SelectionView(kind: 'rater-selection' | 'approval', token: string): Promise<M360SelectionView> {
+    return this.request<M360SelectionView>(`/m360/${kind}/${token}`)
+  }
+
+  async searchM360People(kind: 'rater-selection' | 'approval', token: string, name?: string, lob?: string): Promise<M360PersonSearchResult[]> {
+    const params = new URLSearchParams()
+    if (name) params.set('name', name)
+    if (lob) params.set('lob', lob)
+    const q = params.toString() ? `?${params.toString()}` : ''
+    return this.request<M360PersonSearchResult[]>(`/m360/${kind}/${token}/people${q}`)
+  }
+
+  async addM360Rater(kind: 'rater-selection' | 'approval', token: string, rater: Partial<M360Rater>): Promise<M360SelectionView> {
+    return this.request<M360SelectionView>(`/m360/${kind}/${token}/raters`, {
+      method: 'POST',
+      body: JSON.stringify(rater),
+    })
+  }
+
+  async removeM360Rater(kind: 'rater-selection' | 'approval', token: string, raterAssignmentId: number): Promise<M360SelectionView> {
+    return this.request<M360SelectionView>(`/m360/${kind}/${token}/raters/${raterAssignmentId}`, { method: 'DELETE' })
+  }
+
+  async updateM360RaterRelationship(kind: 'rater-selection' | 'approval', token: string, raterAssignmentId: number, relationship: string): Promise<M360SelectionView> {
+    return this.request<M360SelectionView>(`/m360/${kind}/${token}/raters/${raterAssignmentId}/relationship`, {
+      method: 'PUT',
+      body: JSON.stringify({ relationship }),
+    })
+  }
+
+  async submitM360Selection(token: string): Promise<M360SelectionView> {
+    return this.request<M360SelectionView>(`/m360/rater-selection/${token}/submit`, { method: 'POST' })
+  }
+
+  async approveM360Rater(token: string, raterAssignmentId: number): Promise<M360SelectionView> {
+    return this.request<M360SelectionView>(`/m360/approval/${token}/raters/${raterAssignmentId}/approve`, { method: 'POST' })
+  }
+
+  async rejectM360Rater(token: string, raterAssignmentId: number, reason: string): Promise<M360SelectionView> {
+    return this.request<M360SelectionView>(`/m360/approval/${token}/raters/${raterAssignmentId}/reject`, {
+      method: 'POST',
+      body: JSON.stringify({ reason }),
+    })
+  }
+
+  async completeM360Approval(token: string): Promise<M360SelectionView> {
+    return this.request<M360SelectionView>(`/m360/approval/${token}/complete`, { method: 'POST' })
+  }
+
+  // M360 — feedback, dashboard, report
+  async getM360Feedback(token: string): Promise<Survey> {
+    const survey = await this.request<Survey>(`/m360/feedback/${token}`)
+    return this.deserializeSurveyPages(survey)
+  }
+
+  async submitM360Feedback(token: string, answers: Record<string, string>): Promise<{ responseId: number; message: string }> {
+    return this.request(`/m360/feedback/${token}/submit`, {
+      method: 'POST',
+      body: JSON.stringify({ answers }),
+    })
+  }
+
+  async getM360Activities(): Promise<M360Activity[]> {
+    return this.request<M360Activity[]>('/m360/activities')
+  }
+
+  async getM360Report(cycleId: number, participantId: string): Promise<M360Report> {
+    return this.request<M360Report>(`/m360/cycles/${cycleId}/participants/${participantId}/report`)
   }
 
   // pages is stored as a JSON string in the backend but as SurveyPage[] on the frontend
