@@ -9,13 +9,15 @@ interface ProgramCardProps {
   onDelete?: (programId: number) => void
 }
 
+// Warm palette per the BofA mockups: Not started = tan (it's a state, not an error)
 const PROGRESS_STYLES: Record<string, { bg: string; color: string; label: string }> = {
-  'Not started': { bg: '#FEE2E2', color: '#991B1B', label: 'Not started' },
-  'NOT_STARTED': { bg: '#FEE2E2', color: '#991B1B', label: 'Not started' },
-  'In progress': { bg: '#DBEAFE', color: '#1E40AF', label: 'In progress' },
-  'IN_PROGRESS': { bg: '#DBEAFE', color: '#1E40AF', label: 'In progress' },
-  'Complete': { bg: '#D1FAE5', color: '#065F46', label: 'Complete' },
-  'COMPLETE': { bg: '#D1FAE5', color: '#065F46', label: 'Complete' },
+  'Not started': { bg: '#F0E9DC', color: '#6b5d40', label: 'Not started' },
+  'NOT_STARTED': { bg: '#F0E9DC', color: '#6b5d40', label: 'Not started' },
+  'In progress': { bg: '#D9E8F5', color: '#1e4f7a', label: 'In progress' },
+  'IN_PROGRESS': { bg: '#D9E8F5', color: '#1e4f7a', label: 'In progress' },
+  'Complete': { bg: '#DDEEDD', color: '#2d6a2f', label: 'Complete' },
+  'COMPLETE': { bg: '#DDEEDD', color: '#2d6a2f', label: 'Complete' },
+  'COMPLETED': { bg: '#DDEEDD', color: '#2d6a2f', label: 'Complete' },
 }
 
 function formatStatus(status: string): string {
@@ -54,16 +56,7 @@ export default function ProgramCard({ program, onEdit, onDelete }: ProgramCardPr
   }
 
   return (
-    <div
-      className="program-card"
-      style={{
-        background: '#f5f5f7',
-        border: 'none',
-        borderRadius: '12px',
-        padding: '24px',
-        position: 'relative',
-      }}
-    >
+    <div className="program-card" style={{ position: 'relative' }}>
       {/* Actions menu trigger */}
       <button
         ref={triggerRef}

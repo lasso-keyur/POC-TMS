@@ -88,6 +88,15 @@ export default function RaterSelectionReview() {
 
   useEffect(() => { load() }, [load])
 
+  // Escape closes whichever modal is open
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') { setAddOpen(false); setRejectTargets([]) }
+    }
+    document.addEventListener('keydown', onKey)
+    return () => document.removeEventListener('keydown', onKey)
+  }, [])
+
   function showToast(message: string) {
     setToast(message)
     window.setTimeout(() => setToast(null), 4000)

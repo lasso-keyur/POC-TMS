@@ -7,7 +7,7 @@ import {
   MOCK_STATUS,
 } from '@/types/dashboard'
 
-const TIMESTAMP = 'As of 01/01/2021 12:00 PM ET'
+const TIMESTAMP = `As of ${new Date().toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' })} ${new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })} ET`
 
 export default function DashboardCharts() {
   const statusTotal = MOCK_STATUS.reduce((sum, s) => sum + s.value, 0)

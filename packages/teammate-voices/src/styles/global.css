@@ -7444,3 +7444,103 @@ a { color: var(--bofa-link); }
 
 /* ── Survey responder (rater feedback) picks up the warm bg too ── */
 .fv { background: var(--bofa-bg); }
+
+/* ═══════════════════════ UX POLISH PASS (design critique fixes) ═══════════════════════ */
+
+/* 1. Toasts float top-right (mockup behavior) instead of pushing page content */
+.m360-toast {
+  position: fixed;
+  top: 72px;
+  right: 24px;
+  z-index: 600;
+  margin: 0;
+  min-width: 320px;
+  animation: m360-toast-in 0.25s ease;
+}
+@media (prefers-reduced-motion: no-preference) {
+  @keyframes m360-toast-in {
+    from { opacity: 0; transform: translateY(-8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+}
+
+/* 2. Program cards: cool gray → warm white cards with border + hover lift */
+.program-card {
+  background: #fff;
+  border: 1px solid var(--bofa-border);
+  transition: border-color 0.15s ease, transform 0.15s ease;
+}
+.program-card:hover { border-color: #c9c6bf; transform: translateY(-1px); }
+.program-card__link { color: var(--bofa-link); }
+.program-card__link:hover { color: var(--bofa-navy); }
+
+/* 3. Keyboard accessibility: visible focus ring everywhere */
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+[role="switch"]:focus-visible {
+  outline: 2px solid var(--bofa-navy);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* 4. Row hover on M360 tables for scannability */
+.m360-activities-list tbody tr:hover td,
+.m360-cycles-table tbody tr:hover td,
+.m360-raters-table tbody tr:hover td,
+.m360-criteria-table tbody tr:hover td {
+  background: #FAF9F6;
+}
+
+/* 5. Status pill palette per mockup: Not started = warm tan, In progress = soft blue */
+.m360-badge--neutral { background: #F0E9DC; color: #6b5d40; }
+.m360-badge--info { background: #D9E8F5; color: #1e4f7a; }
+
+/* 6. Icon buttons: 32px minimum hit target */
+.m360-icon-btn {
+  min-width: 32px;
+  min-height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 7. Empty states get breathing room */
+.m360-empty { padding: 36px 12px; }
+
+/* 8. AG Grid (Survey library, participants) picks up the warm theme */
+.ag-theme-alpine {
+  --ag-font-family: "Connections", "Roboto", "Helvetica Neue", Arial, sans-serif;
+  --ag-background-color: #fff;
+  --ag-header-background-color: #FAF9F6;
+  --ag-header-foreground-color: #5f5e5b;
+  --ag-border-color: var(--bofa-border);
+  --ag-row-border-color: #F0EEE9;
+  --ag-row-hover-color: #FAF9F6;
+  --ag-selected-row-background-color: #EEF3FA;
+  --ag-font-size: 13px;
+}
+
+/* 9. Page titles: semibold, not heavy (Connections style) */
+.dashboard__title,
+.program-detail__title,
+.survey-editor__title,
+.program-create__title,
+.m360-review__title { font-weight: 600; }
+
+/* 10. Legacy dashboard sections harmonize with M360 cards */
+.dashboard__charts .tv-card,
+.dashboard__actions { border-radius: 12px; }
+.dashboard__actions { background: #fff; border: 1px solid var(--bofa-border); }
+
+/* 11. Modal entrance animation (matches design-system spec) */
+@media (prefers-reduced-motion: no-preference) {
+  .m360-modal { animation: m360-modal-in 0.2s ease; }
+  @keyframes m360-modal-in {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+}
+.m360-modal-overlay { backdrop-filter: blur(2px); }

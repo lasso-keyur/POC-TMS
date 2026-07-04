@@ -28,6 +28,15 @@ export default function CyclesSection({ programId }: CyclesSectionProps) {
 
   useEffect(() => { load() }, [load])
 
+  // Escape closes the delete confirm + kebab menu
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') { setDeleteTarget(null); setMenuOpenFor(null) }
+    }
+    document.addEventListener('keydown', onKey)
+    return () => document.removeEventListener('keydown', onKey)
+  }, [])
+
   async function handleDuplicate(cycle: M360Cycle) {
     setMenuOpenFor(null)
     if (!cycle.cycleId) return
