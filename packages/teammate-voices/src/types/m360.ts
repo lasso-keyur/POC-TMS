@@ -157,8 +157,10 @@ export interface M360Activity {
   completed: boolean
 }
 
+export type ReportCategory = RaterCategory | 'OTHERS'
+
 export interface M360CategoryScore {
-  category: RaterCategory
+  category: ReportCategory
   avgScore: number
   responseCount: number
 }
@@ -166,9 +168,24 @@ export interface M360CategoryScore {
 export interface M360ReportQuestionRow {
   questionId: number
   questionText?: string
-  category: RaterCategory
+  category: ReportCategory
   avgScore: number
   responseCount: number
+}
+
+export interface M360SuppressedCategory {
+  category: RaterCategory
+  responseCount: number
+  minimumRequired: number
+}
+
+export interface M360GapRow {
+  questionId: number
+  questionText?: string
+  selfScore: number
+  othersAvg: number
+  delta: number
+  classification: 'BLIND_SPOT' | 'HIDDEN_STRENGTH' | 'ALIGNED'
 }
 
 export interface M360Report {
@@ -176,8 +193,11 @@ export interface M360Report {
   cycleName: string
   participantId: string
   participantName?: string
+  anonymityMinimum: number
   categoryScores: M360CategoryScore[]
   questionRows: M360ReportQuestionRow[]
+  suppressedCategories: M360SuppressedCategory[]
+  gapRows: M360GapRow[]
 }
 
 export interface M360AvailableReport {

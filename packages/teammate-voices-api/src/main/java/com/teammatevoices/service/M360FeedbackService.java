@@ -175,7 +175,21 @@ public class M360FeedbackService {
         return response.getResponseId();
     }
 
-    /** Basic 360 report: average score per rater category (+ per question breakdown). */
+    /** Reporting anonymity floor: categories below this many respondents are never broken out. */
+    private static final int ANONYMITY_MINIMUM = 3;
+    /** Attributable by design — the subject knows who their Self and Manager scores come from. */
+    private static final Set<String> ATTRIBUTABLE_CATEGORIES = Set.of("SELF", "MANAGER");
+    /** Self-vs-others delta at or beyond which a question is flagged. */
+    private static final double GAP_FLAG_THRESHOLD = 1.0;
+
+    /**
+     * 360 report with market-standard safeguards:
+     * - categories with fewer than {@value ANONYMITY_MINIMUM} respondents (Self/Manager exempt)
+     *   are folded into an aggregate "OTHERS" group; if that aggregate is still below the floor
+     *   it is suppressed entirely and listed in suppressedCategories
+     * - gapRows compare Self against the average of everyone else per question and classify
+     *   blind spots (self ≥1.0 higher) and hidden strengths (self ≥1.0 lower)
+     */
     @Transactional(readOnly = true)
     public M360ReportDTO getReport(Long cycleId, String participantId) {
         M360Cycle cycle = cycleRepository.findById(cycleId)
@@ -189,26 +203,86 @@ public class M360FeedbackService {
         report.setCycleId(cycleId);
         report.setCycleName(cycle.getName());
         report.setParticipantId(participantId);
+        report.setAnonymityMinimum(ANONYMITY_MINIMUM);
         participantRepository.findById(participantId).ifPresent(p -> report.setParticipantName(p.getFullName()));
 
-        Map<Long, String> questionText = new HashMap<>();
+        Map<Long, String> questionText = new LinkedHashMap<>();
         if (cycle.getSurveyId() != null) {
             questionRepository.findBySurvey_SurveyIdOrderBySortOrder(cycle.getSurveyId())
                     .forEach(q -> questionText.put(q.getQuestionId(), q.getQuestionText()));
         }
 
-        List<Object[]> rows = answerRepository.aggregateM360ByEnrollment(enrollment.getEnrollmentId());
+        // Raw per-category, per-question aggregates
+        record Agg(String category, Long questionId, double avg, long count) {}
+        List<Agg> aggs = new ArrayList<>();
+        for (Object[] row : answerRepository.aggregateM360ByEnrollment(enrollment.getEnrollmentId())) {
+            if (row[2] == null) continue;
+            aggs.add(new Agg((String) row[0], (Long) row[1],
+                    ((Number) row[2]).doubleValue(),
+                    row[3] != null ? ((Number) row[3]).longValue() : 0L));
+        }
 
+        // Respondents per category = max per-question answer count in that category
+        Map<String, Long> categoryRespondents = new LinkedHashMap<>();
+        for (Agg a : aggs) {
+            categoryRespondents.merge(a.category(), a.count(), Math::max);
+        }
+
+        Set<String> visible = new LinkedHashSet<>();
+        Set<String> belowFloor = new LinkedHashSet<>();
+        categoryRespondents.forEach((category, respondents) -> {
+            if (ATTRIBUTABLE_CATEGORIES.contains(category) || respondents >= ANONYMITY_MINIMUM) {
+                visible.add(category);
+            } else {
+                belowFloor.add(category);
+            }
+        });
+
+        // Fold below-floor categories into OTHERS (weighted by answer count per question)
+        Map<Long, double[]> othersPerQuestion = new LinkedHashMap<>(); // questionId -> [scoreSum, count]
+        long othersRespondents = 0;
+        for (String category : belowFloor) {
+            othersRespondents += categoryRespondents.get(category);
+        }
+        for (Agg a : aggs) {
+            if (!belowFloor.contains(a.category())) continue;
+            othersPerQuestion.computeIfAbsent(a.questionId(), k -> new double[2]);
+            double[] acc = othersPerQuestion.get(a.questionId());
+            acc[0] += a.avg() * a.count();
+            acc[1] += a.count();
+        }
+        boolean othersVisible = othersRespondents >= ANONYMITY_MINIMUM;
+
+        // Question rows: visible categories as-is, plus OTHERS when it clears the floor
         Map<String, List<QuestionRow>> byCategory = new LinkedHashMap<>();
-        for (Object[] row : rows) {
+        for (Agg a : aggs) {
+            if (!visible.contains(a.category())) continue;
             QuestionRow qr = new QuestionRow();
-            qr.setCategory((String) row[0]);
-            qr.setQuestionId((Long) row[1]);
-            qr.setQuestionText(questionText.get((Long) row[1]));
-            qr.setAvgScore(row[2] != null ? ((Number) row[2]).doubleValue() : null);
-            qr.setResponseCount(row[3] != null ? ((Number) row[3]).longValue() : 0L);
+            qr.setCategory(a.category());
+            qr.setQuestionId(a.questionId());
+            qr.setQuestionText(questionText.get(a.questionId()));
+            qr.setAvgScore(round2(a.avg()));
+            qr.setResponseCount(a.count());
             report.getQuestionRows().add(qr);
-            byCategory.computeIfAbsent(qr.getCategory(), k -> new ArrayList<>()).add(qr);
+            byCategory.computeIfAbsent(a.category(), k -> new ArrayList<>()).add(qr);
+        }
+        if (othersVisible) {
+            for (Map.Entry<Long, double[]> e : othersPerQuestion.entrySet()) {
+                if (e.getValue()[1] == 0) continue;
+                QuestionRow qr = new QuestionRow();
+                qr.setCategory("OTHERS");
+                qr.setQuestionId(e.getKey());
+                qr.setQuestionText(questionText.get(e.getKey()));
+                qr.setAvgScore(round2(e.getValue()[0] / e.getValue()[1]));
+                qr.setResponseCount((long) e.getValue()[1]);
+                report.getQuestionRows().add(qr);
+                byCategory.computeIfAbsent("OTHERS", k -> new ArrayList<>()).add(qr);
+            }
+        } else {
+            for (String category : belowFloor) {
+                report.getSuppressedCategories().add(new M360ReportDTO.SuppressedCategory(
+                        category, categoryRespondents.get(category), ANONYMITY_MINIMUM));
+            }
         }
 
         byCategory.forEach((category, qRows) -> {
@@ -217,10 +291,44 @@ public class M360FeedbackService {
                     .mapToDouble(QuestionRow::getAvgScore)
                     .average().orElse(0);
             long count = qRows.stream().mapToLong(QuestionRow::getResponseCount).max().orElse(0);
-            report.getCategoryScores().add(new CategoryScore(category, Math.round(avg * 100.0) / 100.0, count));
+            report.getCategoryScores().add(new CategoryScore(category, round2(avg), count));
         });
 
+        // Gap analysis: Self vs the average of everyone else (aggregated — anonymity-safe)
+        Map<Long, Double> selfByQuestion = new LinkedHashMap<>();
+        Map<Long, double[]> othersAll = new LinkedHashMap<>(); // every non-SELF response, incl. below-floor
+        for (Agg a : aggs) {
+            if ("SELF".equals(a.category())) {
+                selfByQuestion.put(a.questionId(), a.avg());
+            } else {
+                othersAll.computeIfAbsent(a.questionId(), k -> new double[2]);
+                double[] acc = othersAll.get(a.questionId());
+                acc[0] += a.avg() * a.count();
+                acc[1] += a.count();
+            }
+        }
+        for (Long questionId : questionText.keySet()) {
+            Double self = selfByQuestion.get(questionId);
+            double[] others = othersAll.get(questionId);
+            if (self == null || others == null || others[1] < ANONYMITY_MINIMUM) continue;
+            double othersAvg = others[0] / others[1];
+            double delta = self - othersAvg;
+            M360ReportDTO.GapRow gap = new M360ReportDTO.GapRow();
+            gap.setQuestionId(questionId);
+            gap.setQuestionText(questionText.get(questionId));
+            gap.setSelfScore(round2(self));
+            gap.setOthersAvg(round2(othersAvg));
+            gap.setDelta(round2(delta));
+            gap.setClassification(delta >= GAP_FLAG_THRESHOLD ? "BLIND_SPOT"
+                    : delta <= -GAP_FLAG_THRESHOLD ? "HIDDEN_STRENGTH" : "ALIGNED");
+            report.getGapRows().add(gap);
+        }
+
         return report;
+    }
+
+    private static double round2(double v) {
+        return Math.round(v * 100.0) / 100.0;
     }
 
     /** Dashboard activity rows across all cycles (admin demo view — no auth). */
