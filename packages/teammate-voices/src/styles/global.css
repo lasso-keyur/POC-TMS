@@ -7648,3 +7648,17 @@ textarea:focus-visible,
   .m360-enroll-grid { grid-template-columns: 1fr; }
   .m360-perms--aligned .toggle-switch { grid-template-columns: 150px auto auto; }
 }
+
+/* Criteria table: compact density — settings rows, not form fields */
+.m360-criteria-table--fixed { max-width: 780px; }
+.m360-criteria-table--fixed td { padding: 5px 10px; }
+.m360-criteria-table--fixed th { padding: 8px 10px 6px; }
+.m360-criteria-table--fixed .m360-criteria-table__num {
+  height: 32px;
+  padding: 0 8px;
+  font-size: 13px;
+  max-width: 92px;
+  border-radius: 6px;
+}
+.m360-criteria-table--fixed .m360-check { font-size: 13px; padding: 0; }
+.m360-criteria-table--fixed .m360-criteria-table__totals td { padding: 8px 10px; }
