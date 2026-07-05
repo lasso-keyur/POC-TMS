@@ -535,159 +535,197 @@ export default function CycleEditor() {
               <h2 className="survey-editor__section-title">Enrollment</h2>
               <p className="m360-wizard__step-desc">Define who can be selected as a rater and how many of each, who is allowed to build the rater list, and enroll the participants for this cycle.</p>
 
-              <h3 className="m360-section-title">Rater selection criteria</h3>
-              <table className="m360-criteria-table">
-                <thead>
-                  <tr>
-                    <th>Relationship</th>
-                    <th>Min raters</th>
-                    <th>Max raters</th>
-                    <th>Auto-Load raters</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {criteria.map(c => {
-                    const fixed = c.category === 'SELF' || c.category === 'MANAGER'
-                    return (
-                      <tr key={c.category}>
-                        <td>{RATER_CATEGORY_LABELS[c.category]}</td>
-                        <td>
-                          {fixed ? <input className="program-create__input m360-criteria-table__num" value="1" disabled /> : (
-                            <input type="number" min={0} className="program-create__input m360-criteria-table__num" placeholder="No min"
-                              value={c.minCount ?? ''} onChange={e => updateCriteria(c.category, { minCount: e.target.value === '' ? null : Number(e.target.value) })} />
-                          )}
-                        </td>
-                        <td>
-                          {fixed ? <input className="program-create__input m360-criteria-table__num" value="1" disabled /> : (
-                            <input type="number" min={0} className="program-create__input m360-criteria-table__num" placeholder="No max"
-                              value={c.maxCount ?? ''} onChange={e => updateCriteria(c.category, { maxCount: e.target.value === '' ? null : Number(e.target.value) })} />
-                          )}
-                        </td>
-                        <td>
-                          {fixed && (
-                            <label className="m360-check">
-                              <input type="checkbox" checked={Boolean(c.autoLoad)} onChange={e => updateCriteria(c.category, { autoLoad: e.target.checked })} />
-                              {c.category === 'SELF' ? 'Auto-load participant to rate themselves' : 'Auto-load manager to rate participant'}
-                            </label>
-                          )}
-                        </td>
-                      </tr>
-                    )
-                  })}
-                  <tr>
-                    <td><strong>Overall rater limits</strong></td>
-                    <td>
-                      <input type="number" min={0} className="program-create__input m360-criteria-table__num" placeholder="No min"
-                        value={overallMin} onChange={e => setOverallMin(e.target.value === '' ? '' : Number(e.target.value))} />
-                    </td>
-                    <td>
-                      <input type="number" min={0} className="program-create__input m360-criteria-table__num"
-                        value={overallMax} onChange={e => setOverallMax(e.target.value === '' ? '' : Number(e.target.value))} />
-                    </td>
-                    <td></td>
-                  </tr>
-                </tbody>
-              </table>
-
-              <h3 className="m360-section-title">Permission to select raters</h3>
-              <div className="m360-perms">
-                <ToggleSwitch label="HR Partners" checked={permHr} onChange={setPermHr} />
-                <ToggleSwitch label="Participant (Self)" checked={permSelf} onChange={setPermSelf} />
-                <ToggleSwitch label="Manager" checked={permManager} onChange={setPermManager} />
-              </div>
-
-              <h3 className="m360-section-title">Upload participant/raters</h3>
-              <div className="m360-upload">
-                <div className="m360-upload__labels">
-                  <span className="form-field__label">File upload</span>
-                  <a className="m360-add-link" href="/360_ParticipantList_Template.xlsx" download>Bulk upload template</a>
+              {/* Panel 1 — Rater selection criteria */}
+              <section className="m360-subsection">
+                <div className="m360-subsection__head">
+                  <h3 className="m360-subsection__title">Rater selection criteria</h3>
+                  <p className="m360-subsection__hint">Self and Manager are always included. Set how many raters each other group needs.</p>
                 </div>
-                <div className="m360-upload__row">
-                  <div className="m360-upload__filebox" onClick={() => fileInputRef.current?.click()}>
-                    <span className={uploadFileName ? '' : 'm360-muted'}>
-                      {uploadFileName ?? 'Choose a .xlsx file…'}
-                    </span>
-                    <span className="m360-upload__icon">⇪</span>
-                  </div>
-                  {uploadFileName && (
-                    <button className="m360-icon-btn" title="Clear" onClick={clearUpload}>🗑</button>
-                  )}
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept=".xlsx"
-                    style={{ display: 'none' }}
-                    onChange={e => { const f = e.target.files?.[0]; if (f) handleFileUpload(f) }}
-                  />
-                </div>
-                <span className="m360-muted">Maximum upload file size: 25 MB</span>
-                {uploadProgress != null && (
-                  <div className="m360-upload__progress">
-                    <div className="m360-upload__progress-track">
-                      <div className="m360-upload__progress-fill" style={{ width: `${uploadProgress}%` }} />
-                    </div>
-                    <span className="m360-muted">
-                      {uploadProgress < 100 ? `Uploading… ${uploadProgress}%` : '100% complete'}
-                    </span>
-                  </div>
-                )}
-                {uploadSuccess && (
-                  <p className="m360-upload__success">✓ {uploadSuccess}</p>
-                )}
-                {uploadError && (
-                  <p className="m360-upload__error">⚠ {uploadError}</p>
-                )}
-              </div>
-
-              <h3 className="m360-section-title">Participants</h3>
-              {enrollments.length === 0 ? (
-                <p className="m360-empty">No participants have been enrolled.</p>
-              ) : (
-                <table className="m360-criteria-table">
+                <table className="m360-criteria-table m360-criteria-table--fixed">
+                  <colgroup>
+                    <col style={{ width: 200 }} />
+                    <col style={{ width: 130 }} />
+                    <col style={{ width: 130 }} />
+                    <col />
+                  </colgroup>
                   <thead>
-                    <tr><th>Name</th><th>Email</th><th>Status</th><th>Raters</th><th>Links</th><th></th></tr>
+                    <tr>
+                      <th>Relationship</th>
+                      <th>Min raters</th>
+                      <th>Max raters</th>
+                      <th>Auto-load</th>
+                    </tr>
                   </thead>
                   <tbody>
-                    {enrollments.map(e => (
-                      <tr key={e.enrollmentId}>
-                        <td>{e.participantName ?? e.participantId}</td>
-                        <td>{e.participantEmail ?? '—'}</td>
-                        <td>{e.status.replace(/_/g, ' ')}</td>
-                        <td>{e.raterCount}</td>
-                        <td>
-                          <a className="m360-add-link" href={`/m360/rater-selection/${e.participantToken}`} target="_blank" rel="noreferrer">Selection</a>
-                          {' · '}
-                          <a className="m360-add-link" href={`/m360/approval/${e.managerToken}`} target="_blank" rel="noreferrer">Approval</a>
-                        </td>
-                        <td>
-                          <button className="m360-icon-btn" title="Remove"
-                            onClick={() => savedCycleId && api.removeM360Enrollment(savedCycleId, e.enrollmentId).then(() => api.getM360Enrollments(savedCycleId).then(setEnrollments))}>🗑</button>
-                        </td>
-                      </tr>
-                    ))}
+                    {criteria.map(c => {
+                      const fixed = c.category === 'SELF' || c.category === 'MANAGER'
+                      return (
+                        <tr key={c.category}>
+                          <td>{RATER_CATEGORY_LABELS[c.category]}</td>
+                          <td>
+                            {fixed ? <input className="program-create__input m360-criteria-table__num" value="1" disabled /> : (
+                              <input type="number" min={0} className="program-create__input m360-criteria-table__num" placeholder="No min"
+                                value={c.minCount ?? ''} onChange={e => updateCriteria(c.category, { minCount: e.target.value === '' ? null : Number(e.target.value) })} />
+                            )}
+                          </td>
+                          <td>
+                            {fixed ? <input className="program-create__input m360-criteria-table__num" value="1" disabled /> : (
+                              <input type="number" min={0} className="program-create__input m360-criteria-table__num" placeholder="No max"
+                                value={c.maxCount ?? ''} onChange={e => updateCriteria(c.category, { maxCount: e.target.value === '' ? null : Number(e.target.value) })} />
+                            )}
+                          </td>
+                          <td>
+                            {fixed ? (
+                              <label className="m360-check">
+                                <input type="checkbox" checked={Boolean(c.autoLoad)} onChange={e => updateCriteria(c.category, { autoLoad: e.target.checked })} />
+                                {c.category === 'SELF' ? 'Participant rates themselves' : 'Manager rates the participant'}
+                              </label>
+                            ) : (
+                              <span className="m360-criteria-table__dash">—</span>
+                            )}
+                          </td>
+                        </tr>
+                      )
+                    })}
                   </tbody>
+                  <tfoot>
+                    <tr className="m360-criteria-table__totals">
+                      <td>Overall rater limits</td>
+                      <td>
+                        <input type="number" min={0} className="program-create__input m360-criteria-table__num" placeholder="No min"
+                          value={overallMin} onChange={e => setOverallMin(e.target.value === '' ? '' : Number(e.target.value))} />
+                      </td>
+                      <td>
+                        <input type="number" min={0} className="program-create__input m360-criteria-table__num"
+                          value={overallMax} onChange={e => setOverallMax(e.target.value === '' ? '' : Number(e.target.value))} />
+                      </td>
+                      <td><span className="m360-muted">Applies across all groups combined</span></td>
+                    </tr>
+                  </tfoot>
                 </table>
-              )}
+              </section>
 
-              {availableParticipants.length > 0 && (
-                <div className="m360-enroll-picker">
-                  <h4 className="m360-section-subtitle">Add participants from the roster</h4>
-                  <div className="m360-enroll-picker__list">
-                    {availableParticipants.map(p => (
-                      <label key={p.participantId} className="m360-check">
+              {/* Panel 2 — Permission to select raters */}
+              <section className="m360-subsection">
+                <div className="m360-subsection__head">
+                  <h3 className="m360-subsection__title">Permission to select raters</h3>
+                  <p className="m360-subsection__hint">Who is allowed to build the rater list for a participant.</p>
+                </div>
+                <div className="m360-perms m360-perms--aligned">
+                  <ToggleSwitch label="HR Partners" checked={permHr} onChange={setPermHr} />
+                  <ToggleSwitch label="Participant (Self)" checked={permSelf} onChange={setPermSelf} />
+                  <ToggleSwitch label="Manager" checked={permManager} onChange={setPermManager} />
+                </div>
+              </section>
+
+              {/* Panel 3 — Participants (import + roster side by side, enrolled below) */}
+              <section className="m360-subsection">
+                <div className="m360-subsection__head">
+                  <h3 className="m360-subsection__title">Participants</h3>
+                  <p className="m360-subsection__hint">Enroll the people who will be reviewed in this cycle — upload a file or pick from the roster.</p>
+                </div>
+
+                <div className="m360-enroll-grid">
+                  <div className="m360-enroll-grid__cell">
+                    <div className="m360-upload">
+                      <div className="m360-upload__labels">
+                        <span className="form-field__label">File upload</span>
+                        <a className="m360-add-link" href="/360_ParticipantList_Template.xlsx" download>Bulk upload template</a>
+                      </div>
+                      <div className="m360-upload__row">
+                        <div className="m360-upload__filebox" onClick={() => fileInputRef.current?.click()}>
+                          <span className={uploadFileName ? '' : 'm360-muted'}>
+                            {uploadFileName ?? 'Choose a .xlsx file…'}
+                          </span>
+                          <span className="m360-upload__icon">⇪</span>
+                        </div>
+                        {uploadFileName && (
+                          <button className="m360-icon-btn" title="Clear" onClick={clearUpload}>🗑</button>
+                        )}
                         <input
-                          type="checkbox"
-                          checked={selectedParticipants.includes(p.participantId)}
-                          onChange={e => setSelectedParticipants(prev =>
-                            e.target.checked ? [...prev, p.participantId] : prev.filter(id => id !== p.participantId))}
+                          ref={fileInputRef}
+                          type="file"
+                          accept=".xlsx"
+                          style={{ display: 'none' }}
+                          onChange={e => { const f = e.target.files?.[0]; if (f) handleFileUpload(f) }}
                         />
-                        {p.fullName} <span className="m360-muted">({p.email})</span>
-                      </label>
-                    ))}
+                      </div>
+                      <span className="m360-muted">Maximum upload file size: 25 MB</span>
+                      {uploadProgress != null && (
+                        <div className="m360-upload__progress">
+                          <div className="m360-upload__progress-track">
+                            <div className="m360-upload__progress-fill" style={{ width: `${uploadProgress}%` }} />
+                          </div>
+                          <span className="m360-muted">
+                            {uploadProgress < 100 ? `Uploading… ${uploadProgress}%` : '100% complete'}
+                          </span>
+                        </div>
+                      )}
+                      {uploadSuccess && (
+                        <p className="m360-upload__success">✓ {uploadSuccess}</p>
+                      )}
+                      {uploadError && (
+                        <p className="m360-upload__error">⚠ {uploadError}</p>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="m360-enroll-grid__cell">
+                    <span className="form-field__label">Add from the roster</span>
+                    {availableParticipants.length === 0 ? (
+                      <p className="m360-muted" style={{ marginTop: 10 }}>Everyone on the roster is already enrolled.</p>
+                    ) : (
+                      <div className="m360-enroll-picker__list">
+                        {availableParticipants.map(p => (
+                          <label key={p.participantId} className="m360-check">
+                            <input
+                              type="checkbox"
+                              checked={selectedParticipants.includes(p.participantId)}
+                              onChange={e => setSelectedParticipants(prev =>
+                                e.target.checked ? [...prev, p.participantId] : prev.filter(id => id !== p.participantId))}
+                            />
+                            {p.fullName} <span className="m360-muted">({p.email})</span>
+                          </label>
+                        ))}
+                      </div>
+                    )}
+                    {selectedParticipants.length > 0 && (
+                      <span className="m360-muted" style={{ marginTop: 8, display: 'block' }}>
+                        {selectedParticipants.length} selected — saved with this tab
+                      </span>
+                    )}
                   </div>
                 </div>
-              )}
 
+                {enrollments.length === 0 ? (
+                  <p className="m360-empty">No participants have been enrolled.</p>
+                ) : (
+                  <table className="m360-criteria-table m360-enrolled-table">
+                    <thead>
+                      <tr><th>Name</th><th>Email</th><th>Status</th><th>Raters</th><th>Links</th><th></th></tr>
+                    </thead>
+                    <tbody>
+                      {enrollments.map(e => (
+                        <tr key={e.enrollmentId}>
+                          <td>{e.participantName ?? e.participantId}</td>
+                          <td>{e.participantEmail ?? '—'}</td>
+                          <td>{e.status.replace(/_/g, ' ')}</td>
+                          <td>{e.raterCount}</td>
+                          <td>
+                            <a className="m360-add-link" href={`/m360/rater-selection/${e.participantToken}`} target="_blank" rel="noreferrer">Selection</a>
+                            {' · '}
+                            <a className="m360-add-link" href={`/m360/approval/${e.managerToken}`} target="_blank" rel="noreferrer">Approval</a>
+                          </td>
+                          <td>
+                            <button className="m360-icon-btn" title="Remove"
+                              onClick={() => savedCycleId && api.removeM360Enrollment(savedCycleId, e.enrollmentId).then(() => api.getM360Enrollments(savedCycleId).then(setEnrollments))}>🗑</button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                )}
+              </section>
             </>
           )}
 

@@ -7582,3 +7582,69 @@ textarea:focus-visible,
 }
 .m360-gap-dot--self { background: var(--bofa-navy); z-index: 2; }
 .m360-gap-dot--others { background: #b0894a; z-index: 1; }
+
+/* ─── Enrollment tab realignment: three uniform panels ─── */
+.m360-subsection {
+  border: 1px solid var(--bofa-border);
+  border-radius: 10px;
+  padding: 20px 22px;
+  margin: 0 0 18px;
+  background: #fff;
+}
+.m360-subsection__head { margin-bottom: 14px; }
+.m360-subsection__title { margin: 0 0 3px; font-size: 15.5px; font-weight: 600; }
+.m360-subsection__hint { margin: 0; font-size: 12.5px; color: var(--bofa-muted); }
+
+/* Criteria table: fixed column grid, placeholder dashes, totals footer */
+.m360-criteria-table--fixed { table-layout: fixed; }
+.m360-criteria-table--fixed .m360-criteria-table__num { width: 100%; max-width: 110px; text-align: center; }
+.m360-criteria-table__dash { color: #c9c6bf; }
+.m360-criteria-table__totals td {
+  background: #FAF9F6;
+  border-top: 2px solid var(--bofa-border);
+  border-bottom: none;
+  font-weight: 600;
+}
+.m360-criteria-table__totals .m360-muted { font-weight: 400; }
+
+/* Permission toggles: fixed label column so all tracks align */
+.m360-perms--aligned { max-width: none; gap: 4px; }
+.m360-perms--aligned .toggle-switch {
+  display: grid;
+  grid-template-columns: 190px auto auto;
+  align-items: center;
+  justify-content: start;
+  column-gap: 12px;
+  padding: 6px 0;
+}
+.m360-perms--aligned .toggle-switch__label { margin: 0; }
+
+/* Participants: upload and roster side by side with equal panels */
+.m360-enroll-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+  margin-bottom: 18px;
+}
+.m360-enroll-grid__cell {
+  border: 1px solid #F0EEE9;
+  border-radius: 10px;
+  padding: 16px;
+  background: #FCFBF9;
+}
+.m360-enroll-grid__cell .m360-upload { max-width: none; }
+.m360-enroll-grid__cell .m360-enroll-picker__list {
+  grid-template-columns: 1fr;
+  max-height: 190px;
+  margin-top: 10px;
+  background: #fff;
+  border: 1px solid #F0EEE9;
+  border-radius: 8px;
+  padding: 8px 12px;
+}
+.m360-enrolled-table th:last-child, .m360-enrolled-table td:last-child { width: 48px; text-align: right; }
+
+@media (max-width: 860px) {
+  .m360-enroll-grid { grid-template-columns: 1fr; }
+  .m360-perms--aligned .toggle-switch { grid-template-columns: 150px auto auto; }
+}
