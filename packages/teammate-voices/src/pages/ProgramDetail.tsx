@@ -287,8 +287,8 @@ export default function ProgramDetail() {
         </div>
       </div>
 
-      {/* Cycles (360 reviews) — shown on Overview tab */}
-      {activeSection === 'overview' && (
+      {/* Cycles — only cycle-based program types (360, ESAT) run repeating cycles */}
+      {activeSection === 'overview' && (program.programKey === '360' || program.programKey === 'ESAT') && (
         <CyclesSection programId={Number(programId)} />
       )}
 

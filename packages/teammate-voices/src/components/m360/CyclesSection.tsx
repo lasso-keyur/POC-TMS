@@ -13,7 +13,7 @@ function fmtDate(iso?: string | null): string {
   return d.toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' })
 }
 
-type CycleCol = 'name' | 'versionLabel' | 'participantCount' | 'scheduleStartAt' | 'scheduleEndAt' | 'status'
+type CycleCol = 'name' | 'surveyTitle' | 'versionLabel' | 'participantCount' | 'scheduleStartAt' | 'scheduleEndAt' | 'status'
 
 export default function CyclesSection({ programId }: CyclesSectionProps) {
   const navigate = useNavigate()
@@ -89,6 +89,7 @@ export default function CyclesSection({ programId }: CyclesSectionProps) {
           <thead>
             <tr>
               {header('Cycle name', 'name')}
+              {header('Survey', 'surveyTitle')}
               {header('Version', 'versionLabel')}
               {header('Participants', 'participantCount')}
               {header('Schedule start date', 'scheduleStartAt')}
@@ -105,6 +106,7 @@ export default function CyclesSection({ programId }: CyclesSectionProps) {
                     {c.name}
                   </button>
                 </td>
+                <td>{c.surveyTitle ?? <span className="m360-muted">No survey aligned</span>}</td>
                 <td>{c.versionLabel ?? '0001'}</td>
                 <td>{(c.participantCount ?? 0).toLocaleString()}</td>
                 <td>{fmtDate(c.scheduleStartAt ?? c.startDate)}</td>
